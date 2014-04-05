@@ -133,7 +133,6 @@ class BaseXYPlot(AbstractPlotRenderer):
         """ Draws the 'plot' layer.
         """
         self._draw_component(gc, view_bounds, mode)
-        return
 
     def _draw_component(self, gc, view_bounds=None, mode="normal"):
         # This method should be folded into self._draw_plot(), but is here for

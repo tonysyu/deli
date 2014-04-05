@@ -5,10 +5,10 @@ tick-related values (i.e., bounds and intervals).
 from numpy import (arange, argsort, array, float64, floor, log10, minimum,
                    newaxis, shape)
 
-from traits.api import HasTraits
+from traits.api import HasStrictTraits
 
 
-class AbstractTickGenerator(HasTraits):
+class AbstractTickGenerator(HasStrictTraits):
     pass
 
 

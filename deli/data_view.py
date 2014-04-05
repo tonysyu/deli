@@ -15,7 +15,7 @@ from .plot_containers import OverlayPlotContainer
 def get_mapper(self, attr_name):
     """ Getter function used by OrientedMapperProperty.
     """
-    if (attr_name,self.orientation) in [("x_mapper","h"), ("y_mapper","v")]:
+    if attr_name in "x_mapper":
         return self.index_mapper
     else:
         return self.value_mapper
@@ -23,7 +23,7 @@ def get_mapper(self, attr_name):
 def set_mapper(self, attr_name, new):
     """ Setter function used by OrientedMapperProperty.
     """
-    if (attr_name,self.orientation) in [("x_mapper","h"), ("y_mapper","v")]:
+    if attr_name == "x_mapper":
         self.index_mapper = new
     else:
         self.value_mapper = new
@@ -35,7 +35,7 @@ OrientedMapperProperty = Property(get_mapper, set_mapper)
 def get_axis(self, attr_name):
     """ Getter function used by AxisProperty.
     """
-    if (attr_name,self.orientation) in [("index_axis","h"), ("value_axis","v")]:
+    if attr_name == "index_axis":
         return self.x_axis
     else:
         return self.y_axis
@@ -43,7 +43,7 @@ def get_axis(self, attr_name):
 def set_axis(self, attr_name, new):
     """ Setter function used by AxisProperty.
     """
-    if (attr_name,self.orientation) in [("index_axis","h"), ("value_axis","v")]:
+    if attr_name == "index_axis":
         self.x_axis = new
     else:
         self.y_axis = new
@@ -55,7 +55,7 @@ AxisProperty = Property(get_axis, set_axis)
 def get_grid(self, attr_name):
     """ Getter function used by GridProperty.
     """
-    if (attr_name,self.orientation) in [("index_grid","v"), ("value_grid","h")]:
+    if attr_name == "index_grid":
         return self.y_grid
     else:
         return self.x_grid
@@ -63,7 +63,7 @@ def get_grid(self, attr_name):
 def set_grid(self, attr_name, new):
     """ Setter function used by GridProperty.
     """
-    if (attr_name,self.orientation) in [("index_grid","v"), ("value_grid","h")]:
+    if attr_name == "value_grid":
         self.y_grid = new
     else:
         self.y_grid = new
@@ -78,9 +78,6 @@ class DataView(OverlayPlotContainer):
     It can house renderers and other plot components, and otherwise behaves
     just like a normal PlotContainer.
     """
-
-    # The orientation of the index axis.
-    orientation = Enum("h", "v")
 
     # The default location of the origin  for new plots
     default_origin = Enum("bottom left", "top left",
@@ -235,7 +232,6 @@ class DataView(OverlayPlotContainer):
             self.y_mapper.high_pos = y2
 
         self.invalidate_draw()
-        return
 
     def _bounds_changed(self, old, new):
         super(DataView, self)._bounds_changed(old, new)

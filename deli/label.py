@@ -4,10 +4,10 @@ from math import pi
 
 from enable.api import black_color_trait, transparent_color_trait
 from kiva.trait_defs.kiva_font_trait import KivaFont
-from traits.api import Any, Bool, Float, HasTraits, Int, List, Str
+from traits.api import Any, Bool, Float, HasStrictTraits, Int, List, Str
 
 
-class Label(HasTraits):
+class Label(HasStrictTraits):
     """ A label used by overlays.
 
     Label is not a Component; it's just an object encapsulating text settings
@@ -61,7 +61,6 @@ class Label(HasTraits):
     def __init__(self, **traits):
         super(Label, self).__init__(**traits)
         self._bounding_box = [0, 0]
-        return
 
     def get_width_height(self, gc):
         """ Returns the width and height of the label, in the rotated frame of
@@ -174,4 +173,3 @@ class Label(HasTraits):
             self._bounding_box[1] = prev_y_pos + prev_y_height + margin \
                 + 2*border_width
             self._position_cache_valid = True
-        return

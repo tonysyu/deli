@@ -91,7 +91,6 @@ class LinePlot(BaseXYPlot):
 
             self._cached_data_pts = points
             self._cache_valid = True
-        return
 
     def _render(self, gc, points, selected_points=None):
         with gc:

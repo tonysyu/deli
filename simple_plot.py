@@ -2,14 +2,14 @@ from numpy import linspace
 from scipy.special import jn
 
 from enable.api import Component, ComponentEditor
-from traits.api import HasTraits, Instance
+from traits.api import HasStrictTraits, Instance
 from traitsui.api import Item, Group, View
 
 from deli.array_plot_data import ArrayPlotData
 from deli.plot import Plot
 
 
-class Demo(HasTraits):
+class Demo(HasStrictTraits):
     plot = Instance(Component)
 
     traits_view = View(

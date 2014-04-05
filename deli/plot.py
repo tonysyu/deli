@@ -1,6 +1,6 @@
 """ Defines the Plot class.
 """
-from traits.api import Delegate, Dict, Instance, Int, List, Property, Str
+from traits.api import Delegate, Dict, Instance, List, Property, Str
 
 from .abstract_data_source import AbstractDataSource
 from .abstract_plot_data import AbstractPlotData
@@ -35,9 +35,6 @@ class Plot(DataView):
 
     # The default index to use when adding new subplots.
     default_index = Instance(AbstractDataSource)
-
-    # Mapping of renderer type string to renderer class
-    renderer_map = Dict(dict(line = LinePlot))
 
     #------------------------------------------------------------------------
     # Annotations and decorations
@@ -78,8 +75,6 @@ class Plot(DataView):
             self.title = title
 
         self._plot_ui_info = None
-
-        return
 
     def plot(self, data, type="line", name=None, index_scale="linear",
              value_scale="linear", origin=None, **styles):
@@ -138,8 +133,6 @@ class Plot(DataView):
         self.index_scale = index_scale
         self.value_scale = value_scale
 
-        # TODO: support lists of plot types
-        plot_type = type
         if name is None:
             name = self._make_new_plot_name()
         if origin is None:
@@ -154,25 +147,21 @@ class Plot(DataView):
 
         # Tie data to the value_range and create the renderer for each data
         new_plots = []
-        simple_plot_types = ("line", "scatter")
         for value_name in data:
             value = self._get_or_create_datasource(value_name)
             self.value_range.add(value)
-            if plot_type in simple_plot_types:
-                cls = self.renderer_map[plot_type]
 
             imap = LinearMapper(range=self.index_range,
                         stretch_data=self.index_mapper.stretch_data)
             vmap = LinearMapper(range=self.value_range,
                         stretch_data=self.value_mapper.stretch_data)
 
-            plot = cls(index=index,
-                       value=value,
-                       index_mapper=imap,
-                       value_mapper=vmap,
-                       orientation=self.orientation,
-                       origin = origin,
-                       **styles)
+            plot = LinePlot(index=index,
+                            value=value,
+                            index_mapper=imap,
+                            value_mapper=vmap,
+                            origin = origin,
+                            **styles)
 
             self.add(plot)
             new_plots.append(plot)

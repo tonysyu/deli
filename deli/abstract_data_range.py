@@ -1,12 +1,12 @@
 """
 Defines the base class for data ranges.
 """
-from traits.api import Float, HasTraits, Instance, List, Trait
+from traits.api import Float, HasStrictTraits, Instance, List, Trait
 
 from .abstract_data_source import AbstractDataSource
 
 
-class AbstractDataRange(HasTraits):
+class AbstractDataRange(HasStrictTraits):
 
     # The list of data sources to which this range responds.
     sources = List(Instance(AbstractDataSource))

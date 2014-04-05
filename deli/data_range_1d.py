@@ -3,7 +3,7 @@ Defines the DataRange1D class.
 """
 from numpy import inf, ndarray
 
-from traits.api import Bool, CFloat, Enum, Float, Property, Trait, Callable
+from traits.api import Bool, Callable, CFloat, Float, Property, Trait
 
 from .base_data_range import BaseDataRange
 
@@ -89,7 +89,6 @@ class DataRange1D(BaseDataRange):
             self._low_value = low_start
             self._high_value = high_start
             self.updated = (self._low_value, self._high_value)
-        return
 
     #------------------------------------------------------------------------
     # Event handlers

@@ -11,6 +11,7 @@ from .ticks import AbstractTickGenerator, DefaultTickGenerator
 from .abstract_mapper import AbstractMapper
 from .abstract_overlay import AbstractOverlay
 from .label import Label
+from .utils import switch_trait_handler
 
 
 def DEFAULT_TICK_FORMATTER(val):
@@ -179,7 +180,6 @@ class PlotAxis(AbstractOverlay):
         Overrides AbstractOverlay.
         """
         self._draw_component(gc, view_bounds, mode, component)
-        return
 
     def _draw_component(self, gc, view_bounds=None, mode='normal', component=None):
         """ Draws the component.
@@ -205,7 +205,6 @@ class PlotAxis(AbstractOverlay):
             self._draw_labels(gc)
 
         self._cache_valid = True
-        return
 
     #------------------------------------------------------------------------
     # Private draw routines
@@ -225,7 +224,6 @@ class PlotAxis(AbstractOverlay):
                 self.width = self.component.width
                 self.height = self.component.padding_bottom
                 self.y = self.component.outer_y
-        return
 
     def _draw_axis_line(self, gc, startpoint, endpoint):
         """ Draws the line for the axis.
@@ -238,7 +236,6 @@ class PlotAxis(AbstractOverlay):
             gc.move_to(*around(startpoint))
             gc.line_to(*around(endpoint))
             gc.stroke_path()
-        return
 
     def _draw_ticks(self, gc):
         """ Draws the tick marks for the axis.
@@ -253,7 +250,6 @@ class PlotAxis(AbstractOverlay):
             gc.move_to(*(tick_pos + tick_in_vector))
             gc.line_to(*(tick_pos - tick_out_vector))
         gc.stroke_path()
-        return
 
     def _draw_labels(self, gc):
         """ Draws the tick labels for the axis.
@@ -277,7 +273,6 @@ class PlotAxis(AbstractOverlay):
             gc.translate_ctm(*tlpos)
             ticklabel.draw(gc)
             gc.translate_ctm(*(-tlpos))
-        return
 
     #------------------------------------------------------------------------
     # Private methods for computing positions and layout
@@ -304,7 +299,6 @@ class PlotAxis(AbstractOverlay):
                                 for tickpos in mapped_tick_positions]))
         self._tick_label_list = tick_list
         self._tick_label_positions = self._tick_positions
-        return
 
     def _compute_labels(self, gc):
         """Generates the labels for tick marks.
@@ -323,7 +317,6 @@ class PlotAxis(AbstractOverlay):
         self.ticklabel_cache = [build_label(val) for val in self._tick_label_list]
         self._tick_label_bounding_boxes = [array(ticklabel.get_bounding_box(gc), float)
                                                for ticklabel in self.ticklabel_cache]
-        return
 
     def _calculate_geometry_overlay(self, overlay_component=None):
         screenhigh = self.mapper.high_pos
@@ -351,8 +344,6 @@ class PlotAxis(AbstractOverlay):
         self._axis_vector = self._end_axis_point - self._origin_point
         # This is the vector that represents one unit of data space in terms of screen space.
         self._axis_pixel_vector = self._axis_vector/sqrt(dot(self._axis_vector,self._axis_vector))
-        return
-
 
     #------------------------------------------------------------------------
     # Event handlers
@@ -364,10 +355,7 @@ class PlotAxis(AbstractOverlay):
         self._invalidate()
 
     def _mapper_changed(self, old, new):
-        if old is not None:
-            old.on_trait_change(self.mapper_updated, "updated", remove=True)
-        if new is not None:
-            new.on_trait_change(self.mapper_updated, "updated")
+        switch_trait_handler(old, new, 'updated', self.mapper_updated)
         self._invalidate()
 
     def mapper_updated(self):
@@ -392,4 +380,3 @@ class PlotAxis(AbstractOverlay):
         self.invalidate_draw()
         if self.component:
             self.component.invalidate_draw()
-        return

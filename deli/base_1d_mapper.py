@@ -4,6 +4,7 @@ from traits.api import Bool, Instance, Float, Property
 
 from .abstract_mapper import AbstractMapper
 from .data_range_1d import DataRange1D
+from .utils import switch_trait_handler
 
 
 class Base1DMapper(AbstractMapper):
@@ -51,12 +52,7 @@ class Base1DMapper(AbstractMapper):
         self.updated = True
 
     def _range_changed(self, old, new):
-        if old is not None:
-            old.on_trait_change(self._range_change_handler, "updated",
-                                remove = True)
-        if new is not None:
-            new.on_trait_change(self._range_change_handler, "updated")
-
+        switch_trait_handler(old, new, 'updated', self._range_change_handler)
         self._cache_valid = False
         self.updated = new
 

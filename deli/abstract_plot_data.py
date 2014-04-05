@@ -1,9 +1,9 @@
 """ Defines the base class for plot data.
 """
-from traits.api import Bool, Event, HasTraits
+from traits.api import Bool, Event, HasStrictTraits
 
 
-class AbstractPlotData(HasTraits):
+class AbstractPlotData(HasStrictTraits):
     """ Defines the interface for data providers to Plot. """
 
     data_changed = Event

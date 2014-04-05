@@ -1,7 +1,8 @@
 """ Defines the base class for mappings.
 """
-from traits.api import HasTraits
+from traits.api import Event, HasStrictTraits
 
 
-class AbstractMapper(HasTraits):
-    pass
+class AbstractMapper(HasStrictTraits):
+
+    updated = Event
