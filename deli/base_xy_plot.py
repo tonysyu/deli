@@ -77,24 +77,6 @@ class BaseXYPlot(AbstractPlotRenderer):
     bgcolor = "transparent"
 
     #------------------------------------------------------------------------
-    # Private traits
-    #------------------------------------------------------------------------
-
-    # Are the cache traits valid? If False, new ones need to be compute.
-    _cache_valid = Bool(False)
-
-    # Cached array of (x,y) data-space points; regardless of self.orientation,
-    # these points are always stored as (index_pt, value_pt).
-    _cached_data_pts = Array
-
-    # Cached array of (x,y) screen-space points.
-    _cached_screen_pts = Array
-
-    # Does **_cached_screen_pts** contain the screen-space coordinates
-    # of the points currently in **_cached_data_pts**?
-    _screen_cache_valid = Bool(False)
-
-    #------------------------------------------------------------------------
     # Concrete methods below
     #------------------------------------------------------------------------
 
@@ -168,8 +150,6 @@ class BaseXYPlot(AbstractPlotRenderer):
         y_mapper.screen_bounds = (y, y2)
 
         self.invalidate_draw()
-        self._cache_valid = False
-        self._screen_cache_valid = False
 
     def _bounds_changed(self, old, new):
         super(BaseXYPlot, self)._bounds_changed(old, new)

@@ -82,7 +82,6 @@ class PlotGrid(AbstractOverlay):
     # Private traits; mostly cached information
     #------------------------------------------------------------------------
 
-    _cache_valid = Bool(False)
     _tick_list = Any
     _tick_positions = Any
 
@@ -133,7 +132,6 @@ class PlotGrid(AbstractOverlay):
         """
         self._tick_positions = array([], dtype=float)
         self._tick_extents = array([], dtype=float)
-        self._cache_valid = False
 
     def _compute_ticks(self, component=None):
         """ Calculates the positions for the grid lines.
@@ -145,10 +143,8 @@ class PlotGrid(AbstractOverlay):
             bounds = component.bounds
             position = component.position
 
-        ticks = self.tick_generator.get_ticks(
-            datalow, datahigh, datalow, datahigh, self.grid_interval,
-            use_endpoints=False, scale='linear'
-        )
+        ticks = self.tick_generator.get_ticks(datalow, datahigh,
+                                              self.grid_interval)
         tick_positions = self.mapper.map_screen(array(ticks, float64))
 
         if self.orientation == 'horizontal':
@@ -167,8 +163,6 @@ class PlotGrid(AbstractOverlay):
             extents = (position[1], position[1] + bounds[1])
         self._tick_extents[:] = extents
 
-        self._cache_valid = True
-
     def overlay(self, other_component, gc, view_bounds=None, mode="normal"):
         """ Draws this component overlaid on another component.
 
@@ -176,7 +170,6 @@ class PlotGrid(AbstractOverlay):
         """
         self._compute_ticks(other_component)
         self._draw_component(gc, view_bounds, mode)
-        self._cache_valid = False
 
     def _draw_component(self, gc, view_bounds=None, mode="normal"):
         """ Draws the component.
@@ -210,10 +203,10 @@ class PlotGrid(AbstractOverlay):
             gc.stroke_path()
 
     def _mapper_changed(self, old, new):
-        switch_trait_handler(old, new, 'updated', self.mapper_updated)
+        switch_trait_handler(old, new, 'updated', self._mapper_updated)
         self.invalidate()
 
-    def mapper_updated(self):
+    def _mapper_updated(self):
         """
         Event handler that is bound to this mapper's **updated** event.
         """
@@ -230,7 +223,7 @@ class PlotGrid(AbstractOverlay):
     #------------------------------------------------------------------------
 
     @on_trait_change("visible,line_color,line_style,line_weight")
-    def visual_attr_changed(self):
+    def _visual_attr_changed(self):
         """ Called when an attribute that affects the appearance of the grid
         is changed.
         """
@@ -239,4 +232,4 @@ class PlotGrid(AbstractOverlay):
 
     def _orientation_changed(self):
         self.invalidate()
-        self.visual_attr_changed()
+        self._visual_attr_changed()

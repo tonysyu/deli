@@ -16,15 +16,12 @@ class DefaultTickGenerator(AbstractTickGenerator):
     """ An implementation of AbstractTickGenerator that simply uses the
     auto_ticks() and log_auto_ticks() functions.
     """
-    def get_ticks(self, data_low, data_high, bounds_low,
-                  bounds_high, interval, use_endpoints=False,
-                  scale='linear'):
-        if scale == 'linear':
-            return array(auto_ticks(data_low, data_high, bounds_low, bounds_high,
-                         interval, use_endpoints=False), float64)
+    def get_ticks(self, bounds_low, bounds_high, interval):
+        ticks = auto_ticks(bounds_low, bounds_high, interval)
+        return array(ticks, float64)
 
-def auto_ticks ( data_low, data_high, bound_low, bound_high, tick_interval,
-                 use_endpoints = True):
+
+def auto_ticks(bound_low, bound_high, tick_interval):
     """ Finds locations for axis tick marks.
 
         Calculates the locations for tick marks on an axis. The *bound_low*,
@@ -33,11 +30,6 @@ def auto_ticks ( data_low, data_high, bound_low, bound_high, tick_interval,
 
         Parameters
         ----------
-
-        data_low, data_high : number
-            The minimum and maximum values of the data along this axis.
-            If any of the bound settings are 'auto' or 'fit', the axis
-            traits are calculated automatically from these values.
         bound_low, bound_high : 'auto', 'fit', or a number.
             The lower and upper bounds of the axis. If the value is a number,
             that value is used for the corresponding end point. If the value is
@@ -50,10 +42,6 @@ def auto_ticks ( data_low, data_high, bound_low, bound_high, tick_interval,
             number of tick intervals; 'auto' specifies that the number and
             length of the tick intervals are automatically calculated, based
             on the range of the axis.
-        use_endpoints : Boolean
-            If True, the lower and upper bounds of the data are used as the
-            lower and upper end points of the axis. If False, the end points
-            might not fall exactly on the bounds.
 
         Returns
         -------

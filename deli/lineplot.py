@@ -54,43 +54,41 @@ class LinePlot(BaseXYPlot):
         Collects the data points that are within the bounds of the plot and
         caches them.
         """
-        if not self._cache_valid:
-            index = self.index.get_data()
-            value = self.value.get_data()
+        index = self.index.get_data()
+        value = self.value.get_data()
 
-            # Check to see if the data is completely outside the view region
-            for ds, rng in ((self.index, self.index_range), (self.value, self.value_range)):
-                low, high = ds.get_bounds()
+        # Check to see if the data is completely outside the view region
+        for ds, rng in ((self.index, self.index_range), (self.value, self.value_range)):
+            low, high = ds.get_bounds()
 
-            index_max = len(value)
-            index = index[:index_max]
+        index_max = len(value)
+        index = index[:index_max]
 
-            # Split the index and value raw data into non-NaN chunks
-            nan_mask = np.invert(np.isnan(value)) & np.invert(np.isnan(index))
-            blocks = [b for b in arg_find_runs(nan_mask, "flat") if nan_mask[b[0]] != 0]
+        # Split the index and value raw data into non-NaN chunks
+        nan_mask = np.invert(np.isnan(value)) & np.invert(np.isnan(index))
+        blocks = [b for b in arg_find_runs(nan_mask, "flat") if nan_mask[b[0]] != 0]
 
-            points = []
-            for block in blocks:
-                start, end = block
-                block_index = index[start:end]
-                block_value = value[start:end]
-                index_mask = self.index_mapper.range.mask_data(block_index)
+        points = []
+        for block in blocks:
+            start, end = block
+            block_index = index[start:end]
+            block_value = value[start:end]
+            index_mask = self.index_mapper.range.mask_data(block_index)
 
-                runs = [r for r in arg_find_runs(index_mask, "flat") \
-                        if index_mask[r[0]] != 0]
-                # Expand the width of every group of points so we draw the lines
-                # up to their next point, outside the plot area
-                for run in runs:
-                    start, end = run
+            runs = [r for r in arg_find_runs(index_mask, "flat") \
+                    if index_mask[r[0]] != 0]
+            # Expand the width of every group of points so we draw the lines
+            # up to their next point, outside the plot area
+            for run in runs:
+                start, end = run
 
-                    run_data = ( block_index[start:end],
-                                 block_value[start:end] )
-                    run_data = np.column_stack(run_data)
+                run_data = ( block_index[start:end],
+                             block_value[start:end] )
+                run_data = np.column_stack(run_data)
 
-                    points.append(run_data)
+                points.append(run_data)
 
-            self._cached_data_pts = points
-            self._cache_valid = True
+        self._cached_data_pts = points
 
     def _render(self, gc, points, selected_points=None):
         with gc:

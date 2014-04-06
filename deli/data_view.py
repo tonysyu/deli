@@ -4,72 +4,12 @@ functions.
 from traits.api import Bool, Enum, Instance, Property
 
 from .abstract_overlay import AbstractOverlay
-from .axis import PlotAxis
+from .axis import XAxis, YAxis
 from .base_1d_mapper import Base1DMapper
 from .data_range_2d import DataRange2D
 from .grid import PlotGrid
 from .linear_mapper import LinearMapper
 from .plot_containers import OverlayPlotContainer
-
-
-def get_mapper(self, attr_name):
-    """ Getter function used by OrientedMapperProperty.
-    """
-    if attr_name in "x_mapper":
-        return self.index_mapper
-    else:
-        return self.value_mapper
-
-def set_mapper(self, attr_name, new):
-    """ Setter function used by OrientedMapperProperty.
-    """
-    if attr_name == "x_mapper":
-        self.index_mapper = new
-    else:
-        self.value_mapper = new
-
-# Property that represents a mapper for an orientation.
-OrientedMapperProperty = Property(get_mapper, set_mapper)
-
-
-def get_axis(self, attr_name):
-    """ Getter function used by AxisProperty.
-    """
-    if attr_name == "index_axis":
-        return self.x_axis
-    else:
-        return self.y_axis
-
-def set_axis(self, attr_name, new):
-    """ Setter function used by AxisProperty.
-    """
-    if attr_name == "index_axis":
-        self.x_axis = new
-    else:
-        self.y_axis = new
-
-# Property that represents an axis.
-AxisProperty = Property(get_axis, set_axis)
-
-
-def get_grid(self, attr_name):
-    """ Getter function used by GridProperty.
-    """
-    if attr_name == "index_grid":
-        return self.y_grid
-    else:
-        return self.x_grid
-
-def set_grid(self, attr_name, new):
-    """ Setter function used by GridProperty.
-    """
-    if attr_name == "value_grid":
-        self.y_grid = new
-    else:
-        self.y_grid = new
-
-# Property that represents a grid for a particular orientation.
-GridProperty = Property(get_grid, set_grid)
 
 
 class DataView(OverlayPlotContainer):
@@ -113,14 +53,6 @@ class DataView(OverlayPlotContainer):
     # supporting both XY plots and 2-D (image) plots.
     range2d = Instance(DataRange2D)
 
-    # Convenience property that offers access to whatever mapper corresponds
-    # to the X-axis.
-    x_mapper = OrientedMapperProperty
-
-    # Convenience property that offers access to whatever mapper corresponds
-    # to the Y-axis
-    y_mapper = OrientedMapperProperty
-
     #------------------------------------------------------------------------
     # Axis and Grids
     #------------------------------------------------------------------------
@@ -144,19 +76,6 @@ class DataView(OverlayPlotContainer):
     # Whether to automatically create the x_grid and y_grid if they were not
     # already set by the caller.
     auto_grid = Bool(True)
-
-    # Convenience property for accessing the index axis, which can be X or Y,
-    # depending on **orientation**.
-    index_axis = AxisProperty
-    # Convenience property for accessing the value axis, which can be Y or X,
-    # depending on **orientation**.
-    value_axis = AxisProperty
-    # Convenience property for accessing the index grid, which can be horizontal
-    # or vertical, depending on **orientation**.
-    index_grid = GridProperty
-    # Convenience property for accessing the value grid, which can be vertical
-    # or horizontal, depending on **orientation**.
-    value_grid = GridProperty
 
     #------------------------------------------------------------------------
     # Appearance
@@ -196,40 +115,32 @@ class DataView(OverlayPlotContainer):
         grid_color = 'lightgray'
 
         if not self.x_grid and self.auto_grid:
-            self.x_grid = PlotGrid(mapper=self.x_mapper, orientation="vertical",
+            self.x_grid = PlotGrid(mapper=self.index_mapper, orientation="vertical",
                                   line_color=grid_color, line_style="dot",
                                   component=self)
         if not self.y_grid and self.auto_grid:
-            self.y_grid = PlotGrid(mapper=self.y_mapper, orientation="horizontal",
+            self.y_grid = PlotGrid(mapper=self.value_mapper, orientation="horizontal",
                                   line_color=grid_color, line_style="dot",
                                   component=self)
 
         if not self.x_axis and self.auto_axis:
-            self.x_axis = PlotAxis(mapper=self.x_mapper, orientation="bottom",
-                                  component=self)
+            self.x_axis = XAxis(mapper=self.index_mapper, component=self)
 
         if not self.y_axis and self.auto_axis:
-            self.y_axis = PlotAxis(mapper=self.y_mapper, orientation="left",
-                                  component=self)
+            self.y_axis = YAxis(mapper=self.value_mapper, component=self)
 
     #-------------------------------------------------------------------------
     # Event handlers
     #-------------------------------------------------------------------------
 
     def _update_mappers(self):
+        if self.index_mapper is not None:
+            self.index_mapper.low_pos = self.x
+            self.index_mapper.high_pos = self.x2
 
-        x = self.x
-        x2 = self.x2
-        y = self.y
-        y2 = self.y2
-
-        if self.x_mapper is not None:
-            self.x_mapper.low_pos = x
-            self.x_mapper.high_pos = x2
-
-        if self.y_mapper is not None:
-            self.y_mapper.low_pos = y
-            self.y_mapper.high_pos = y2
+        if self.value_mapper is not None:
+            self.value_mapper.low_pos = self.y
+            self.value_mapper.high_pos = self.y2
 
         self.invalidate_draw()
 

@@ -31,10 +31,6 @@ class Base1DMapper(AbstractMapper):
     # the ratio if both screen and data space extents are non-zero.
     stretch_data = Bool(True)
 
-    # If the subclass uses a cache, _cache_valid is maintained to
-    # monitor its status
-    _cache_valid = Bool(False)
-
     # Indicates whether or not the bounds have been set at all, or if they
     # are at their initial default values.
     _bounds_initialized = Bool(False)
@@ -44,16 +40,13 @@ class Base1DMapper(AbstractMapper):
     #------------------------------------------------------------------------
 
     def _low_pos_changed(self):
-        self._cache_valid = False
         self.updated = True
 
     def _high_pos_changed(self):
-        self._cache_valid = False
         self.updated = True
 
     def _range_changed(self, old, new):
         switch_trait_handler(old, new, 'updated', self._range_change_handler)
-        self._cache_valid = False
         self.updated = new
 
     def _range_change_handler(self, obj, name, new):
@@ -62,6 +55,5 @@ class Base1DMapper(AbstractMapper):
     def _set_screen_bounds(self, new_bounds):
         self.set(low_pos = new_bounds[0], trait_change_notify=False)
         self.set(high_pos = new_bounds[1], trait_change_notify=False)
-        self._cache_valid = False
         self._bounds_initialized = True
         self.updated = True

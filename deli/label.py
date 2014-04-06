@@ -53,7 +53,6 @@ class Label(HasStrictTraits):
     #------------------------------------------------------------------------
 
     _bounding_box = List()
-    _position_cache_valid = Bool(False)
     _text_needs_fitting = Bool(True)
     _line_xpos = Any()
     _line_ypos = Any()
@@ -71,7 +70,7 @@ class Label(HasStrictTraits):
         width, height = self._bounding_box
         return width, height
 
-    def get_bounding_box(self, gc):
+    def get_bbox(self, gc):
         """ Returns a rectangular bounding box for the Label as (width,height).
         """
         return self.get_width_height(gc)
@@ -90,7 +89,7 @@ class Label(HasStrictTraits):
         self._calc_line_positions(gc)
 
         with gc:
-            bb_width, bb_height = self.get_bounding_box(gc)
+            bb_width, bb_height = self.get_bbox(gc)
 
             # Rotate label about center of bounding box
             width, height = self._bounding_box
@@ -141,35 +140,33 @@ class Label(HasStrictTraits):
             self._text_needs_fitting = False
 
     def _calc_line_positions(self, gc):
-        if not self._position_cache_valid:
-            with gc:
-                gc.set_font(self.font)
-                # The bottommost line starts at postion (0, 0).
-                x_pos = []
-                y_pos = []
-                self._bounding_box = [0, 0]
-                margin = self.margin
-                prev_y_pos = margin
-                prev_y_height = -self.line_spacing
-                max_width = 0
-                for line in self.text.split("\n")[::-1]:
-                    if line != "":
-                        (width, height, descent, leading) = \
-                            gc.get_full_text_extent(line)
-                        ascent = height - abs(descent)
-                        if width > max_width:
-                            max_width = width
-                        new_y_pos = prev_y_pos + prev_y_height \
-                            + self.line_spacing
-                    x_pos.append(-leading + margin)
-                    y_pos.append(new_y_pos)
-                    prev_y_pos = new_y_pos
-                    prev_y_height = ascent
+        with gc:
+            gc.set_font(self.font)
+            # The bottommost line starts at postion (0, 0).
+            x_pos = []
+            y_pos = []
+            self._bounding_box = [0, 0]
+            margin = self.margin
+            prev_y_pos = margin
+            prev_y_height = -self.line_spacing
+            max_width = 0
+            for line in self.text.split("\n")[::-1]:
+                if line != "":
+                    (width, height, descent, leading) = \
+                        gc.get_full_text_extent(line)
+                    ascent = height - abs(descent)
+                    if width > max_width:
+                        max_width = width
+                    new_y_pos = prev_y_pos + prev_y_height \
+                        + self.line_spacing
+                x_pos.append(-leading + margin)
+                y_pos.append(new_y_pos)
+                prev_y_pos = new_y_pos
+                prev_y_height = ascent
 
-            self._line_xpos = x_pos[::-1]
-            self._line_ypos = y_pos[::-1]
-            border_width = self.border_width if self.border_visible else 0
-            self._bounding_box[0] = max_width + 2*margin + 2*border_width
-            self._bounding_box[1] = prev_y_pos + prev_y_height + margin \
-                + 2*border_width
-            self._position_cache_valid = True
+        self._line_xpos = x_pos[::-1]
+        self._line_ypos = y_pos[::-1]
+        border_width = self.border_width if self.border_visible else 0
+        self._bounding_box[0] = max_width + 2*margin + 2*border_width
+        self._bounding_box[1] = prev_y_pos + prev_y_height + margin \
+            + 2*border_width

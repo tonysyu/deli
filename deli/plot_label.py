@@ -71,7 +71,7 @@ class PlotLabel(AbstractOverlay):
         """
         # Perform justification and compute the correct offsets for
         # the label position
-        width, height = self._label.get_bounding_box(gc)
+        width, height = self._label.get_bbox(gc)
 
         x_offset = int((self.width - width) / 2)
         y_offset = int((self.height - height) / 2)
