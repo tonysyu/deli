@@ -43,7 +43,7 @@ class LinePlot(BaseXYPlot):
 
     def get_screen_points(self):
         self._gather_points()
-        return [self.map_screen(ary) for ary in self._cached_data_pts]
+        return [self.map_screen(pts) for pts in self._cached_data_pts]
 
     #------------------------------------------------------------------------
     # Private methods; implements the BaseXYPlot stub methods
@@ -54,36 +54,29 @@ class LinePlot(BaseXYPlot):
         Collects the data points that are within the bounds of the plot and
         caches them.
         """
-        index = self.index.get_data()
-        value = self.value.get_data()
+        x = self.x_src.get_data()
+        y = self.y_src.get_data()
 
-        # Check to see if the data is completely outside the view region
-        for ds, rng in ((self.index, self.index_range), (self.value, self.value_range)):
-            low, high = ds.get_bounds()
-
-        index_max = len(value)
-        index = index[:index_max]
-
-        # Split the index and value raw data into non-NaN chunks
-        nan_mask = np.invert(np.isnan(value)) & np.invert(np.isnan(index))
+        # Split the raw x/y data into non-NaN chunks
+        nan_mask = np.invert(np.isnan(y)) & np.invert(np.isnan(x))
         blocks = [b for b in arg_find_runs(nan_mask, "flat") if nan_mask[b[0]] != 0]
 
         points = []
         for block in blocks:
             start, end = block
-            block_index = index[start:end]
-            block_value = value[start:end]
-            index_mask = self.index_mapper.range.mask_data(block_index)
+            x_segment = x[start:end]
+            y_segment = y[start:end]
+            x_mask = self.x_mapper.range.mask_data(x_segment)
 
-            runs = [r for r in arg_find_runs(index_mask, "flat") \
-                    if index_mask[r[0]] != 0]
+            runs = [r for r in arg_find_runs(x_mask, "flat") \
+                    if x_mask[r[0]] != 0]
             # Expand the width of every group of points so we draw the lines
             # up to their next point, outside the plot area
             for run in runs:
                 start, end = run
 
-                run_data = ( block_index[start:end],
-                             block_value[start:end] )
+                run_data = ( x_segment[start:end],
+                             y_segment[start:end] )
                 run_data = np.column_stack(run_data)
 
                 points.append(run_data)
@@ -95,23 +88,18 @@ class LinePlot(BaseXYPlot):
             gc.set_antialias(True)
             gc.clip_to_rect(self.x, self.y, self.width, self.height)
 
-            render_method_dict = {
-                    "connectedpoints": self._render_normal
-                    }
-            render = render_method_dict.get(self.render_style, self._render_normal)
-
             # Render using the normal style
             gc.set_stroke_color(self.effective_color)
             gc.set_line_width(self.line_width)
             gc.set_line_dash(self.line_style_)
-            render(gc, points)
+            self._render_normal(gc, points)
 
     @classmethod
     def _render_normal(cls, gc, points):
-        for ary in points:
-            if len(ary) > 0:
+        for line in points:
+            if len(line) > 0:
                 gc.begin_path()
-                gc.lines(ary)
+                gc.lines(line)
                 gc.stroke_path()
 
     def _color_changed(self):

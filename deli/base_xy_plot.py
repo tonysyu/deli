@@ -2,7 +2,7 @@
 """
 from numpy import array, transpose
 
-from traits.api import Array, Bool, Enum, Instance, Property, Range
+from traits.api import Instance, Property, Range
 
 from .abstract_mapper import AbstractMapper
 from .abstract_plot_renderer import AbstractPlotRenderer
@@ -11,8 +11,8 @@ from .array_data_source import ArrayDataSource
 
 
 class BaseXYPlot(AbstractPlotRenderer):
-    """ Base class for simple X-vs-Y plots that consist of a single index
-    data array and a single value data array.
+    """ Base class for simple X-vs-Y plots that consist of a single x
+    data array and a single y data array.
 
     Subclasses handle the actual rendering, but this base class takes care of
     most of making sure events are wired up between mappers and data or screen
@@ -23,33 +23,21 @@ class BaseXYPlot(AbstractPlotRenderer):
     # Data-related traits
     #------------------------------------------------------------------------
 
-    # The data source to use for the index coordinate.
-    index = Instance(ArrayDataSource)
+    # The data source to use for the x coordinate.
+    x_src = Instance(ArrayDataSource)
 
-    # The data source to use as value points.
-    value = Instance(AbstractDataSource)
+    # The data source to use as y points.
+    y_src = Instance(AbstractDataSource)
 
-    # Screen mapper for index data.
-    index_mapper = Instance(AbstractMapper)
-    # Screen mapper for value data
-    value_mapper = Instance(AbstractMapper)
+    # Screen mapper for x data.
+    x_mapper = Instance(AbstractMapper)
 
-    # Corresponds to **index_mapper**
-    x_mapper = Property
-    # Corresponds to **value_mapper**
-    y_mapper = Property
-
-    # Convenience property for accessing the index data range.
-    index_range = Property
-    # Convenience property for accessing the value data range.
-    value_range = Property
+    # Screen mapper for y data
+    y_mapper = Instance(AbstractMapper)
 
     #------------------------------------------------------------------------
     # Appearance-related traits
     #------------------------------------------------------------------------
-
-    # The orientation of the index axis.
-    orientation = Enum("h", "v")
 
     # Overall alpha value of the image. Ranges from 0.0 for transparent to 1.0
     alpha = Range(0.0, 1.0, 1.0)
@@ -58,10 +46,6 @@ class BaseXYPlot(AbstractPlotRenderer):
     # Convenience readonly properties for common annotations
     #------------------------------------------------------------------------
 
-    # Read-only property for horizontal grid.
-    hgrid = Property
-    # Read-only property for vertical grid.
-    vgrid = Property
     # Read-only property for x-axis.
     x_axis = Property
     # Read-only property for y-axis.
@@ -83,8 +67,8 @@ class BaseXYPlot(AbstractPlotRenderer):
     def __init__(self, **kwtraits):
         # Handling the setting/initialization of these traits manually because
         # they should be initialized in a certain order.
-        priority_traits = {"trait_change_notify": False}
-        for trait_name in ("index", "value", "index_mapper", "value_mapper"):
+        priority_traits = {}
+        for trait_name in ("x_src", "y_src", "x_mapper", "y_mapper"):
             if trait_name in kwtraits:
                 priority_traits[trait_name] = kwtraits.pop(trait_name)
         AbstractPlotRenderer.__init__(self)
@@ -103,8 +87,8 @@ class BaseXYPlot(AbstractPlotRenderer):
         """
         x_ary, y_ary = transpose(data_array)
 
-        sx = self.index_mapper.map_screen(x_ary)
-        sy = self.value_mapper.map_screen(y_ary)
+        sx = self.x_mapper.map_screen(x_ary)
+        sy = self.y_mapper.map_screen(y_ary)
         return transpose(array((sx,sy)))
 
     #------------------------------------------------------------------------
@@ -124,31 +108,12 @@ class BaseXYPlot(AbstractPlotRenderer):
         self._render(gc, pts)
 
     #------------------------------------------------------------------------
-    # Properties
-    #------------------------------------------------------------------------
-
-    def _get_index_range(self):
-        return self.index_mapper.range
-
-    def _get_value_range(self):
-        return self.value_mapper.range
-
-    #------------------------------------------------------------------------
     # Event handlers
     #------------------------------------------------------------------------
 
     def _update_mappers(self):
-        x_mapper = self.index_mapper
-        y_mapper = self.value_mapper
-
-        x = self.x
-        x2 = self.x2
-        y = self.y
-        y2 = self.y2
-
-        x_mapper.screen_bounds = (x, x2)
-        y_mapper.screen_bounds = (y, y2)
-
+        self.x_mapper.screen_bounds = (self.x, self.x2)
+        self.y_mapper.screen_bounds = (self.y, self.y2)
         self.invalidate_draw()
 
     def _bounds_changed(self, old, new):

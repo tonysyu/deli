@@ -33,8 +33,8 @@ class Plot(DataView):
     # Mapping of plot names to *lists* of plot renderers.
     plots = Dict(Str, List)
 
-    # The default index to use when adding new subplots.
-    default_index = Instance(AbstractDataSource)
+    # The default x to use when adding new subplots.
+    default_x_src = Instance(AbstractDataSource)
 
     #------------------------------------------------------------------------
     # Annotations and decorations
@@ -74,93 +74,36 @@ class Plot(DataView):
         if title is not None:
             self.title = title
 
-        self._plot_ui_info = None
-
-    def plot(self, data, type="line", name=None, index_scale="linear",
-             value_scale="linear", origin=None, **styles):
+    def plot(self, data, type="line", **styles):
         """ Adds a new sub-plot using the given data and plot style.
-
-        Parameters
-        ----------
-        data : string, tuple(string), list(string)
-            The data to be plotted. The type of plot and the number of
-            arguments determines how the arguments are interpreted:
-
-            one item: (line/scatter)
-                The data is treated as the value and self.default_index is
-                used as the index.  If **default_index** does not exist, one is
-                created from arange(len(*data*))
-            two or more items: (line/scatter)
-                Interpreted as (index, value1, value2, ...).  Each index,value
-                pair forms a new plot of the type specified.
-            two items: (cmap_scatter)
-                Interpreted as (value, color_values).  Uses **default_index**.
-            three or more items: (cmap_scatter)
-                Interpreted as (index, val1, color_val1, val2, color_val2, ...)
-
-        type : comma-delimited string of "line", "scatter", "cmap_scatter"
-            The types of plots to add.
-        name : string
-            The name of the plot.  If None, then a default one is created
-            (usually "plotNNN").
-        index_scale : string
-            The type of scale to use for the index axis. If not "linear", then
-            a log scale is used.
-        value_scale : string
-            The type of scale to use for the value axis. If not "linear", then
-            a log scale is used.
-        origin : string
-            Which corner the origin of this plot should occupy:
-                "bottom left", "top left", "bottom right", "top right"
-        styles : series of keyword arguments
-            attributes and values that apply to one or more of the
-            plot types requested, e.g.,'line_color' or 'line_width'.
-
-        Examples
-        --------
-        ::
-
-            plot("my_data", type="line", name="myplot", color=lightblue)
-
-            plot(("x-data", "y-data"), type="scatter")
-
-            plot(("x", "y1", "y2", "y3"))
 
         Returns
         -------
         [renderers] -> list of renderers created in response to this call to plot()
         """
-        self.index_scale = index_scale
-        self.value_scale = value_scale
+        name = self._make_new_plot_name()
 
-        if name is None:
-            name = self._make_new_plot_name()
-        if origin is None:
-            origin = self.default_origin
-
-        # Tie data to the index range
-        index = self._get_or_create_datasource(data[0])
-        if self.default_index is None:
-            self.default_index = index
-        self.index_range.add(index)
+        x_src = self._get_or_create_datasource(data[0])
+        if self.default_x_src is None:
+            self.default_x_src = x_src
+        self.x_range.add(x_src)
         data = data[1:]
 
-        # Tie data to the value_range and create the renderer for each data
         new_plots = []
-        for value_name in data:
-            value = self._get_or_create_datasource(value_name)
-            self.value_range.add(value)
+        for y_name in data:
+            y_src = self._get_or_create_datasource(y_name)
+            self.y_range.add(y_src)
 
-            imap = LinearMapper(range=self.index_range,
-                        stretch_data=self.index_mapper.stretch_data)
-            vmap = LinearMapper(range=self.value_range,
-                        stretch_data=self.value_mapper.stretch_data)
+            imap = LinearMapper(range=self.x_range,
+                        stretch_data=self.x_mapper.stretch_data)
+            vmap = LinearMapper(range=self.y_range,
+                        stretch_data=self.y_mapper.stretch_data)
 
-            plot = LinePlot(index=index,
-                            value=value,
-                            index_mapper=imap,
-                            value_mapper=vmap,
-                            origin = origin,
+            plot = LinePlot(x_src=x_src,
+                            y_src=y_src,
+                            x_mapper=imap,
+                            y_mapper=vmap,
+                            origin = self.default_origin,
                             **styles)
 
             self.add(plot)

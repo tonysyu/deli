@@ -64,7 +64,7 @@ def auto_ticks(bound_low, bound_high, tick_interval):
     return [tick for tick in ticks if tick >= bound_low and tick <= bound_high]
 
 
-def auto_interval ( data_low, data_high ):
+def auto_interval(data_low, data_high):
     """ Calculates the tick interval for a range.
 
         The boundaries for the data to be plotted on the axis are::

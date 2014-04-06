@@ -20,36 +20,26 @@ class DataView(OverlayPlotContainer):
     """
 
     # The default location of the origin  for new plots
-    default_origin = Enum("bottom left", "top left",
-                          "bottom right", "top right")
+    default_origin = Enum('bottom left', 'top left',
+                          'bottom right', 'top right')
 
     # The origin reported to axes, etc
     origin = Property(depends_on='default_origin')
 
-    # Whether our map_screen and map_data should treat screen-space
-    # coords as being in our coordinate space or in our contained
-    # coordinate space.
+    # The mapper to use for the x data.
+    x_mapper = Instance(Base1DMapper)
 
-    # The mapper to use for the index data.
-    index_mapper = Instance(Base1DMapper)
+    # The mapper to use for y data.
+    y_mapper = Instance(Base1DMapper)
 
-    # The mapper to use for value data.
-    value_mapper = Instance(Base1DMapper)
+    # The range used for the x data.
+    x_range = Property
 
-    # For x-y plots, the scale of the index axis.
-    index_scale = Enum("linear", "log")
-
-    # For x-y plots, the scale of the index axis.
-    value_scale = Enum("linear", "log")
-
-    # The range used for the index data.
-    index_range = Property
-
-    # The range used for the value data.
-    value_range = Property
+    # The range used for the y data.
+    y_range = Property
 
     # The 2-D data range whose x- and y-ranges are exposed as the
-    # **index_range** and **value_range** property traits. This allows
+    # **x_range** and **y_range** property traits. This allows
     # supporting both XY plots and 2-D (image) plots.
     range2d = Instance(DataRange2D)
 
@@ -104,43 +94,43 @@ class DataView(OverlayPlotContainer):
     #------------------------------------------------------------------------
 
     def _init_components(self):
-        if not self.index_mapper:
+        if not self.x_mapper:
             imap = LinearMapper(range=self.range2d.x_range)
-            self.index_mapper = imap
+            self.x_mapper = imap
 
-        if not self.value_mapper:
+        if not self.y_mapper:
             vmap = LinearMapper(range=self.range2d.y_range)
-            self.value_mapper = vmap
+            self.y_mapper = vmap
 
         grid_color = 'lightgray'
 
         if not self.x_grid and self.auto_grid:
-            self.x_grid = PlotGrid(mapper=self.index_mapper, orientation="vertical",
+            self.x_grid = PlotGrid(mapper=self.x_mapper, orientation="vertical",
                                   line_color=grid_color, line_style="dot",
                                   component=self)
         if not self.y_grid and self.auto_grid:
-            self.y_grid = PlotGrid(mapper=self.value_mapper, orientation="horizontal",
+            self.y_grid = PlotGrid(mapper=self.y_mapper, orientation="horizontal",
                                   line_color=grid_color, line_style="dot",
                                   component=self)
 
         if not self.x_axis and self.auto_axis:
-            self.x_axis = XAxis(mapper=self.index_mapper, component=self)
+            self.x_axis = XAxis(mapper=self.x_mapper, component=self)
 
         if not self.y_axis and self.auto_axis:
-            self.y_axis = YAxis(mapper=self.value_mapper, component=self)
+            self.y_axis = YAxis(mapper=self.y_mapper, component=self)
 
     #-------------------------------------------------------------------------
     # Event handlers
     #-------------------------------------------------------------------------
 
     def _update_mappers(self):
-        if self.index_mapper is not None:
-            self.index_mapper.low_pos = self.x
-            self.index_mapper.high_pos = self.x2
+        if self.x_mapper is not None:
+            self.x_mapper.low_pos = self.x
+            self.x_mapper.high_pos = self.x2
 
-        if self.value_mapper is not None:
-            self.value_mapper.low_pos = self.y
-            self.value_mapper.high_pos = self.y2
+        if self.y_mapper is not None:
+            self.y_mapper.low_pos = self.y
+            self.y_mapper.high_pos = self.y2
 
         self.invalidate_draw()
 
@@ -152,11 +142,11 @@ class DataView(OverlayPlotContainer):
         super(DataView, self)._position_changed(old, new)
         self._update_mappers()
 
-    def _index_mapper_changed(self, old, new):
-        new.range = self.index_range
+    def _x_mapper_changed(self, old, new):
+        new.range = self.x_range
 
-    def _value_mapper_changed(self, old, new):
-        new.range = self.value_range
+    def _y_mapper_changed(self, old, new):
+        new.range = self.y_range
 
     def _x_grid_changed(self, old, new):
         self._underlay_change_helper(old, new)
@@ -189,11 +179,8 @@ class DataView(OverlayPlotContainer):
     # Property getters and setters
     #------------------------------------------------------------------------
 
-    def _get_index_range(self):
+    def _get_x_range(self):
         return self.range2d.x_range
 
-    def _get_value_range(self):
+    def _get_y_range(self):
         return self.range2d.y_range
-
-    def _get_origin(self):
-        return self.default_origin

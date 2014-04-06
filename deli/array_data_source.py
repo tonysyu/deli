@@ -1,7 +1,7 @@
 """ Defines the ArrayDataSource class."""
-from numpy import array, nanargmin, nanargmax, ndarray
+import numpy as np
 
-from traits.api import Any, Tuple
+from traits.api import Tuple
 
 from .base import NumericalSequenceTrait, SortOrderTrait
 from .abstract_data_source import AbstractDataSource
@@ -24,17 +24,11 @@ class ArrayDataSource(AbstractDataSource):
     # Cached values of min and max as long as **_data** doesn't change.
     _cached_bounds = Tuple
 
-    # The index of the (first) minimum value in self._data
-    _min_index = Any
-
-    # The index of the (first) maximum value in self._data
-    _max_index = Any
-
     #------------------------------------------------------------------------
     # Public methods
     #------------------------------------------------------------------------
 
-    def __init__(self, data=array([]), sort_order="none", **kw):
+    def __init__(self, data=np.array([]), sort_order="none", **kw):
         AbstractDataSource.__init__(self, **kw)
         self.set_data(data, sort_order)
 
@@ -89,18 +83,9 @@ class ArrayDataSource(AbstractDataSource):
         If a data array is passed in, then that is used instead of self._data.
         This behavior is useful for subclasses.
         """
-        # TODO: as an optimization, perhaps create and cache a sorted
-        #       version of the dataset?
-
         if data is None:
-            # Several sources weren't setting the _data attribute, so we
-            # go through the interface.  This seems like the correct thing
-            # to do anyway... right?
-            #data = self._data
             data = self.get_data()
 
-        self._min_index = nanargmin(data.view(ndarray))
-        self._max_index = nanargmax(data.view(ndarray))
-
-        self._cached_bounds = (data[self._min_index],
-                               data[self._max_index])
+        d_min = np.nanmin(data)
+        d_max = np.nanmax(data)
+        self._cached_bounds = (d_min, d_max)
