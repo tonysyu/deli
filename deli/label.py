@@ -90,9 +90,9 @@ class Label(HasStrictTraits):
 
         with gc:
             bb_width, bb_height = self.get_bbox(gc)
+            width, height = self._bounding_box
 
             # Rotate label about center of bounding box
-            width, height = self._bounding_box
             gc.translate_ctm(bb_width/2.0, bb_height/2.0)
             gc.rotate_ctm(pi/180.0*self.rotate_angle)
             gc.translate_ctm(-width/2.0, -height/2.0)
@@ -100,7 +100,7 @@ class Label(HasStrictTraits):
             gc.set_fill_color(self.color_)
             gc.set_stroke_color(self.color_)
             gc.set_font(self.font)
-            gc.set_antialias(1)
+            gc.set_antialias(True)
 
             lines = self.text.split("\n")
             if self.border_visible:
@@ -152,13 +152,12 @@ class Label(HasStrictTraits):
             max_width = 0
             for line in self.text.split("\n")[::-1]:
                 if line != "":
-                    (width, height, descent, leading) = \
-                        gc.get_full_text_extent(line)
+                    text_extent = gc.get_full_text_extent(line)
+                    (width, height, descent, leading) = text_extent
                     ascent = height - abs(descent)
                     if width > max_width:
                         max_width = width
-                    new_y_pos = prev_y_pos + prev_y_height \
-                        + self.line_spacing
+                    new_y_pos = prev_y_pos + prev_y_height + self.line_spacing
                 x_pos.append(-leading + margin)
                 y_pos.append(new_y_pos)
                 prev_y_pos = new_y_pos

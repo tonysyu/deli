@@ -1,8 +1,9 @@
 """
 Defines the AbstractDataSource class.
 """
-from traits.api import HasTraits
+from traits.api import Event, HasStrictTraits
 
 
-class AbstractDataSource(HasTraits):
-    pass
+class AbstractDataSource(HasStrictTraits):
+
+    data_changed = Event

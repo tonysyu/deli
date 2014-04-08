@@ -2,7 +2,7 @@
 """
 from traits.api import Enum
 
-from plot_component import PlotComponent
+from .plot_component import PlotComponent
 
 
 class AbstractPlotRenderer(PlotComponent):

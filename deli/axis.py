@@ -1,16 +1,16 @@
 """ Defines the PlotAxis class, and associated validator and UI.
 """
-from numpy import array, around, dot, float64, sqrt
+from numpy import array, around, dot, sqrt
 
-from enable.api import ColorTrait, LineStyle
+from enable.api import ColorTrait
 from kiva.trait_defs.kiva_font_trait import KivaFont
-from traits.api import Any, Float, Int, Str, Trait, Unicode, \
-     Bool, Event, List, Array, Instance, Enum, Callable
+from traits.api import Any, Float, Int, Event, List, Array, Instance, Callable
 
-from .ticks import AbstractTickGenerator, DefaultTickGenerator
 from .abstract_mapper import AbstractMapper
 from .abstract_overlay import AbstractOverlay
 from .label import Label
+from .line_artist import LineArtist
+from .ticks import TickGrid
 from .utils import switch_trait_handler
 
 
@@ -23,27 +23,6 @@ class PlotAxis(AbstractOverlay):
     # The mapper that drives this axis.
     mapper = Instance(AbstractMapper)
 
-    # Keep an origin for plots that aren't attached to a component
-    origin = Enum("bottom left", "top left", "bottom right", "top right")
-
-    # The text of the axis title.
-    title = Trait('', Str, Unicode) #May want to add PlotLabel option
-
-    # The font of the title.
-    title_font = KivaFont('modern 12')
-
-    # The spacing between the axis line and the title
-    title_spacing = Trait('auto', 'auto', Float)
-
-    # The color of the title.
-    title_color = ColorTrait("black")
-
-    # The thickness (in pixels) of each tick.
-    tick_weight = Float(1.0)
-
-    # The color of the ticks.
-    tick_color = ColorTrait("black")
-
     # The font of the tick labels.
     tick_label_font = KivaFont('modern 10')
 
@@ -53,17 +32,11 @@ class PlotAxis(AbstractOverlay):
     # The rotation of the tick labels.
     tick_label_rotate_angle = Float(0)
 
-    # Whether to align to corners or edges (corner is better for 45 degree rotation)
-    tick_label_alignment = Enum('edge', 'corner')
-
     # The margin around the tick labels.
     tick_label_margin = Int(2)
 
     # The distance of the tick label from the axis.
     tick_label_offset = Float(8.)
-
-    # Whether the tick labels appear to the inside or the outside of the plot area
-    tick_label_position = Enum("outside", "inside")
 
     # A callable that is passed the numerical value of each tick label and
     # that returns a string.
@@ -75,53 +48,20 @@ class PlotAxis(AbstractOverlay):
     # The number of pixels by which the ticks extend into the label area.
     tick_out = Int(5)
 
-    # Are ticks visible at all?
-    tick_visible = Bool(True)
-
     # The dataspace interval between ticks.
-    tick_interval = Trait('auto', 'auto', Float)
-
-    # A callable that implements the AbstractTickGenerator interface.
-    tick_generator = Instance(AbstractTickGenerator)
-
-    # Is the axis line visible?
-    axis_line_visible = Bool(True)
-
-    # The color of the axis line.
-    axis_line_color = ColorTrait("black")
-
-    # The line thickness (in pixels) of the axis line.
-    axis_line_weight = Float(1.0)
-
-    # The dash style of the axis line.
-    axis_line_style = LineStyle('solid')
-
-    # A special version of the axis line that is more useful for geophysical
-    # plots.
-    small_haxis_style = Bool(False)
-
-    # Does the axis ensure that its end labels fall within its bounding area?
-    ensure_labels_bounded = Bool(False)
-
-    # Does the axis prevent the ticks from being rendered outside its bounds?
-    # This flag is off by default because the standard axis *does* render ticks
-    # that encroach on the plot area.
-    ensure_ticks_bounded = Bool(False)
+    # A tick grid that controls tick positioning
+    tick_grid = Instance(TickGrid, ())
 
     # Fired when the axis's range bounds change.
     updated = Event
 
     #------------------------------------------------------------------------
-    # Override default values of inherited traits
+    # Appearance traits
     #------------------------------------------------------------------------
 
-    # Background color (overrides AbstractOverlay). Axes usually let the color of
-    # the container show through.
-    bgcolor = ColorTrait("transparent")
+    tick_artist = Instance(LineArtist, ())
 
-    # Dimensions that the axis is resizable in (overrides PlotComponent).
-    # Typically, axes are resizable in both dimensions.
-    resizable = "hv"
+    line_artist = Instance(LineArtist, ())
 
     #------------------------------------------------------------------------
     # Private Traits
@@ -129,29 +69,22 @@ class PlotAxis(AbstractOverlay):
 
     # Cached position calculations
 
-    _tick_positions = Any #List
-    _tick_label_list = Any
-    _tick_label_positions = Any
+    _xy_tick = Any #List
     _tick_label_bbox = List
-    _major_axis_size = Float
-    _minor_axis_size = Float
     _major_axis = Array
-    _title_orientation = Array
-    _origin_point = Array
+    _xy_origin = Array
     _inside_vector = Array
     _axis_vector = Array
     _axis_pixel_vector = Array
     _end_axis_point = Array
 
-    ticklabel_cache = List
+    _tick_label_cache = List
 
     #------------------------------------------------------------------------
     # Public methods
     #------------------------------------------------------------------------
 
     def __init__(self, component=None, **kwargs):
-        # TODO: change this back to a factory in the instance trait some day
-        self.tick_generator = DefaultTickGenerator()
         # Override init so that our component gets set last.  We want the
         # _component_changed() event handler to get run last.
         super(PlotAxis, self).__init__(**kwargs)
@@ -162,36 +95,28 @@ class PlotAxis(AbstractOverlay):
     # PlotComponent and AbstractOverlay interface
     #------------------------------------------------------------------------
 
-    def _do_layout(self, *args, **kw):
-        """ Tells this component to do layout at a given size.
-
-        Overrides Component.
-        """
-        self._layout_as_overlay(*args, **kw)
-
     def overlay(self, component, gc, view_bounds=None, mode='normal'):
         """ Draws this component overlaid on another component.
 
         Overrides AbstractOverlay.
         """
-        self._draw_component(gc, view_bounds, mode, component)
+        self._draw_component(gc, view_bounds, component)
 
-    def _draw_component(self, gc, view_bounds=None, mode='normal', component=None):
+    def _draw_component(self, gc, view_bounds=None, component=None):
         """ Draws the component.
 
         This method is preserved for backwards compatibility. Overrides
         PlotComponent.
         """
         self._calculate_geometry_overlay(component)
-        self._compute_tick_positions(gc, component)
+        self._compute_tick_positions()
         self._compute_labels(gc)
 
         with gc:
+            gc.set_antialias(False)
             gc.set_font(self.tick_label_font)
 
-            if self.axis_line_visible:
-                self._draw_axis_line(gc, self._origin_point, self._end_axis_point)
-
+            self._draw_axis_line(gc)
             self._draw_ticks(gc)
             self._draw_labels(gc)
 
@@ -199,105 +124,86 @@ class PlotAxis(AbstractOverlay):
     # Private draw routines
     #------------------------------------------------------------------------
 
-    def _draw_axis_line(self, gc, startpoint, endpoint):
-        """ Draws the line for the axis.
-        """
-        with gc:
-            gc.set_antialias(0)
-            gc.set_line_width(self.axis_line_weight)
-            gc.set_stroke_color(self.axis_line_color_)
-            gc.set_line_dash(self.axis_line_style_)
-            gc.move_to(*around(startpoint))
-            gc.line_to(*around(endpoint))
-            gc.stroke_path()
+    def _draw_axis_line(self, gc):
+        """ Draws the line for the axis. """
+        self.line_artist.update_context(gc)
+
+        gc.move_to(*around(self._xy_origin))
+        gc.line_to(*around(self._end_axis_point))
+        gc.stroke_path()
 
     def _draw_ticks(self, gc):
         """ Draws the tick marks for the axis.
         """
-        gc.set_stroke_color(self.tick_color_)
-        gc.set_line_width(self.tick_weight)
-        gc.set_antialias(False)
+        self.tick_artist.update_context(gc)
+
         gc.begin_path()
-        tick_in_vector = self._inside_vector*self.tick_in
-        tick_out_vector = self._inside_vector*self.tick_out
-        for tick_pos in self._tick_positions:
+
+        tick_in_vector = self._inside_vector * self.tick_in
+        tick_out_vector = -self._inside_vector * self.tick_out
+
+        for tick_pos in self._xy_tick:
             gc.move_to(*(tick_pos + tick_in_vector))
-            gc.line_to(*(tick_pos - tick_out_vector))
+            gc.line_to(*(tick_pos + tick_out_vector))
+
         gc.stroke_path()
 
     def _draw_labels(self, gc):
         """ Draws the tick labels for the axis.
         """
-        # which axis are we moving away from the axis line along?
-        axis_index = self._major_axis.argmin()
+        offset_index = self._major_axis.argmin()
 
         inside_vector = self._inside_vector
 
-        for i in range(len(self._tick_label_positions)):
-            #We want a more sophisticated scheme than just 2 decimals all the time
-            ticklabel = self.ticklabel_cache[i]
-            tl_bounds = self._tick_label_bbox[i]
+        for i in range(len(self._xy_tick)):
+            tick_label = self._tick_label_cache[i]
+            bbox = self._tick_label_bbox[i]
 
-            base_position = self._tick_label_positions[i].copy()
-            axis_dist = self.tick_label_offset + tl_bounds[axis_index]/2.0
+            base_position = self._xy_tick[i].copy()
+            axis_dist = self.tick_label_offset + bbox[offset_index]/2.0
             base_position -= inside_vector * axis_dist
-            base_position -= tl_bounds/2.0
+            base_position -= bbox/2.0
 
             tlpos = around(base_position)
             gc.translate_ctm(*tlpos)
-            ticklabel.draw(gc)
+            tick_label.draw(gc)
             gc.translate_ctm(*(-tlpos))
 
     #------------------------------------------------------------------------
     # Private methods for computing positions and layout
     #------------------------------------------------------------------------
 
-    def _compute_tick_positions(self, gc, overlay_component=None):
+    def _compute_tick_positions(self):
         """ Calculates the positions for the tick marks.
         """
-        datalow = self.mapper.range.low
-        datahigh = self.mapper.range.high
-        screenhigh = self.mapper.high_pos
-        screenlow = self.mapper.low_pos
-
-        ticks = self.tick_generator.get_ticks(datalow, datahigh,
-                                              self.tick_interval)
-        tick_list = array(ticks, float64)
-
-        x_tick_px = array(self.mapper.map_screen(tick_list))
-        x_tick_norm = array((x_tick_px-screenlow) / (screenhigh-screenlow))
-        self._tick_positions = around(self._axis_vector * x_tick_norm[:, None]
-                                      + self._origin_point)
-        self._tick_label_list = tick_list
-        self._tick_label_positions = self._tick_positions
+        self.tick_grid.update(self.mapper)
+        x_norm = self.tick_grid.x_norm[:, None]
+        self._xy_tick = self._axis_vector * x_norm + self._xy_origin
 
     def _compute_labels(self, gc):
         """Generates the labels for tick marks.
-
-        Waits for the cache to become invalid.
         """
         formatter = self.tick_label_formatter
         def build_label(val):
-            tickstring = formatter(val) if formatter is not None else str(val)
-            return Label(text=tickstring,
+            label = formatter(val) if formatter is not None else str(val)
+            return Label(text=label,
                          font=self.tick_label_font,
                          color=self.tick_label_color,
                          rotate_angle=self.tick_label_rotate_angle,
                          margin=self.tick_label_margin)
 
-        self.ticklabel_cache = [build_label(val)
-                                for val in self._tick_label_list]
-        self._tick_label_bbox = [array(ticklabel.get_bbox(gc), float)
-                                 for ticklabel in self.ticklabel_cache]
+        self._tick_label_cache = [build_label(val)
+                                  for val in self.tick_grid.x_data]
+        self._tick_label_bbox = [array(tick_label.get_bbox(gc), float)
+                                 for tick_label in self._tick_label_cache]
 
-    def _calculate_geometry_overlay(self, overlay_component=None):
-        screenhigh = self.mapper.high_pos
-        screenlow = self.mapper.low_pos
+    def _calculate_geometry_overlay(self, component=None):
+        screen_size = self.mapper.high_pos - self.mapper.low_pos
 
-        self._set_geometry_traits(overlay_component)
+        self._set_geometry_traits(component)
 
-        self._end_axis_point = abs(screenhigh-screenlow)*self._major_axis + self._origin_point
-        self._axis_vector = self._end_axis_point - self._origin_point
+        self._end_axis_point = screen_size*self._major_axis + self._xy_origin
+        self._axis_vector = self._end_axis_point - self._xy_origin
         # This is the vector that represents one unit of data space in terms of screen space.
         vec = self._axis_vector
         self._axis_pixel_vector = vec / sqrt(dot(vec, vec))
@@ -309,11 +215,6 @@ class PlotAxis(AbstractOverlay):
     # Event handlers
     #------------------------------------------------------------------------
 
-    def _bounds_items_changed(self, event):
-        super(PlotAxis, self)._bounds_items_changed(event)
-        self._layout_needed = True
-        self._invalidate()
-
     def _mapper_changed(self, old, new):
         switch_trait_handler(old, new, 'updated', self.mapper_updated)
         self._invalidate()
@@ -323,9 +224,6 @@ class PlotAxis(AbstractOverlay):
         Event handler that is bound to this axis's mapper's **updated** event
         """
         self._invalidate()
-
-    def _position_items_changed(self, event):
-        super(PlotAxis, self)._position_items_changed(event)
 
     def _bounds_changed_for_component(self):
         self._layout_needed = True
@@ -338,39 +236,15 @@ class PlotAxis(AbstractOverlay):
 
 class XAxis(PlotAxis):
 
-    def _layout_as_overlay(self, size=None, force=False):
-        """ Lays out the axis as an overlay on another component. """
-        if self.component is not None:
-            self.x = self.component.x
-            self.width = self.component.width
-            self.height = self.component.padding_bottom
-            self.y = self.component.outer_y
-
-    def _set_geometry_traits(self, overlay_component):
-        self._major_axis_size = overlay_component.bounds[0]
-        self._minor_axis_size = overlay_component.bounds[1]
+    def _set_geometry_traits(self, component):
         self._major_axis = array([1., 0.])
-        self._title_orientation = array([0.,1.])
-        self.title_angle = 0.0
-        self._origin_point = array([overlay_component.x, overlay_component.y])
+        self._xy_origin = array([component.x, component.y])
         self._inside_vector = array([0.0, 1.0])
 
 
 class YAxis(PlotAxis):
 
-    def _layout_as_overlay(self, size=None, force=False):
-        """ Lays out the axis as an overlay on another component. """
-        if self.component is not None:
-            self.y = self.component.y
-            self.height = self.component.height
-            self.width = self.component.padding_left
-            self.x = self.component.outer_x
-
-    def _set_geometry_traits(self, overlay_component):
-        self._major_axis_size = overlay_component.bounds[1]
-        self._minor_axis_size = overlay_component.bounds[0]
+    def _set_geometry_traits(self, component):
         self._major_axis = array([0., 1.])
-        self._title_orientation = array([-1., 0])
-        self._origin_point = array([overlay_component.x, overlay_component.y])
+        self._xy_origin = array([component.x, component.y])
         self._inside_vector = array([1.0, 0.0])
-        self.title_angle = 90.0

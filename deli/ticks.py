@@ -2,35 +2,41 @@
 tick-related values (i.e., bounds and intervals).
 
 """
-from numpy import (arange, argsort, array, float64, floor, log10, minimum,
-                   newaxis, shape)
+import numpy as np
 
-from traits.api import HasStrictTraits
-
-
-class AbstractTickGenerator(HasStrictTraits):
-    pass
+from traits.api import Array, HasStrictTraits
 
 
-class DefaultTickGenerator(AbstractTickGenerator):
-    """ An implementation of AbstractTickGenerator that simply uses the
-    auto_ticks() and log_auto_ticks() functions.
-    """
-    def get_ticks(self, bounds_low, bounds_high, interval):
-        ticks = auto_ticks(bounds_low, bounds_high, interval)
-        return array(ticks, float64)
+class TickGrid(HasStrictTraits):
+
+    #: Tick positions in data space.
+    x_data = Array
+
+    #: Tick positions in screen space.
+    x_screen = Array
+
+    #: Tick positions normalized to lie within [0, 1]
+    x_norm = Array
+
+    def update(self, mapper):
+        x_min = mapper.range.low
+        x_max = mapper.range.high
+
+        self.x_data = np.array(auto_ticks(x_min, x_max), np.float64)
+        self.x_screen = mapper.map_screen(self.x_data)
+        self.x_norm = (self.x_data - x_min) / (x_max - x_min)
 
 
-def auto_ticks(bound_low, bound_high, tick_interval):
+def auto_ticks(x_min, x_max):
     """ Finds locations for axis tick marks.
 
-        Calculates the locations for tick marks on an axis. The *bound_low*,
-        *bound_high*, and *tick_interval* parameters specify how the axis end
+        Calculates the locations for tick marks on an axis. The *x_min*,
+        *x_max*, and *tick_interval* parameters specify how the axis end
         points and tick interval are calculated.
 
         Parameters
         ----------
-        bound_low, bound_high : 'auto', 'fit', or a number.
+        x_min, x_max : 'auto', 'fit', or a number.
             The lower and upper bounds of the axis. If the value is a number,
             that value is used for the corresponding end point. If the value is
             'auto', then the end point is calculated automatically. If the
@@ -48,20 +54,20 @@ def auto_ticks(bound_low, bound_high, tick_interval):
         An array of tick mark locations. The first and last tick entries are the
         axis end points.
     """
-    lower = float(bound_low)
-    upper = float(bound_high)
+    lower = float(x_min)
+    upper = float(x_max)
 
-    tick_interval = auto_interval( lower, upper )
+    tick_interval = auto_interval(lower, upper)
 
     # Compute the range of ticks values:
-    start = floor(lower / tick_interval) * tick_interval
-    end = floor(upper / tick_interval) * tick_interval
+    start = np.floor(lower / tick_interval) * tick_interval
+    end = np.floor(upper / tick_interval) * tick_interval
 
     if upper > end:
         end += tick_interval
-    ticks = arange( start, end + (tick_interval / 2.0), tick_interval )
+    ticks = np.arange(start, end + (tick_interval / 2.0), tick_interval)
 
-    return [tick for tick in ticks if tick >= bound_low and tick <= bound_high]
+    return [tick for tick in ticks if tick >= x_min and tick <= x_max]
 
 
 def auto_interval(data_low, data_high):
@@ -80,46 +86,46 @@ def auto_interval(data_low, data_high):
         interval : float
             tick mark interval for axis
     """
-    range = float( data_high ) - float( data_low )
+    x_range = float(data_high ) - float(data_low)
 
     # We'll choose from between 2 and 8 tick marks.
     # Preference is given to more ticks:
     #   Note reverse order and see kludge below...
-    divisions = arange( 8.0, 2.0, -1.0 ) # ( 7, 6, ..., 3 )
+    divisions = np.arange( 8.0, 2.0, -1.0 ) # ( 7, 6, ..., 3 )
 
     # Calculate the intervals for the divisions:
-    candidate_intervals = range / divisions
+    candidate_intervals = x_range / divisions
 
     # Get magnitudes and mantissas for each candidate:
-    magnitudes = 10.0 ** floor( log10( candidate_intervals ) )
+    magnitudes = 10.0 ** np.floor( np.log10( candidate_intervals ) )
     mantissas  = candidate_intervals / magnitudes
 
     # List of "pleasing" intervals between ticks on graph.
     # Only the first magnitude are listed, higher mags others are inferred:
-    magic_intervals = array( ( 1.0, 2.0, 2.5, 5.0, 10.0 ) )
+    magic_intervals = np.array( ( 1.0, 2.0, 2.5, 5.0, 10.0 ) )
 
     # Calculate the absolute differences between the candidates
     # (with magnitude removed) and the magic intervals:
-    differences = abs( magic_intervals[:,newaxis] - mantissas )
+    differences = abs( magic_intervals[:, np.newaxis] - mantissas )
 
     # Find the division and magic interval combo that produce the
     # smallest differences:
 
-    # KLUDGE: 'argsort' doesn't preserve the order of equal values,
+    # KLUDGE: 'np.argsort' doesn't preserve the order of equal values,
     # so we subtract a small, index dependent amount from each difference
     # to force correct ordering.
-    sh    = shape( differences )
-    small = 2.2e-16 * arange( sh[1] ) * arange( sh[0] )[:,newaxis]
+    sh    = np.shape( differences )
+    small = 2.2e-16 * np.arange( sh[1] ) * np.arange( sh[0] )[:, np.newaxis]
     small = small[::-1,::-1] #reverse the order
     differences = differences - small
 
     # ? Numeric should allow keyword "axis" ? comment out for now
     #best_mantissa = minimum.reduce(differences,axis=0)
     #best_magic = minimum.reduce(differences,axis=-1)
-    best_mantissa  = minimum.reduce( differences,  0 )
-    best_magic     = minimum.reduce( differences, -1 )
-    magic_index    = argsort( best_magic )[0]
-    mantissa_index = argsort( best_mantissa )[0]
+    best_mantissa  = np.minimum.reduce( differences,  0 )
+    best_magic     = np.minimum.reduce( differences, -1 )
+    magic_index    = np.argsort( best_magic )[0]
+    mantissa_index = np.argsort( best_mantissa )[0]
 
     # The best interval is the magic_interval multiplied by the magnitude
     # of the best mantissa:

@@ -19,12 +19,8 @@ class DataView(OverlayPlotContainer):
     just like a normal PlotContainer.
     """
 
-    # The default location of the origin  for new plots
-    default_origin = Enum('bottom left', 'top left',
-                          'bottom right', 'top right')
-
-    # The origin reported to axes, etc
-    origin = Property(depends_on='default_origin')
+    # The default location of the origin for new plots
+    origin = Enum('bottom left', 'top left', 'bottom right', 'top right')
 
     # The mapper to use for the x data.
     x_mapper = Instance(Base1DMapper)
@@ -102,16 +98,12 @@ class DataView(OverlayPlotContainer):
             vmap = LinearMapper(range=self.range2d.y_range)
             self.y_mapper = vmap
 
-        grid_color = 'lightgray'
-
         if not self.x_grid and self.auto_grid:
             self.x_grid = PlotGrid(mapper=self.x_mapper, orientation="vertical",
-                                  line_color=grid_color, line_style="dot",
-                                  component=self)
+                                   component=self)
         if not self.y_grid and self.auto_grid:
             self.y_grid = PlotGrid(mapper=self.y_mapper, orientation="horizontal",
-                                  line_color=grid_color, line_style="dot",
-                                  component=self)
+                                   component=self)
 
         if not self.x_axis and self.auto_axis:
             self.x_axis = XAxis(mapper=self.x_mapper, component=self)

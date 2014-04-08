@@ -94,16 +94,14 @@ class Plot(DataView):
             y_src = self._get_or_create_datasource(y_name)
             self.y_range.add(y_src)
 
-            imap = LinearMapper(range=self.x_range,
-                        stretch_data=self.x_mapper.stretch_data)
-            vmap = LinearMapper(range=self.y_range,
-                        stretch_data=self.y_mapper.stretch_data)
+            imap = LinearMapper(range=self.x_range)
+            vmap = LinearMapper(range=self.y_range)
 
             plot = LinePlot(x_src=x_src,
                             y_src=y_src,
                             x_mapper=imap,
                             y_mapper=vmap,
-                            origin = self.default_origin,
+                            origin = self.origin,
                             **styles)
 
             self.add(plot)
