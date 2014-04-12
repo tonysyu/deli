@@ -1,6 +1,6 @@
 """ Defines the PlotAxis class, and associated validator and UI.
 """
-from numpy import array, around, dot, sqrt
+from numpy import array, around
 
 from enable.api import ColorTrait
 from kiva.trait_defs.kiva_font_trait import KivaFont
@@ -48,7 +48,6 @@ class PlotAxis(AbstractOverlay):
     # The number of pixels by which the ticks extend into the label area.
     tick_out = Int(5)
 
-    # The dataspace interval between ticks.
     # A tick grid that controls tick positioning
     tick_grid = Instance(TickGrid, ())
 
@@ -75,7 +74,6 @@ class PlotAxis(AbstractOverlay):
     _xy_origin = Array
     _inside_vector = Array
     _axis_vector = Array
-    _axis_pixel_vector = Array
     _end_axis_point = Array
 
     _tick_label_cache = List
@@ -138,14 +136,7 @@ class PlotAxis(AbstractOverlay):
         self.tick_artist.update_context(gc)
 
         gc.begin_path()
-
-        tick_in_vector = self._inside_vector * self.tick_in
-        tick_out_vector = -self._inside_vector * self.tick_out
-
-        for tick_pos in self._xy_tick:
-            gc.move_to(*(tick_pos + tick_in_vector))
-            gc.line_to(*(tick_pos + tick_out_vector))
-
+        gc.line_set(self._tick_starts, self._tick_ends)
         gc.stroke_path()
 
     def _draw_labels(self, gc):
@@ -179,6 +170,7 @@ class PlotAxis(AbstractOverlay):
         self.tick_grid.update(self.mapper)
         x_norm = self.tick_grid.x_norm[:, None]
         self._xy_tick = self._axis_vector * x_norm + self._xy_origin
+        self._tick_starts, self._tick_ends = self._get_tick_segments()
 
     def _compute_labels(self, gc):
         """Generates the labels for tick marks.
@@ -204,9 +196,6 @@ class PlotAxis(AbstractOverlay):
 
         self._end_axis_point = screen_size*self._major_axis + self._xy_origin
         self._axis_vector = self._end_axis_point - self._xy_origin
-        # This is the vector that represents one unit of data space in terms of screen space.
-        vec = self._axis_vector
-        self._axis_pixel_vector = vec / sqrt(dot(vec, vec))
 
     def _set_geometry_traits(self, component):
         raise NotImplementedError()
@@ -241,6 +230,11 @@ class XAxis(PlotAxis):
         self._xy_origin = array([component.x, component.y])
         self._inside_vector = array([0.0, 1.0])
 
+    def _get_tick_segments(self):
+        starts = self._xy_tick + [0, self.tick_in]
+        ends = self._xy_tick - [0, self.tick_out]
+        return starts, ends
+
 
 class YAxis(PlotAxis):
 
@@ -248,3 +242,8 @@ class YAxis(PlotAxis):
         self._major_axis = array([0., 1.])
         self._xy_origin = array([component.x, component.y])
         self._inside_vector = array([1.0, 0.0])
+
+    def _get_tick_segments(self):
+        starts = self._xy_tick + [self.tick_in, 0]
+        ends = self._xy_tick - [self.tick_out, 0]
+        return starts, ends

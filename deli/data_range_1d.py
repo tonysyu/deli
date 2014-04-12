@@ -5,10 +5,10 @@ from numpy import inf, ndarray
 
 from traits.api import Bool, Callable, CFloat, Float, Property, Trait
 
-from .base_data_range import BaseDataRange
+from .abstract_data_range import AbstractDataRange
 
 
-class DataRange1D(BaseDataRange):
+class DataRange1D(AbstractDataRange):
     """ Represents a 1-D data range.
     """
 

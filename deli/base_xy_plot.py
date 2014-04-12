@@ -1,8 +1,9 @@
 """ Defines the base class for XY plots.
 """
 from numpy import array, transpose
+from matplotlib.transforms import Bbox
 
-from traits.api import Instance, Property, Range
+from traits.api import Disallow, Instance, Property, Range
 
 from .abstract_mapper import AbstractMapper
 from .abstract_plot_renderer import AbstractPlotRenderer
@@ -19,6 +20,8 @@ class BaseXYPlot(AbstractPlotRenderer):
     space changes, etc.
     """
 
+    _ = Disallow
+
     #------------------------------------------------------------------------
     # Data-related traits
     #------------------------------------------------------------------------
@@ -34,6 +37,9 @@ class BaseXYPlot(AbstractPlotRenderer):
 
     # Screen mapper for y data
     y_mapper = Instance(AbstractMapper)
+
+    #: Bounding box in screen coordinates.
+    screen_bbox = Instance(Bbox)
 
     #------------------------------------------------------------------------
     # Appearance-related traits
@@ -114,6 +120,9 @@ class BaseXYPlot(AbstractPlotRenderer):
     def _update_mappers(self):
         self.x_mapper.screen_bounds = (self.x, self.x2)
         self.y_mapper.screen_bounds = (self.y, self.y2)
+
+        self.screen_bbox = Bbox.from_extents(self.x, self.y, self.x2, self.y2)
+
         self.invalidate_draw()
 
     def _bounds_changed(self, old, new):

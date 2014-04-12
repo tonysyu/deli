@@ -5,11 +5,11 @@ from numpy import inf
 
 from traits.api import Any, CFloat, Instance, Property, Trait, Tuple
 
-from .base_data_range import BaseDataRange
+from .abstract_data_range import AbstractDataRange
 from .data_range_1d import DataRange1D
 
 
-class DataRange2D(BaseDataRange):
+class DataRange2D(AbstractDataRange):
     """ A range on (2-D) image data.
     """
 

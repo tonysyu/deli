@@ -3,13 +3,13 @@ function.
 """
 import numpy as np
 
-from traits.api import Any, Enum, Instance, on_trait_change
+from traits.api import Array, Enum, Instance, on_trait_change
 
 from .abstract_overlay import AbstractOverlay
 from .abstract_mapper import AbstractMapper
 from .line_artist import LineArtist
 from .ticks import TickGrid
-from .utils import switch_trait_handler
+from .utils import hline_segments, switch_trait_handler, vline_segments
 
 
 class PlotGrid(AbstractOverlay):
@@ -55,8 +55,8 @@ class PlotGrid(AbstractOverlay):
     # Private traits; mostly cached information
     #------------------------------------------------------------------------
 
-    _tick_list = Any
-    _xy_tick = Any
+    _line_starts = Array
+    _line_ends = Array
 
     #------------------------------------------------------------------------
     # Public methods
@@ -75,9 +75,10 @@ class PlotGrid(AbstractOverlay):
     def _reset_cache(self):
         """ Clears the cached tick positions.
         """
-        self._tick_segments = np.array([])
+        self._line_starts = np.array([])
+        self._line_ends = np.array([])
 
-    def _compute_ticks(self, component=None):
+    def _compute_ticks(self, component):
         """ Calculate the positions of grid lines in screen space.
         """
         self.tick_grid.update(self.mapper)
@@ -90,14 +91,13 @@ class PlotGrid(AbstractOverlay):
         x_hi = x_lo + bounds[0]
         y_hi = y_lo + bounds[1]
 
-        p = np.ones_like(offsets)
-        # XXX: Factor these out into VLine and Hline Artists.
         if self.orientation == 'horizontal':
-            segments = np.vstack([x_lo * p, offsets, x_hi * p, offsets])
+            starts, ends = hline_segments(offsets, x_lo, x_hi)
         elif self.orientation == 'vertical':
-            segments = np.vstack([offsets, y_lo * p, offsets, y_hi * p])
+            starts, ends = vline_segments(offsets, y_lo, y_hi)
 
-        self._tick_segments = np.transpose(np.around(segments))
+        self._line_starts = np.around(starts)
+        self._line_ends = np.around(ends)
 
     def overlay(self, other_component, gc, view_bounds=None, mode="normal"):
         """ Draws this component overlaid on another component.
@@ -120,7 +120,7 @@ class PlotGrid(AbstractOverlay):
 
             gc.begin_path()
 
-            gc.line_set(self._tick_segments[:, :2], self._tick_segments[:, 2:])
+            gc.line_set(self._line_starts, self._line_ends)
             gc.stroke_path()
 
     def _mapper_changed(self, old, new):

@@ -3,6 +3,8 @@ from traits.api import HasStrictTraits, CFloat
 
 
 class LineArtist(HasStrictTraits):
+    """ A Flyweight object for drawing lines.
+    """
 
     # The color of the grid lines.
     color = ColorTrait('black')
@@ -17,3 +19,8 @@ class LineArtist(HasStrictTraits):
         gc.set_line_width(self.width)
         gc.set_line_dash(self.style_)
         gc.set_stroke_color(self.color_)
+
+    def draw_segments(self, gc, starts, ends):
+        gc.begin_path()
+        gc.line_set(starts, ends)
+        gc.stroke_path()
