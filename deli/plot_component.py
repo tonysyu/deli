@@ -1,7 +1,9 @@
 """ Defines the PlotComponent class.
 """
+from matplotlib.transforms import Bbox
+
 from enable.api import Component
-from traits.api import Instance, Str
+from traits.api import Disallow, Instance, Str
 
 
 DEFAULT_DRAWING_ORDER = ["background", "image", "underlay", "plot",
@@ -39,7 +41,27 @@ class PlotComponent(Component):
        elements
     """
 
+    _ = Disallow
+
     draw_order = Instance(list, args=(DEFAULT_DRAWING_ORDER,))
 
     # The default draw layer for plot components is the "plot" layer
     draw_layer = Str("plot")
+
+    #--------------------------------------------------------------------------
+    #  Bounding box
+    #--------------------------------------------------------------------------
+
+    #: Bounding box in screen coordinates
+    screen_bbox = Instance(Bbox)
+
+    def _screen_bbox_default(self):
+        return Bbox.from_extents(self.x, self.y, self.x2, self.y2)
+
+    def _bounds_changed(self, old, new):
+        super(PlotComponent, self)._bounds_changed(old, new)
+        self._update_bbox()
+
+    def _update_bbox(self):
+        self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
+        self.invalidate_draw()

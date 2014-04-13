@@ -1,14 +1,14 @@
 """ Defines the DataView class, and associated property traits and property
 functions.
 """
-from traits.api import Bool, Enum, Instance, Property
+from matplotlib.transforms import BboxTransform
+
+from traits.api import Bool, Instance, Property
 
 from .abstract_overlay import AbstractOverlay
 from .axis import XAxis, YAxis
-from .base_1d_mapper import Base1DMapper
 from .data_range_2d import DataRange2D
-from .grid import PlotGrid
-from .linear_mapper import LinearMapper
+from .grid import PlotGrid, XGrid, YGrid
 from .plot_containers import OverlayPlotContainer
 
 
@@ -19,25 +19,20 @@ class DataView(OverlayPlotContainer):
     just like a normal PlotContainer.
     """
 
-    # The default location of the origin for new plots
-    origin = Enum('bottom left', 'top left', 'bottom right', 'top right')
-
-    # The mapper to use for the x data.
-    x_mapper = Instance(Base1DMapper)
-
-    # The mapper to use for y data.
-    y_mapper = Instance(Base1DMapper)
-
     # The range used for the x data.
     x_range = Property
 
     # The range used for the y data.
     y_range = Property
 
-    # The 2-D data range whose x- and y-ranges are exposed as the
-    # **x_range** and **y_range** property traits. This allows
-    # supporting both XY plots and 2-D (image) plots.
+    # The 2D data range.
     range2d = Instance(DataRange2D)
+
+    #: Transform from data space to screen space.
+    data_to_screen = Instance(BboxTransform)
+
+    def _data_to_screen_default(self):
+        return BboxTransform(self.range2d.bbox, self.screen_bbox)
 
     #------------------------------------------------------------------------
     # Axis and Grids
@@ -90,55 +85,20 @@ class DataView(OverlayPlotContainer):
     #------------------------------------------------------------------------
 
     def _init_components(self):
-        if not self.x_mapper:
-            imap = LinearMapper(range=self.range2d.x_range)
-            self.x_mapper = imap
-
-        if not self.y_mapper:
-            vmap = LinearMapper(range=self.range2d.y_range)
-            self.y_mapper = vmap
-
         if not self.x_grid and self.auto_grid:
-            self.x_grid = PlotGrid(mapper=self.x_mapper, orientation="vertical",
-                                   component=self)
+            self.x_grid = XGrid(component=self)
         if not self.y_grid and self.auto_grid:
-            self.y_grid = PlotGrid(mapper=self.y_mapper, orientation="horizontal",
-                                   component=self)
+            self.y_grid = YGrid(component=self)
 
         if not self.x_axis and self.auto_axis:
-            self.x_axis = XAxis(mapper=self.x_mapper, component=self)
+            self.x_axis = XAxis(component=self)
 
         if not self.y_axis and self.auto_axis:
-            self.y_axis = YAxis(mapper=self.y_mapper, component=self)
+            self.y_axis = YAxis(component=self)
 
     #-------------------------------------------------------------------------
     # Event handlers
     #-------------------------------------------------------------------------
-
-    def _update_mappers(self):
-        if self.x_mapper is not None:
-            self.x_mapper.low_pos = self.x
-            self.x_mapper.high_pos = self.x2
-
-        if self.y_mapper is not None:
-            self.y_mapper.low_pos = self.y
-            self.y_mapper.high_pos = self.y2
-
-        self.invalidate_draw()
-
-    def _bounds_changed(self, old, new):
-        super(DataView, self)._bounds_changed(old, new)
-        self._update_mappers()
-
-    def _position_changed(self, old, new):
-        super(DataView, self)._position_changed(old, new)
-        self._update_mappers()
-
-    def _x_mapper_changed(self, old, new):
-        new.range = self.x_range
-
-    def _y_mapper_changed(self, old, new):
-        new.range = self.y_range
 
     def _x_grid_changed(self, old, new):
         self._underlay_change_helper(old, new)

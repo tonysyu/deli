@@ -1,11 +1,9 @@
 """ Defines the base class for XY plots.
 """
-from numpy import array, transpose
-from matplotlib.transforms import Bbox
+from matplotlib.transforms import Bbox, BboxTransform
 
 from traits.api import Disallow, Instance, Property, Range
 
-from .abstract_mapper import AbstractMapper
 from .abstract_plot_renderer import AbstractPlotRenderer
 from .abstract_data_source import AbstractDataSource
 from .array_data_source import ArrayDataSource
@@ -32,14 +30,14 @@ class BaseXYPlot(AbstractPlotRenderer):
     # The data source to use as y points.
     y_src = Instance(AbstractDataSource)
 
-    # Screen mapper for x data.
-    x_mapper = Instance(AbstractMapper)
+    #: Bounding box for data in plot.
+    data_bbox = Instance(Bbox)
 
-    # Screen mapper for y data
-    y_mapper = Instance(AbstractMapper)
+    #: Transform from data space to screen space.
+    data_to_screen = Instance(BboxTransform)
 
-    #: Bounding box in screen coordinates.
-    screen_bbox = Instance(Bbox)
+    def _data_to_screen_default(self):
+        return BboxTransform(self.data_bbox, self.screen_bbox)
 
     #------------------------------------------------------------------------
     # Appearance-related traits
@@ -70,33 +68,6 @@ class BaseXYPlot(AbstractPlotRenderer):
     # Concrete methods below
     #------------------------------------------------------------------------
 
-    def __init__(self, **kwtraits):
-        # Handling the setting/initialization of these traits manually because
-        # they should be initialized in a certain order.
-        priority_traits = {}
-        for trait_name in ("x_src", "y_src", "x_mapper", "y_mapper"):
-            if trait_name in kwtraits:
-                priority_traits[trait_name] = kwtraits.pop(trait_name)
-        AbstractPlotRenderer.__init__(self)
-        self.set(**priority_traits)
-        self.set(**kwtraits)
-
-    #------------------------------------------------------------------------
-    # AbstractPlotRenderer interface
-    #------------------------------------------------------------------------
-
-    def map_screen(self, data_array):
-        """ Maps an array of data points into screen space and returns it as
-        an array.
-
-        Implements the AbstractPlotRenderer interface.
-        """
-        x_ary, y_ary = transpose(data_array)
-
-        sx = self.x_mapper.map_screen(x_ary)
-        sy = self.y_mapper.map_screen(y_ary)
-        return transpose(array((sx,sy)))
-
     #------------------------------------------------------------------------
     # PlotComponent interface
     #------------------------------------------------------------------------
@@ -112,19 +83,3 @@ class BaseXYPlot(AbstractPlotRenderer):
 
         pts = self.get_screen_points()
         self._render(gc, pts)
-
-    #------------------------------------------------------------------------
-    # Event handlers
-    #------------------------------------------------------------------------
-
-    def _update_mappers(self):
-        self.x_mapper.screen_bounds = (self.x, self.x2)
-        self.y_mapper.screen_bounds = (self.y, self.y2)
-
-        self.screen_bbox = Bbox.from_extents(self.x, self.y, self.x2, self.y2)
-
-        self.invalidate_draw()
-
-    def _bounds_changed(self, old, new):
-        super(BaseXYPlot, self)._bounds_changed(old, new)
-        self._update_mappers()

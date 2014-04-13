@@ -6,12 +6,10 @@ from enable.api import ColorTrait
 from kiva.trait_defs.kiva_font_trait import KivaFont
 from traits.api import Any, Float, Int, Event, List, Array, Instance, Callable
 
-from .abstract_mapper import AbstractMapper
 from .abstract_overlay import AbstractOverlay
 from .label import Label
 from .line_artist import LineArtist
 from .ticks import TickGrid
-from .utils import switch_trait_handler
 
 
 def DEFAULT_TICK_FORMATTER(val):
@@ -19,9 +17,6 @@ def DEFAULT_TICK_FORMATTER(val):
 
 
 class PlotAxis(AbstractOverlay):
-
-    # The mapper that drives this axis.
-    mapper = Instance(AbstractMapper)
 
     # The font of the tick labels.
     tick_label_font = KivaFont('modern 10')
@@ -75,6 +70,8 @@ class PlotAxis(AbstractOverlay):
     _inside_vector = Array
     _axis_vector = Array
     _end_axis_point = Array
+    _tick_starts = Array
+    _tick_ends = Array
 
     _tick_label_cache = List
 
@@ -167,8 +164,7 @@ class PlotAxis(AbstractOverlay):
     def _compute_tick_positions(self):
         """ Calculates the positions for the tick marks.
         """
-        self.tick_grid.update(self.mapper)
-        x_norm = self.tick_grid.x_norm[:, None]
+        x_norm = self._get_tick_offsets(norm=True)[:, None]
         self._xy_tick = self._axis_vector * x_norm + self._xy_origin
         self._tick_starts, self._tick_ends = self._get_tick_segments()
 
@@ -184,13 +180,14 @@ class PlotAxis(AbstractOverlay):
                          rotate_angle=self.tick_label_rotate_angle,
                          margin=self.tick_label_margin)
 
+        x_data = self._get_tick_offsets()
         self._tick_label_cache = [build_label(val)
-                                  for val in self.tick_grid.x_data]
+                                  for val in x_data]
         self._tick_label_bbox = [array(tick_label.get_bbox(gc), float)
                                  for tick_label in self._tick_label_cache]
 
     def _calculate_geometry_overlay(self, component=None):
-        screen_size = self.mapper.high_pos - self.mapper.low_pos
+        screen_size = self.screen_size(component)
 
         self._set_geometry_traits(component)
 
@@ -203,16 +200,6 @@ class PlotAxis(AbstractOverlay):
     #------------------------------------------------------------------------
     # Event handlers
     #------------------------------------------------------------------------
-
-    def _mapper_changed(self, old, new):
-        switch_trait_handler(old, new, 'updated', self.mapper_updated)
-        self._invalidate()
-
-    def mapper_updated(self):
-        """
-        Event handler that is bound to this axis's mapper's **updated** event
-        """
-        self._invalidate()
 
     def _bounds_changed_for_component(self):
         self._layout_needed = True
@@ -235,6 +222,13 @@ class XAxis(PlotAxis):
         ends = self._xy_tick - [0, self.tick_out]
         return starts, ends
 
+    def screen_size(self, component):
+        return component.screen_bbox.width
+
+    def _get_tick_offsets(self, norm=False):
+        x_min, x_max = self.component.range2d.bbox.intervalx
+        return self.tick_grid.get_axial_offsets(x_min, x_max, norm=norm)
+
 
 class YAxis(PlotAxis):
 
@@ -247,3 +241,10 @@ class YAxis(PlotAxis):
         starts = self._xy_tick + [self.tick_in, 0]
         ends = self._xy_tick - [self.tick_out, 0]
         return starts, ends
+
+    def screen_size(self, component):
+        return component.screen_bbox.height
+
+    def _get_tick_offsets(self, norm=False):
+        y_min, y_max = self.component.range2d.bbox.intervaly
+        return self.tick_grid.get_axial_offsets(y_min, y_max, norm=norm)

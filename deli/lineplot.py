@@ -6,7 +6,6 @@ from enable.api import black_color_trait, LineStyle
 from traits.api import Enum, Float, List, Property, Tuple, cached_property
 
 from .base_xy_plot import BaseXYPlot
-from matplotlib.transforms import Bbox, BboxTransform
 
 
 class LinePlot(BaseXYPlot):
@@ -39,14 +38,9 @@ class LinePlot(BaseXYPlot):
     def get_screen_points(self):
         x = self.x_src.get_data()
         y = self.y_src.get_data()
-
-        x0, x1 = self.x_mapper.range.low, self.x_mapper.range.high
-        y0, y1 = self.y_mapper.range.low, self.y_mapper.range.high
-        data_bbox = Bbox.from_extents(x0, y0, x1, y1)
-        data_to_screen = BboxTransform(data_bbox, self.screen_bbox)
-
         xy_points = np.column_stack((x, y))
-        return [data_to_screen.transform(xy_points)]
+
+        return [self.data_to_screen.transform(xy_points)]
 
     #------------------------------------------------------------------------
     # Private methods; implements the BaseXYPlot stub methods
@@ -55,7 +49,7 @@ class LinePlot(BaseXYPlot):
     def _render(self, gc, points, selected_points=None):
         with gc:
             gc.set_antialias(True)
-            gc.clip_to_rect(self.x, self.y, self.width, self.height)
+            gc.clip_to_rect(*self.screen_bbox.bounds)
 
             # Render using the normal style
             gc.set_stroke_color(self.effective_color)

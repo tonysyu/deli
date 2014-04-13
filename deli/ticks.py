@@ -4,27 +4,16 @@ tick-related values (i.e., bounds and intervals).
 """
 import numpy as np
 
-from traits.api import Array, HasStrictTraits
+from traits.api import HasStrictTraits
 
 
 class TickGrid(HasStrictTraits):
 
-    #: Tick positions in data space.
-    x_data = Array
-
-    #: Tick positions in screen space.
-    x_screen = Array
-
-    #: Tick positions normalized to lie within [0, 1]
-    x_norm = Array
-
-    def update(self, mapper):
-        x_min = mapper.range.low
-        x_max = mapper.range.high
-
-        self.x_data = np.array(auto_ticks(x_min, x_max), np.float64)
-        self.x_screen = mapper.map_screen(self.x_data)
-        self.x_norm = (self.x_data - x_min) / (x_max - x_min)
+    def get_axial_offsets(self, a_min, a_max, norm=False):
+        offsets = np.array(auto_ticks(a_min, a_max), np.float64)
+        if norm:
+            offsets = (offsets - a_min) / (a_max - a_min)
+        return offsets
 
 
 def auto_ticks(x_min, x_max):

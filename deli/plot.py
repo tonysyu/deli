@@ -7,7 +7,6 @@ from .abstract_plot_data import AbstractPlotData
 from .array_data_source import ArrayDataSource
 from .data_view import DataView
 from .lineplot import LinePlot
-from .linear_mapper import LinearMapper
 from .plot_label import PlotLabel
 
 
@@ -32,9 +31,6 @@ class Plot(DataView):
 
     # Mapping of plot names to *lists* of plot renderers.
     plots = Dict(Str, List)
-
-    # The default x to use when adding new subplots.
-    default_x_src = Instance(AbstractDataSource)
 
     #------------------------------------------------------------------------
     # Annotations and decorations
@@ -63,14 +59,14 @@ class Plot(DataView):
     #------------------------------------------------------------------------
 
     def __init__(self, data=None, **kwtraits):
-        title = kwtraits.pop("title")
+        title = kwtraits.pop('title')
         super(Plot, self).__init__(**kwtraits)
         if data is not None:
             self.data = data
 
-        if not self._title:
-            self._title = PlotLabel(font="swiss 16", visible=False,
-                                   overlay_position="top", component=self)
+        # This doesn't work when moved to a trait-default definition (Why?)
+        self._title= PlotLabel(font="swiss 16", visible=False,
+                               overlay_position="top", component=self)
         if title is not None:
             self.title = title
 
@@ -84,8 +80,6 @@ class Plot(DataView):
         name = self._make_new_plot_name()
 
         x_src = self._get_or_create_datasource(data[0])
-        if self.default_x_src is None:
-            self.default_x_src = x_src
         self.x_range.add(x_src)
         data = data[1:]
 
@@ -94,15 +88,8 @@ class Plot(DataView):
             y_src = self._get_or_create_datasource(y_name)
             self.y_range.add(y_src)
 
-            imap = LinearMapper(range=self.x_range)
-            vmap = LinearMapper(range=self.y_range)
-
-            plot = LinePlot(x_src=x_src,
-                            y_src=y_src,
-                            x_mapper=imap,
-                            y_mapper=vmap,
-                            origin = self.origin,
-                            **styles)
+            plot = LinePlot(x_src=x_src, y_src=y_src,
+                            data_bbox=self.range2d.bbox, **styles)
 
             self.add(plot)
             new_plots.append(plot)

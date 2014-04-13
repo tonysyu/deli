@@ -1,9 +1,9 @@
 """
 Defines the DataRange1D class.
 """
-from numpy import inf, ndarray
+from numpy import inf
 
-from traits.api import Bool, Callable, CFloat, Float, Property, Trait
+from traits.api import CFloat, Property, Trait
 
 from .abstract_data_range import AbstractDataRange
 
@@ -17,14 +17,6 @@ class DataRange1D(AbstractDataRange):
 
     low_setting = Property(Trait('auto', 'auto', 'track', CFloat))
     high_setting = Property(Trait('auto', 'auto', 'track', CFloat))
-
-    tight_bounds = Bool(True)
-
-    bounds_func = Callable
-
-    margin = Float(0.05)
-
-    epsilon = CFloat(1.0e-10)
 
     #------------------------------------------------------------------------
     # Private traits
@@ -42,19 +34,6 @@ class DataRange1D(AbstractDataRange):
     _high_setting = Trait('auto', 'auto', 'track', CFloat)
     # The actual numerical value for the high setting.
     _high_value = CFloat(inf)
-
-    #------------------------------------------------------------------------
-    # AbstractRange interface
-    #------------------------------------------------------------------------
-
-    def mask_data(self, data):
-        """ Returns a mask array, indicating whether values in the given array
-        are inside the range.
-
-        Implements AbstractDataRange.
-        """
-        return ((data.view(ndarray) >= self._low_value) &
-                (data.view(ndarray) <= self._high_value))
 
     #------------------------------------------------------------------------
     # Public methods
@@ -79,11 +58,7 @@ class DataRange1D(AbstractDataRange):
 
         mins, maxes = zip(*bounds_list)
 
-        low_start, high_start = \
-                 calc_bounds(self._low_setting, self._high_setting,
-                             mins, maxes, self.epsilon,
-                             self.tight_bounds, margin=self.margin,
-                             bounds_func=self.bounds_func)
+        low_start, high_start = calc_bounds(mins, maxes)
 
         if (self._low_value != low_start) or (self._high_value != high_start):
             self._low_value = low_start
@@ -98,8 +73,7 @@ class DataRange1D(AbstractDataRange):
         self.refresh()
 
 
-def calc_bounds(low_set, high_set, mins, maxes, epsilon, tight_bounds,
-                margin=0.08, track_amount=0, bounds_func=None):
+def calc_bounds(mins, maxes):
     """ Calculates bounds for a given 1-D set of data.
 
     Returns

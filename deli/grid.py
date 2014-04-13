@@ -3,10 +3,9 @@ function.
 """
 import numpy as np
 
-from traits.api import Array, Enum, Instance, on_trait_change
+from traits.api import Array, Instance, on_trait_change
 
 from .abstract_overlay import AbstractOverlay
-from .abstract_mapper import AbstractMapper
 from .line_artist import LineArtist
 from .ticks import TickGrid
 from .utils import hline_segments, switch_trait_handler, vline_segments
@@ -24,20 +23,8 @@ class PlotGrid(AbstractOverlay):
     # Data-related traits
     #------------------------------------------------------------------------
 
-    # The mapper (and associated range) that drive this PlotGrid.
-    mapper = Instance(AbstractMapper)
-
     # A callable that implements the AbstractTickGenerator Interface.
     tick_grid = Instance(TickGrid, ())
-
-    #------------------------------------------------------------------------
-    # Layout traits
-    #------------------------------------------------------------------------
-
-    # The orientation of the grid lines.  "horizontal" means that the grid
-    # lines are parallel to the X axis and the ticker and grid interval
-    # refer to the Y axis.
-    orientation = Enum('horizontal', 'vertical')
 
     #------------------------------------------------------------------------
     # Appearance traits
@@ -68,6 +55,13 @@ class PlotGrid(AbstractOverlay):
         """
         self._reset_cache()
 
+    #--------------------------------------------------------------------------
+    #  Protected interface
+    #--------------------------------------------------------------------------
+
+    def _compute_ticks(self, component):
+        raise NotImplementedError()
+
     #------------------------------------------------------------------------
     # Private methods
     #------------------------------------------------------------------------
@@ -77,27 +71,6 @@ class PlotGrid(AbstractOverlay):
         """
         self._line_starts = np.array([])
         self._line_ends = np.array([])
-
-    def _compute_ticks(self, component):
-        """ Calculate the positions of grid lines in screen space.
-        """
-        self.tick_grid.update(self.mapper)
-        offsets = self.tick_grid.x_screen  # x = x or y, depending on grid.
-
-        bounds = component.bounds
-        position = component.position
-
-        x_lo, y_lo = position
-        x_hi = x_lo + bounds[0]
-        y_hi = y_lo + bounds[1]
-
-        if self.orientation == 'horizontal':
-            starts, ends = hline_segments(offsets, x_lo, x_hi)
-        elif self.orientation == 'vertical':
-            starts, ends = vline_segments(offsets, y_lo, y_hi)
-
-        self._line_starts = np.around(starts)
-        self._line_ends = np.around(ends)
 
     def overlay(self, other_component, gc, view_bounds=None, mode="normal"):
         """ Draws this component overlaid on another component.
@@ -123,16 +96,6 @@ class PlotGrid(AbstractOverlay):
             gc.line_set(self._line_starts, self._line_ends)
             gc.stroke_path()
 
-    def _mapper_changed(self, old, new):
-        switch_trait_handler(old, new, 'updated', self._mapper_updated)
-        self.invalidate()
-
-    def _mapper_updated(self):
-        """
-        Event handler that is bound to this mapper's **updated** event.
-        """
-        self.invalidate()
-
     def _position_changed_for_component(self):
         self.invalidate()
 
@@ -154,3 +117,41 @@ class PlotGrid(AbstractOverlay):
     def _orientation_changed(self):
         self.invalidate()
         self._visual_attr_changed()
+
+
+class XGrid(PlotGrid):
+
+    def _compute_ticks(self, component):
+        """ Calculate the positions of grid lines in screen space.
+        """
+        data_bbox = component.range2d.bbox
+        offsets = self.tick_grid.get_axial_offsets(*data_bbox.intervalx)
+        y_lo, y_hi = component.screen_bbox.intervaly
+
+        y = np.resize(y_lo, offsets.shape)
+        points = np.transpose((offsets, y))
+        offsets = component.data_to_screen.transform(points)[:, 0]
+
+        starts, ends = vline_segments(offsets, y_lo, y_hi)
+
+        self._line_starts = np.around(starts)
+        self._line_ends = np.around(ends)
+
+
+class YGrid(PlotGrid):
+
+    def _compute_ticks(self, component):
+        """ Calculate the positions of grid lines in screen space.
+        """
+        data_bbox = component.range2d.bbox
+        offsets = self.tick_grid.get_axial_offsets(*data_bbox.intervaly)
+        x_lo, x_hi = component.screen_bbox.intervalx
+
+        x = np.resize(x_lo, offsets.shape)
+        points = np.transpose((x, offsets))
+        offsets = component.data_to_screen.transform(points)[:, 1]
+
+        starts, ends = hline_segments(offsets, x_lo, x_hi)
+
+        self._line_starts = np.around(starts)
+        self._line_ends = np.around(ends)
