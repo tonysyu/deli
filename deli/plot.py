@@ -8,6 +8,7 @@ from .array_data_source import ArrayDataSource
 from .data_view import DataView
 from .lineplot import LinePlot
 from .plot_label import PlotLabel
+from .utils import new_item_name
 
 
 class Plot(DataView):
@@ -77,16 +78,16 @@ class Plot(DataView):
         -------
         [renderers] -> list of renderers created in response to this call to plot()
         """
-        name = self._make_new_plot_name()
+        name = new_item_name(self.plots, name_template='plot_{}')
 
         x_src = self._get_or_create_datasource(data[0])
-        self.x_range.add(x_src)
+        self.range2d.update_x_data(x_src.get_data())
         data = data[1:]
 
         new_plots = []
         for y_name in data:
             y_src = self._get_or_create_datasource(y_name)
-            self.y_range.add(y_src)
+            self.range2d.update_y_data(y_src.get_data())
 
             plot = LinePlot(x_src=x_src, y_src=y_src,
                             data_bbox=self.range2d.bbox, **styles)
@@ -100,19 +101,6 @@ class Plot(DataView):
     #------------------------------------------------------------------------
     # Private methods
     #------------------------------------------------------------------------
-
-    def _make_new_plot_name(self):
-        """ Returns a string that is not already used as a plot title.
-        """
-        n = len(self.plots)
-        plot_template = "plot%d"
-        while True:
-            name = plot_template % n
-            if name not in self.plots:
-                break
-            else:
-                n += 1
-        return name
 
     def _get_or_create_datasource(self, name):
         """ Returns the data source associated with the given name, or creates

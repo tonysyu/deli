@@ -1,6 +1,19 @@
 import numpy as np
 
 
+def new_item_name(name_list, name_template='item_{}'):
+    """ Returns a string that is not already used as a plot title.
+    """
+    n = len(name_list)
+    while True:
+        name = name_template.format(n)
+        if name not in name_list:
+            break
+        else:
+            n += 1
+    return name
+
+
 def switch_trait_handler(old, new, observed_trait_name, handler):
     """Move handler from one `HasTraits` object to another.
 

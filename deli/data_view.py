@@ -3,7 +3,7 @@ functions.
 """
 from matplotlib.transforms import BboxTransform
 
-from traits.api import Bool, Instance, Property
+from traits.api import Bool, Instance
 
 from .abstract_overlay import AbstractOverlay
 from .axis import XAxis, YAxis
@@ -19,14 +19,8 @@ class DataView(OverlayPlotContainer):
     just like a normal PlotContainer.
     """
 
-    # The range used for the x data.
-    x_range = Property
-
-    # The range used for the y data.
-    y_range = Property
-
     # The 2D data range.
-    range2d = Instance(DataRange2D)
+    range2d = Instance(DataRange2D, ())
 
     #: Transform from data space to screen space.
     data_to_screen = Instance(BboxTransform)
@@ -123,16 +117,3 @@ class DataView(OverlayPlotContainer):
             self.overlays.remove(old)
         if new is not None:
             self.overlays.append(new)
-
-    def _range2d_default(self):
-        return DataRange2D()
-
-    #------------------------------------------------------------------------
-    # Property getters and setters
-    #------------------------------------------------------------------------
-
-    def _get_x_range(self):
-        return self.range2d.x_range
-
-    def _get_y_range(self):
-        return self.range2d.y_range

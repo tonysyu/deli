@@ -8,7 +8,7 @@ from traits.api import Array, Instance, on_trait_change
 from .abstract_overlay import AbstractOverlay
 from .line_artist import LineArtist
 from .ticks import TickGrid
-from .utils import hline_segments, switch_trait_handler, vline_segments
+from .utils import hline_segments, vline_segments
 
 
 class PlotGrid(AbstractOverlay):
