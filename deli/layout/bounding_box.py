@@ -3,6 +3,8 @@ from matplotlib.transforms import Bbox
 
 from traits.api import Event, HasStrictTraits, Instance, Property
 
+from ..utils import calc_bounds
+
 
 __all__ = ['BoundingBox']
 
@@ -135,3 +137,13 @@ class BoundingBox(HasStrictTraits):
     width = BboxProperty('width', readonly=True)
 
     height = BboxProperty('height', readonly=True)
+
+    def update_from_x_data(self, x_data):
+        x_span = calc_bounds(x_data, self.x_limits)
+        if x_span is not None:
+            self.x_limits = x_span
+
+    def update_from_y_data(self, y_data):
+        y_span = calc_bounds(y_data, self.y_limits)
+        if y_span is not None:
+            self.y_limits = y_span

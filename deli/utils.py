@@ -1,6 +1,16 @@
 import numpy as np
 
 
+def calc_bounds(x, current_bounds):
+    x_min, x_max = current_bounds
+    x_lo = min(np.min(x), x_min)
+    x_hi = max(np.max(x), x_max)
+    if x_lo < x_min or x_hi > x_max:
+        return (x_lo, x_hi)
+    else:
+        return None
+
+
 def new_item_name(name_list, name_template='item_{}'):
     """ Returns a string that is not already used as a plot title.
     """
