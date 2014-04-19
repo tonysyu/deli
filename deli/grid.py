@@ -126,7 +126,7 @@ class XGrid(PlotGrid):
         """
         data_bbox = component.range2d.bbox
         offsets = self.tick_grid.get_axial_offsets(*data_bbox.intervalx)
-        y_lo, y_hi = component.screen_bbox.intervaly
+        y_lo, y_hi = component.screen_bbox.y_limits
 
         y = np.resize(y_lo, offsets.shape)
         points = np.transpose((offsets, y))
@@ -145,7 +145,7 @@ class YGrid(PlotGrid):
         """
         data_bbox = component.range2d.bbox
         offsets = self.tick_grid.get_axial_offsets(*data_bbox.intervaly)
-        x_lo, x_hi = component.screen_bbox.intervalx
+        x_lo, x_hi = component.screen_bbox.x_limits
 
         x = np.resize(x_lo, offsets.shape)
         points = np.transpose((x, offsets))

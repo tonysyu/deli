@@ -37,7 +37,7 @@ class BaseXYPlot(AbstractPlotRenderer):
     data_to_screen = Instance(BboxTransform)
 
     def _data_to_screen_default(self):
-        return BboxTransform(self.data_bbox, self.screen_bbox)
+        return BboxTransform(self.data_bbox, self.screen_bbox._bbox)
 
     #------------------------------------------------------------------------
     # Appearance-related traits

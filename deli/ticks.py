@@ -9,6 +9,9 @@ from traits.api import HasStrictTraits
 
 class TickGrid(HasStrictTraits):
 
+    # TODO: Add bbox.interval{x|y} transform and make axial offsets a
+    #       cached property. Also add offsets.
+
     def get_axial_offsets(self, a_min, a_max, norm=False):
         offsets = np.array(auto_ticks(a_min, a_max), np.float64)
         if norm:

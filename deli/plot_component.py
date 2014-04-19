@@ -1,9 +1,9 @@
 """ Defines the PlotComponent class.
 """
-from matplotlib.transforms import Bbox
-
 from enable.api import Component
 from traits.api import Disallow, Instance, Str
+
+from .bounding_box import BoundingBox
 
 
 DEFAULT_DRAWING_ORDER = ["background", "image", "underlay", "plot",
@@ -53,10 +53,10 @@ class PlotComponent(Component):
     #--------------------------------------------------------------------------
 
     #: Bounding box in screen coordinates
-    screen_bbox = Instance(Bbox)
+    screen_bbox = Instance(BoundingBox)
 
     def _screen_bbox_default(self):
-        return Bbox.from_extents(self.x, self.y, self.x2, self.y2)
+        return BoundingBox.from_extents(self.x, self.y, self.x2, self.y2)
 
     def _bounds_changed(self, old, new):
         super(PlotComponent, self)._bounds_changed(old, new)

@@ -1,10 +1,9 @@
 """ Defines the BasePlotContainer class.
 """
-from matplotlib.transforms import Bbox
-
 from enable.api import Container
 from traits.api import Instance, Str, Tuple
 
+from .bounding_box import BoundingBox
 from .plot_component import DEFAULT_DRAWING_ORDER
 
 
@@ -35,10 +34,10 @@ class BasePlotContainer(Container):
     #--------------------------------------------------------------------------
 
     #: Bounding box in screen coordinates
-    screen_bbox = Instance(Bbox)
+    screen_bbox = Instance(BoundingBox)
 
     def _screen_bbox_default(self):
-        return Bbox.from_extents(self.x, self.y, self.x2, self.y2)
+        return BoundingBox.from_extents(self.x, self.y, self.x2, self.y2)
 
     def _bounds_changed(self, old, new):
         super(BasePlotContainer, self)._bounds_changed(old, new)
