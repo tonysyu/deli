@@ -5,7 +5,7 @@ from enable.api import Component, ComponentEditor
 from traits.api import HasStrictTraits, Instance
 from traitsui.api import Item, Group, View
 
-from deli.array_plot_data import ArrayPlotData
+from deli.utils.data_structures import NoisyDict
 from deli.plot import Plot
 
 
@@ -26,9 +26,9 @@ class Demo(HasStrictTraits):
     def _plot_default(self):
         # Create some x-y data series to plot
         x = linspace(-2.0, 10.0, 100)
-        pd = ArrayPlotData(x=x)
+        pd = NoisyDict(x=x)
         for i in range(5):
-            pd.set_data('y' + str(i), jn(i,x))
+            pd['y' + str(i)] = jn(i, x)
 
         # Create some line plots of some of the data
         plot = Plot(pd, title="Line Plot")

@@ -3,12 +3,12 @@
 from traits.api import Delegate, Dict, Instance, List, Property, Str
 
 from .abstract_data_source import AbstractDataSource
-from .abstract_plot_data import AbstractPlotData
 from .array_data_source import ArrayDataSource
 from .data_view import DataView
 from .lineplot import LinePlot
 from .plot_label import PlotLabel
-from .utils import new_item_name
+from .utils.data_structures import NoisyDict
+from .utils.misc import new_item_name
 
 
 class Plot(DataView):
@@ -21,7 +21,7 @@ class Plot(DataView):
     #------------------------------------------------------------------------
 
     # The PlotData instance that drives this plot.
-    data = Instance(AbstractPlotData)
+    data = Instance(NoisyDict)
 
     # Mapping of data names from self.data to their respective datasources.
     datasources = Dict(Str, Instance(AbstractDataSource))
@@ -107,7 +107,7 @@ class Plot(DataView):
         it if it doesn't exist.
         """
         if name not in self.datasources:
-            data = self.data.get_data(name)
+            data = self.data[name]
 
             if len(data.shape) == 1:
                 ds = ArrayDataSource(data, sort_order="none")

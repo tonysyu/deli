@@ -3,10 +3,18 @@ from matplotlib.transforms import Bbox
 
 from traits.api import Event, HasStrictTraits, Instance, Property
 
-from ..utils import calc_bounds
-
 
 __all__ = ['BoundingBox']
+
+
+def calc_bounds(x, current_bounds):
+    x_min, x_max = current_bounds
+    x_lo = min(np.min(x), x_min)
+    x_hi = max(np.max(x), x_max)
+    if x_lo < x_min or x_hi > x_max:
+        return (x_lo, x_hi)
+    else:
+        return None
 
 
 class Signal(object):
