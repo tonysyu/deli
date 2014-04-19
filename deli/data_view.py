@@ -26,7 +26,7 @@ class DataView(OverlayPlotContainer):
     data_to_screen = Instance(BboxTransform)
 
     def _data_to_screen_default(self):
-        return BboxTransform(self.range2d.bbox, self.screen_bbox._bbox)
+        return BboxTransform(self.range2d.bbox._bbox, self.screen_bbox._bbox)
 
     #------------------------------------------------------------------------
     # Axis and Grids

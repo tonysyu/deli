@@ -222,7 +222,7 @@ class XAxis(PlotAxis):
         return component.screen_bbox.width
 
     def _get_tick_offsets(self, norm=False):
-        x_min, x_max = self.component.range2d.bbox.intervalx
+        x_min, x_max = self.component.range2d.bbox.x_limits
         return self.tick_grid.get_axial_offsets(x_min, x_max, norm=norm)
 
 
@@ -242,5 +242,5 @@ class YAxis(PlotAxis):
         return component.screen_bbox.height
 
     def _get_tick_offsets(self, norm=False):
-        y_min, y_max = self.component.range2d.bbox.intervaly
+        y_min, y_max = self.component.range2d.bbox.y_limits
         return self.tick_grid.get_axial_offsets(y_min, y_max, norm=norm)

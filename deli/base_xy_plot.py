@@ -1,12 +1,13 @@
 """ Defines the base class for XY plots.
 """
-from matplotlib.transforms import Bbox, BboxTransform
+from matplotlib.transforms import BboxTransform
 
 from traits.api import Disallow, Instance, Property, Range
 
 from .abstract_plot_renderer import AbstractPlotRenderer
 from .abstract_data_source import AbstractDataSource
 from .array_data_source import ArrayDataSource
+from .bounding_box import BoundingBox
 
 
 class BaseXYPlot(AbstractPlotRenderer):
@@ -31,13 +32,13 @@ class BaseXYPlot(AbstractPlotRenderer):
     y_src = Instance(AbstractDataSource)
 
     #: Bounding box for data in plot.
-    data_bbox = Instance(Bbox)
+    data_bbox = Instance(BoundingBox)
 
     #: Transform from data space to screen space.
     data_to_screen = Instance(BboxTransform)
 
     def _data_to_screen_default(self):
-        return BboxTransform(self.data_bbox, self.screen_bbox._bbox)
+        return BboxTransform(self.data_bbox._bbox, self.screen_bbox._bbox)
 
     #------------------------------------------------------------------------
     # Appearance-related traits
