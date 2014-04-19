@@ -7,7 +7,7 @@ from traits.api import Disallow, Instance, Property, Range
 from .abstract_plot_renderer import AbstractPlotRenderer
 from .abstract_data_source import AbstractDataSource
 from .array_data_source import ArrayDataSource
-from .bounding_box import BoundingBox
+from .layout.bounding_box import BoundingBox
 
 
 class BaseXYPlot(AbstractPlotRenderer):

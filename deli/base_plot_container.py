@@ -3,7 +3,7 @@
 from enable.api import Container
 from traits.api import Instance, Str, Tuple
 
-from .bounding_box import BoundingBox
+from .layout.bounding_box import BoundingBox
 from .plot_component import DEFAULT_DRAWING_ORDER
 
 

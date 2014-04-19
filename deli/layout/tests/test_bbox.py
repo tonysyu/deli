@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose, assert_raises
 from traits.api import TraitError
 from traits.testing.unittest_tools import UnittestTools
 
-from deli.bounding_box import BoundingBox
+from deli.layout.bounding_box import BoundingBox
 
 
 #--------------------------------------------------------------------------

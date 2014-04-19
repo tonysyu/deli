@@ -5,7 +5,7 @@ import numpy as np
 
 from traits.api import HasStrictTraits, Instance
 
-from .bounding_box import BoundingBox
+from .layout.bounding_box import BoundingBox
 
 
 class DataRange2D(HasStrictTraits):

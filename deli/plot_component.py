@@ -3,7 +3,7 @@
 from enable.api import Component
 from traits.api import Disallow, Instance, Str
 
-from .bounding_box import BoundingBox
+from .layout.bounding_box import BoundingBox
 
 
 DEFAULT_DRAWING_ORDER = ["background", "image", "underlay", "plot",
