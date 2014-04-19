@@ -124,7 +124,7 @@ class XGrid(PlotGrid):
     def _compute_ticks(self, component):
         """ Calculate the positions of grid lines in screen space.
         """
-        data_bbox = component.range2d.bbox
+        data_bbox = component.data_bbox
         offsets = self.tick_grid.get_axial_offsets(*data_bbox.x_limits)
         y_lo, y_hi = component.screen_bbox.y_limits
 
@@ -143,7 +143,7 @@ class YGrid(PlotGrid):
     def _compute_ticks(self, component):
         """ Calculate the positions of grid lines in screen space.
         """
-        data_bbox = component.range2d.bbox
+        data_bbox = component.data_bbox
         offsets = self.tick_grid.get_axial_offsets(*data_bbox.y_limits)
         x_lo, x_hi = component.screen_bbox.x_limits
 

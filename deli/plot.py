@@ -81,16 +81,16 @@ class Plot(DataView):
         name = new_item_name(self.plots, name_template='plot_{}')
 
         x_src = self._get_or_create_datasource(data[0])
-        self.range2d.bbox.update_from_x_data(x_src.get_data())
+        self.data_bbox.update_from_x_data(x_src.get_data())
         data = data[1:]
 
         new_plots = []
         for y_name in data:
             y_src = self._get_or_create_datasource(y_name)
-            self.range2d.bbox.update_from_y_data(y_src.get_data())
+            self.data_bbox.update_from_y_data(y_src.get_data())
 
             plot = LinePlot(x_src=x_src, y_src=y_src,
-                            data_bbox=self.range2d.bbox, **styles)
+                            data_bbox=self.data_bbox, **styles)
 
             self.add(plot)
             new_plots.append(plot)

@@ -1,13 +1,15 @@
 """ Defines the DataView class, and associated property traits and property
 functions.
 """
+import numpy as np
+
 from traits.api import Bool, Instance
 
 from .abstract_overlay import AbstractOverlay
 from .axis import XAxis, YAxis
-from .data_range_2d import DataRange2D
 from .grid import PlotGrid, XGrid, YGrid
 from .layout.bbox_transform import BboxTransform
+from .layout.bounding_box import BoundingBox
 from .plot_containers import OverlayPlotContainer
 
 
@@ -18,14 +20,17 @@ class DataView(OverlayPlotContainer):
     just like a normal PlotContainer.
     """
 
-    # The 2D data range.
-    range2d = Instance(DataRange2D, ())
+    # The bounding box containing data added to plot.
+    data_bbox = Instance(BoundingBox)
+
+    def _data_bbox_default(self):
+        return BoundingBox.from_extents(np.inf, np.inf, -np.inf, -np.inf)
 
     #: Transform from data space to screen space.
     data_to_screen = Instance(BboxTransform)
 
     def _data_to_screen_default(self):
-        return BboxTransform(self.range2d.bbox, self.screen_bbox)
+        return BboxTransform(self.data_bbox, self.screen_bbox)
 
     #------------------------------------------------------------------------
     # Axis and Grids
