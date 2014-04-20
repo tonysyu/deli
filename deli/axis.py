@@ -9,7 +9,7 @@ from traits.api import Any, Float, Int, Event, List, Array, Instance, Callable
 from .abstract_overlay import AbstractOverlay
 from .label import Label
 from .line_artist import LineArtist
-from .ticks import TickGrid
+from .ticks import BaseGridLayout, XGridLayout, YGridLayout
 
 
 def DEFAULT_TICK_FORMATTER(val):
@@ -41,7 +41,7 @@ class PlotAxis(AbstractOverlay):
     tick_out = Int(5)
 
     # A tick grid that controls tick positioning
-    tick_grid = Instance(TickGrid, ())
+    tick_grid = Instance(BaseGridLayout)
 
     # Fired when the axis's range bounds change.
     updated = Event
@@ -128,10 +128,7 @@ class PlotAxis(AbstractOverlay):
         """ Draws the tick marks for the axis.
         """
         self.tick_artist.update_context(gc)
-
-        gc.begin_path()
-        gc.line_set(self._tick_starts, self._tick_ends)
-        gc.stroke_path()
+        self.tick_artist.draw_segments(gc, self._tick_starts, self._tick_ends)
 
     def _draw_labels(self, gc):
         """ Draws the tick labels for the axis.
@@ -161,7 +158,7 @@ class PlotAxis(AbstractOverlay):
     def _compute_tick_positions(self):
         """ Calculates the positions for the tick marks.
         """
-        x_norm = self._get_tick_offsets(norm=True)[:, None]
+        x_norm = self.tick_grid.norm_axial_offsets[:, None]
         self._xy_tick = self._axis_vector * x_norm + self._xy_origin
         self._tick_starts, self._tick_ends = self._get_tick_segments()
 
@@ -176,7 +173,7 @@ class PlotAxis(AbstractOverlay):
                          color=self.tick_label_color,
                          margin=self.tick_label_margin)
 
-        x_data = self._get_tick_offsets()
+        x_data = self.tick_grid.axial_offsets
         self._tick_label_cache = [build_label(val)
                                   for val in x_data]
         self._tick_label_bbox = [array(tick_label.get_bbox(gc), float)
@@ -208,6 +205,9 @@ class PlotAxis(AbstractOverlay):
 
 class XAxis(PlotAxis):
 
+    def _tick_grid_default(self):
+        return XGridLayout(data_bbox=self.component.data_bbox)
+
     def _set_geometry_traits(self, component):
         self._major_axis = array([1., 0.])
         self._xy_origin = array([component.x, component.y])
@@ -221,12 +221,11 @@ class XAxis(PlotAxis):
     def screen_size(self, component):
         return component.screen_bbox.width
 
-    def _get_tick_offsets(self, norm=False):
-        x_min, x_max = self.component.data_bbox.x_limits
-        return self.tick_grid.get_axial_offsets(x_min, x_max, norm=norm)
-
 
 class YAxis(PlotAxis):
+
+    def _tick_grid_default(self):
+        return YGridLayout(data_bbox=self.component.data_bbox)
 
     def _set_geometry_traits(self, component):
         self._major_axis = array([0., 1.])
@@ -240,7 +239,3 @@ class YAxis(PlotAxis):
 
     def screen_size(self, component):
         return component.screen_bbox.height
-
-    def _get_tick_offsets(self, norm=False):
-        y_min, y_max = self.component.data_bbox.y_limits
-        return self.tick_grid.get_axial_offsets(y_min, y_max, norm=norm)

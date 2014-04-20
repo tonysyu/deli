@@ -27,7 +27,7 @@ class OverlayPlotContainer(BasePlotContainer):
     _cached_preferred_size = Tuple
 
     def get_preferred_size(self, components=None):
-        """ Returns the size (width,height) that is preferred for this component.
+        """ Returns the preferred size (width, height) for this component.
 
         Overrides PlotComponent
         """

@@ -71,7 +71,7 @@ class Plot(DataView):
         if title is not None:
             self.title = title
 
-    def plot(self, data, type="line", **styles):
+    def plot(self, data, **styles):
         """ Adds a new sub-plot using the given data and plot style.
 
         Returns
@@ -110,7 +110,7 @@ class Plot(DataView):
             data = self.data[name]
 
             if len(data.shape) == 1:
-                ds = ArrayDataSource(data, sort_order="none")
+                ds = ArrayDataSource(data)
             self.datasources[name] = ds
 
         return self.datasources[name]

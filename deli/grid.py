@@ -7,7 +7,7 @@ from traits.api import Array, Instance, on_trait_change
 
 from .abstract_overlay import AbstractOverlay
 from .line_artist import LineArtist
-from .ticks import TickGrid
+from .ticks import BaseGridLayout, XGridLayout, YGridLayout
 from .utils.drawing import hline_segments, vline_segments
 
 
@@ -19,12 +19,8 @@ class PlotGrid(AbstractOverlay):
     lines in a plot.
     """
 
-    #------------------------------------------------------------------------
-    # Data-related traits
-    #------------------------------------------------------------------------
-
-    # A callable that implements the AbstractTickGenerator Interface.
-    tick_grid = Instance(TickGrid, ())
+    # A tick grid that controls tick positioning
+    tick_grid = Instance(BaseGridLayout)
 
     #------------------------------------------------------------------------
     # Appearance traits
@@ -90,11 +86,8 @@ class PlotGrid(AbstractOverlay):
             self.line_artist.update_context(gc)
             gc.set_antialias(False)
             gc.clip_to_rect(*(self.component.position + self.component.bounds))
-
-            gc.begin_path()
-
-            gc.line_set(self._line_starts, self._line_ends)
-            gc.stroke_path()
+            self.line_artist.draw_segments(gc, self._line_starts,
+                                               self._line_ends)
 
     def _position_changed_for_component(self):
         self.invalidate()
@@ -121,11 +114,13 @@ class PlotGrid(AbstractOverlay):
 
 class XGrid(PlotGrid):
 
+    def _tick_grid_default(self):
+        return XGridLayout(data_bbox=self.component.data_bbox)
+
     def _compute_ticks(self, component):
         """ Calculate the positions of grid lines in screen space.
         """
-        data_bbox = component.data_bbox
-        offsets = self.tick_grid.get_axial_offsets(*data_bbox.x_limits)
+        offsets = self.tick_grid.axial_offsets
         y_lo, y_hi = component.screen_bbox.y_limits
 
         y = np.resize(y_lo, offsets.shape)
@@ -140,11 +135,13 @@ class XGrid(PlotGrid):
 
 class YGrid(PlotGrid):
 
+    def _tick_grid_default(self):
+        return YGridLayout(data_bbox=self.component.data_bbox)
+
     def _compute_ticks(self, component):
         """ Calculate the positions of grid lines in screen space.
         """
-        data_bbox = component.data_bbox
-        offsets = self.tick_grid.get_axial_offsets(*data_bbox.y_limits)
+        offsets = self.tick_grid.axial_offsets
         x_lo, x_hi = component.screen_bbox.x_limits
 
         x = np.resize(x_lo, offsets.shape)

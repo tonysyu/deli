@@ -21,6 +21,16 @@ class LineArtist(HasStrictTraits):
         gc.set_stroke_color(self.color_)
 
     def draw_segments(self, gc, starts, ends):
+        """ Draw a series of straight line segments between points.
+
+        Parameters
+        ----------
+        gc : GraphicsContext
+            The graphics context where elements are drawn.
+        starts, ends : (N, 2) arrays
+            Starting and ending points for straight line segments. Each row
+            of `starts` and `ends` define an (x, y) point.
+        """
         gc.begin_path()
         gc.line_set(starts, ends)
         gc.stroke_path()

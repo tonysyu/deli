@@ -46,29 +46,26 @@ class Label(HasStrictTraits):
     # Number of pixels of spacing between lines of text.
     line_spacing = Int(5)
 
-    max_width = Float(0.0)
-
     #------------------------------------------------------------------------
     # Private traits
     #------------------------------------------------------------------------
 
-    _bounding_box = List()
-    _text_needs_fitting = Bool(True)
+    _size = List()
+    _text_needs_fitting = Bool(False)
     _line_xpos = Any()
     _line_ypos = Any()
 
     def __init__(self, **traits):
         super(Label, self).__init__(**traits)
-        self._bounding_box = [0, 0]
+        self._size = [0, 0]
 
     def get_width_height(self, gc):
         """ Returns the width and height of the label, in the rotated frame of
         reference.
         """
-        self._fit_text_to_max_width(gc)
+        # self._fit_text_to_max_width(gc)
         self._calc_line_positions(gc)
-        width, height = self._bounding_box
-        return width, height
+        return self._size
 
     def get_bbox(self, gc):
         """ Returns a rectangular bounding box for the Label as (width,height).
@@ -82,15 +79,12 @@ class Label(HasStrictTraits):
         correct position such that the origin is at the lower left-hand corner
         of this text label's box.
         """
-        # Make sure `max_width` is respected
-        self._fit_text_to_max_width(gc)
-
         # For this version we're not supporting rotated text.
         self._calc_line_positions(gc)
 
         with gc:
             bb_width, bb_height = self.get_bbox(gc)
-            width, height = self._bounding_box
+            width, height = self._size
 
             # Rotate label about center of bounding box
             gc.translate_ctm(bb_width/2.0, bb_height/2.0)
@@ -117,35 +111,12 @@ class Label(HasStrictTraits):
     # Private methods
     #------------------------------------------------------------------------
 
-    def _fit_text_to_max_width(self, gc):
-        """ Break the text into lines whose width is no greater than
-        `max_width`.
-        """
-        if self._text_needs_fitting:
-            lines = []
-
-            with gc:
-                gc.set_font(self.font)
-                for line in self.text.split('\n'):
-                    width = gc.get_full_text_extent(line)[0]
-                    line_words = []
-                    for word in line.split():
-                        line_words.append(word)
-                        test_line = ' '.join(line_words)
-                        width = gc.get_full_text_extent(test_line)[0]
-                        if width > self.max_width:
-                            lines.append(word)
-                            line_words = []
-            self.trait_setq(text='\n'.join(lines))
-            self._text_needs_fitting = False
-
     def _calc_line_positions(self, gc):
         with gc:
             gc.set_font(self.font)
             # The bottommost line starts at postion (0, 0).
             x_pos = []
             y_pos = []
-            self._bounding_box = [0, 0]
             margin = self.margin
             prev_y_pos = margin
             prev_y_height = -self.line_spacing
@@ -166,6 +137,6 @@ class Label(HasStrictTraits):
         self._line_xpos = x_pos[::-1]
         self._line_ypos = y_pos[::-1]
         border_width = self.border_width if self.border_visible else 0
-        self._bounding_box[0] = max_width + 2*margin + 2*border_width
-        self._bounding_box[1] = prev_y_pos + prev_y_height + margin \
+        self._size[0] = max_width + 2*margin + 2*border_width
+        self._size[1] = prev_y_pos + prev_y_height + margin \
             + 2*border_width

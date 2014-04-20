@@ -4,19 +4,49 @@ tick-related values (i.e., bounds and intervals).
 """
 import numpy as np
 
-from traits.api import HasStrictTraits
+from traits.api import (Array, cached_property, HasStrictTraits, Instance,
+                        Property)
+
+from .layout.bounding_box import BoundingBox
 
 
-class TickGrid(HasStrictTraits):
+class BaseGridLayout(HasStrictTraits):
 
-    # TODO: Add bbox.interval{x|y} transform and make axial offsets a
-    #       cached property. Also add offsets.
+    #: The bounding box containing data added to plot.
+    data_bbox = Instance(BoundingBox)
 
-    def get_axial_offsets(self, a_min, a_max, norm=False):
-        offsets = np.array(auto_ticks(a_min, a_max), np.float64)
-        if norm:
-            offsets = (offsets - a_min) / (a_max - a_min)
-        return offsets
+    #: The data limits of in the grid direction.
+    axial_limits = Property(Array, depends_on='data_bbox.updated')
+
+    #: The grid positions in data space.
+    axial_offsets = Property(Array, depends_on='data_limits')
+
+    #: The grid positions, normalized to (0, 1).
+    norm_axial_offsets = Property(Array, depends_on='data_limits')
+
+    @cached_property
+    def _get_axial_offsets(self):
+        a_min, a_max = self.axial_limits
+        return np.array(auto_ticks(a_min, a_max), np.float64)
+
+    @cached_property
+    def _get_norm_axial_offsets(self):
+        a_min, a_max = self.axial_limits
+        return (self.axial_offsets - a_min) / (a_max - a_min)
+
+
+class XGridLayout(BaseGridLayout):
+
+    @cached_property
+    def _get_axial_limits(self):
+        return self.data_bbox.x_limits
+
+
+class YGridLayout(BaseGridLayout):
+
+    @cached_property
+    def _get_axial_limits(self):
+        return self.data_bbox.y_limits
 
 
 def auto_ticks(x_min, x_max):
