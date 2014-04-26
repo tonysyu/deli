@@ -68,8 +68,6 @@ class DataView(OverlayPlotContainer):
     padding_left = 50
     padding_right = 50
 
-    border_visible = True
-
     #------------------------------------------------------------------------
     # Public methods
     #------------------------------------------------------------------------

@@ -59,20 +59,19 @@ class Label(HasStrictTraits):
         super(Label, self).__init__(**traits)
         self._size = [0, 0]
 
-    def get_width_height(self, gc):
+    def get_width_height(self, gc, text):
         """ Returns the width and height of the label, in the rotated frame of
         reference.
         """
-        # self._fit_text_to_max_width(gc)
-        self._calc_line_positions(gc)
+        self._calc_line_positions(gc, text)
         return self._size
 
-    def get_bbox(self, gc):
+    def get_size(self, gc, text):
         """ Returns a rectangular bounding box for the Label as (width,height).
         """
-        return self.get_width_height(gc)
+        return self.get_width_height(gc, text)
 
-    def draw(self, gc):
+    def draw(self, gc, text):
         """ Draws the label.
 
         This method assumes the graphics context has been translated to the
@@ -80,10 +79,10 @@ class Label(HasStrictTraits):
         of this text label's box.
         """
         # For this version we're not supporting rotated text.
-        self._calc_line_positions(gc)
+        self._calc_line_positions(gc, text)
 
         with gc:
-            bb_width, bb_height = self.get_bbox(gc)
+            bb_width, bb_height = self.get_size(gc, text)
             width, height = self._size
 
             # Rotate label about center of bounding box
@@ -96,10 +95,10 @@ class Label(HasStrictTraits):
             gc.set_font(self.font)
             gc.set_antialias(True)
 
-            lines = self.text.split("\n")
+            lines = text.split("\n")
             if self.border_visible:
                 gc.translate_ctm(self.border_width, self.border_width)
-            width, height = self.get_width_height(gc)
+            width, height = self.get_width_height(gc, text)
 
             for i, line in enumerate(lines):
                 x_offset = round(self._line_xpos[i])
@@ -111,7 +110,7 @@ class Label(HasStrictTraits):
     # Private methods
     #------------------------------------------------------------------------
 
-    def _calc_line_positions(self, gc):
+    def _calc_line_positions(self, gc, text):
         with gc:
             gc.set_font(self.font)
             # The bottommost line starts at postion (0, 0).
@@ -121,8 +120,8 @@ class Label(HasStrictTraits):
             prev_y_pos = margin
             prev_y_height = -self.line_spacing
             max_width = 0
-            for line in self.text.split("\n")[::-1]:
-                if line != "":
+            for line in text.split("\n")[::-1]:
+                if len(line) > 0:
                     text_extent = gc.get_full_text_extent(line)
                     (width, height, descent, leading) = text_extent
                     ascent = height - abs(descent)

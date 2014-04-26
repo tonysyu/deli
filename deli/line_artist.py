@@ -1,3 +1,5 @@
+import numpy as np
+
 from enable.api import ColorTrait, LineStyle
 from traits.api import HasStrictTraits, CFloat
 
@@ -16,6 +18,7 @@ class LineArtist(HasStrictTraits):
     width = CFloat(1)
 
     def update_context(self, gc):
+        # XXX: Rename to update_style since "context" is overloaded.
         gc.set_line_width(self.width)
         gc.set_line_dash(self.style_)
         gc.set_stroke_color(self.color_)
@@ -27,10 +30,14 @@ class LineArtist(HasStrictTraits):
         ----------
         gc : GraphicsContext
             The graphics context where elements are drawn.
-        starts, ends : (N, 2) arrays
+        starts, ends : array, shape (N, 2) or (2,)
             Starting and ending points for straight line segments. Each row
             of `starts` and `ends` define an (x, y) point.
         """
+        # Turn arrays with shape (2,) to (1, 2)
+        starts = np.atleast_2d(starts)
+        ends = np.atleast_2d(ends)
+
         gc.begin_path()
         gc.line_set(starts, ends)
         gc.stroke_path()

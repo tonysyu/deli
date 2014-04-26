@@ -1,5 +1,6 @@
 """ Defines the PlotAxis class, and associated validator and UI.
 """
+from functools import partial
 from numpy import array, around
 
 from enable.api import ColorTrait
@@ -33,6 +34,14 @@ class PlotAxis(AbstractOverlay):
     # A callable that is passed the numerical value of each tick label and
     # that returns a string.
     tick_label_formatter = Callable(DEFAULT_TICK_FORMATTER)
+
+    #: Artist responsible for drawing tick labels.
+    label_artist = Instance(Label)
+
+    def _label_artist_default(self):
+        return Label(font=self.tick_label_font,
+                     color=self.tick_label_color,
+                     margin=self.tick_label_margin)
 
     # The number of pixels by which the ticks extend into the plot area.
     tick_in = Int(5)
@@ -69,8 +78,6 @@ class PlotAxis(AbstractOverlay):
     _end_axis_point = Array
     _tick_starts = Array
     _tick_ends = Array
-
-    _tick_label_cache = List
 
     #------------------------------------------------------------------------
     # Public methods
@@ -119,10 +126,8 @@ class PlotAxis(AbstractOverlay):
     def _draw_axis_line(self, gc):
         """ Draws the line for the axis. """
         self.line_artist.update_context(gc)
-
-        gc.move_to(*around(self._xy_origin))
-        gc.line_to(*around(self._end_axis_point))
-        gc.stroke_path()
+        self.line_artist.draw_segments(gc, self._xy_origin,
+                                           self._end_axis_point)
 
     def _draw_ticks(self, gc):
         """ Draws the tick marks for the axis.
@@ -137,18 +142,19 @@ class PlotAxis(AbstractOverlay):
 
         inside_vector = self._inside_vector
 
-        for i in range(len(self._xy_tick)):
-            tick_label = self._tick_label_cache[i]
-            bbox = self._tick_label_bbox[i]
+        axial_offsets = self.tick_grid.axial_offsets
+        iter_labels = zip(self._xy_tick, axial_offsets, self._tick_label_bbox)
+        for screen_point, data_offset, bbox in iter_labels:
+            text = str(data_offset)
 
-            base_position = self._xy_tick[i].copy()
+            xy_screen = screen_point
             axis_dist = self.tick_label_offset + bbox[offset_index]/2.0
-            base_position -= inside_vector * axis_dist
-            base_position -= bbox/2.0
+            xy_screen -= inside_vector * axis_dist
+            xy_screen -= bbox/2.0
 
-            tlpos = around(base_position)
+            tlpos = around(xy_screen)
             gc.translate_ctm(*tlpos)
-            tick_label.draw(gc)
+            self.label_artist.draw(gc, text)
             gc.translate_ctm(*(-tlpos))
 
     #------------------------------------------------------------------------
@@ -163,21 +169,12 @@ class PlotAxis(AbstractOverlay):
         self._tick_starts, self._tick_ends = self._get_tick_segments()
 
     def _compute_labels(self, gc):
-        """Generates the labels for tick marks.
-        """
-        formatter = self.tick_label_formatter
-        def build_label(val):
-            label = formatter(val) if formatter is not None else str(val)
-            return Label(text=label,
-                         font=self.tick_label_font,
-                         color=self.tick_label_color,
-                         margin=self.tick_label_margin)
-
+        """ Generates the labels for tick marks. """
+        format_label = self.tick_label_formatter
         x_data = self.tick_grid.axial_offsets
-        self._tick_label_cache = [build_label(val)
-                                  for val in x_data]
-        self._tick_label_bbox = [array(tick_label.get_bbox(gc), float)
-                                 for tick_label in self._tick_label_cache]
+        get_size = partial(self.label_artist.get_size, gc)
+        self._tick_label_bbox = [array(get_size(format_label(text)), float)
+                                 for text in x_data]
 
     def _calculate_geometry_overlay(self, component=None):
         screen_size = self.screen_size(component)

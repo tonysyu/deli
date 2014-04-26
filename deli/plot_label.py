@@ -45,7 +45,6 @@ class PlotLabel(AbstractOverlay):
     # The Label instance this plot label is wrapping.
     _label = Instance(Label, args=())
 
-
     def __init__(self, text="", *args, **kw):
         super(PlotLabel, self).__init__(*args, **kw)
         self.text = text
@@ -71,7 +70,7 @@ class PlotLabel(AbstractOverlay):
         """
         # Perform justification and compute the correct offsets for
         # the label position
-        width, height = self._label.get_bbox(gc)
+        width, height = self._label.get_size(gc, self.text)
 
         x_offset = int((self.width - width) / 2)
         y_offset = int((self.height - height) / 2)
@@ -80,7 +79,7 @@ class PlotLabel(AbstractOverlay):
             # We have to translate to our position because the label
             # tries to draw at (0,0).
             gc.translate_ctm(self.x + x_offset, self.y + y_offset)
-            self._label.draw(gc)
+            self._label.draw(gc, self.text)
 
         return
 
