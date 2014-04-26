@@ -7,7 +7,7 @@ import numpy as np
 from traits.api import (Array, cached_property, HasStrictTraits, Instance,
                         Property)
 
-from .layout.bounding_box import BoundingBox
+from .bounding_box import BoundingBox
 
 
 class BaseGridLayout(HasStrictTraits):

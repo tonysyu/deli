@@ -9,8 +9,8 @@ from traits.api import Any, Float, Int, Event, List, Array, Instance, Callable
 
 from .abstract_overlay import AbstractOverlay
 from .label import Label
+from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
 from .line_artist import LineArtist
-from .ticks import BaseGridLayout, XGridLayout, YGridLayout
 
 
 def DEFAULT_TICK_FORMATTER(val):

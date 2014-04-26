@@ -51,7 +51,6 @@ class Label(HasStrictTraits):
     #------------------------------------------------------------------------
 
     _size = List()
-    _text_needs_fitting = Bool(False)
     _line_xpos = Any()
     _line_ypos = Any()
 
