@@ -3,7 +3,7 @@
 from traits.api import DelegatesTo, Enum, Instance, Str, Trait
 
 from .abstract_overlay import AbstractOverlay
-from .label import Label
+from .artist.label_artist import LabelArtist
 
 
 LabelDelegate = DelegatesTo("_label")
@@ -11,7 +11,7 @@ LabelDelegate = DelegatesTo("_label")
 class PlotLabel(AbstractOverlay):
     """ A label used by plots.
 
-    This class wraps a simple Label instance, and delegates some traits to it.
+    This class wraps a simple LabelArtist, and delegates some traits to it.
     """
 
     # The text of the label.
@@ -43,7 +43,7 @@ class PlotLabel(AbstractOverlay):
     resizable = "h"
 
     # The Label instance this plot label is wrapping.
-    _label = Instance(Label, args=())
+    _label = Instance(LabelArtist, args=())
 
     def __init__(self, text="", *args, **kw):
         super(PlotLabel, self).__init__(*args, **kw)

@@ -8,7 +8,7 @@ from traits.api import (Any, Bool, Enum, Float, HasStrictTraits, Int, List,
                         Property, Str, cached_property)
 
 
-class Label(HasStrictTraits):
+class LabelArtist(HasStrictTraits):
     """ A Flyweight object for drawing text labels.
     """
 
@@ -57,7 +57,7 @@ class Label(HasStrictTraits):
     _line_ypos = Any()
 
     def __init__(self, **traits):
-        super(Label, self).__init__(**traits)
+        super(LabelArtist, self).__init__(**traits)
         self._size = [0, 0]
 
     def get_size(self, gc, text):

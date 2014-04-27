@@ -7,9 +7,9 @@ from kiva.trait_defs.kiva_font_trait import KivaFont
 from traits.api import Any, Float, Int, Event, Array, Instance, Callable
 
 from .abstract_overlay import AbstractOverlay
-from .label import Label
+from .artist.label_artist import LabelArtist
+from .artist.line_artist import LineArtist
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
-from .line_artist import LineArtist
 
 
 def DEFAULT_TICK_FORMATTER(val):
@@ -35,12 +35,7 @@ class PlotAxis(AbstractOverlay):
     tick_label_formatter = Callable(DEFAULT_TICK_FORMATTER)
 
     #: Artist responsible for drawing tick labels.
-    label_artist = Instance(Label)
-
-    def _label_artist_default(self):
-        return Label(font=self.tick_label_font,
-                     color=self.tick_label_color,
-                     margin=self.tick_label_margin)
+    label_artist = Instance(LabelArtist)
 
     # The number of pixels by which the ticks extend into the plot area.
     tick_in = Int(5)
@@ -188,11 +183,10 @@ class PlotAxis(AbstractOverlay):
 class XAxis(PlotAxis):
 
     def _label_artist_default(self):
-        return Label(font=self.tick_label_font,
-                     y_origin='top',
-                     color=self.tick_label_color,
-                     margin=self.tick_label_margin)
-
+        return LabelArtist(font=self.tick_label_font,
+                           y_origin='top',
+                           color=self.tick_label_color,
+                           margin=self.tick_label_margin)
 
     def _tick_grid_default(self):
         return XGridLayout(data_bbox=self.component.data_bbox)
@@ -214,10 +208,10 @@ class XAxis(PlotAxis):
 class YAxis(PlotAxis):
 
     def _label_artist_default(self):
-        return Label(font=self.tick_label_font,
-                     x_origin='right',
-                     color=self.tick_label_color,
-                     margin=self.tick_label_margin)
+        return LabelArtist(font=self.tick_label_font,
+                           x_origin='right',
+                           color=self.tick_label_color,
+                           margin=self.tick_label_margin)
 
     def _tick_grid_default(self):
         return YGridLayout(data_bbox=self.component.data_bbox)

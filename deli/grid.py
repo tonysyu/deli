@@ -6,8 +6,8 @@ import numpy as np
 from traits.api import Array, Instance, on_trait_change
 
 from .abstract_overlay import AbstractOverlay
+from .artist.line_artist import LineArtist
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
-from .line_artist import LineArtist
 from .utils.drawing import hline_segments, vline_segments
 
 
