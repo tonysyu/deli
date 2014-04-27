@@ -4,22 +4,18 @@ from math import pi
 
 from enable.api import black_color_trait, transparent_color_trait
 from kiva.trait_defs.kiva_font_trait import KivaFont
-from traits.api import Any, Bool, Float, HasStrictTraits, Int, List, Str
+from traits.api import (Any, Bool, Enum, Float, HasStrictTraits, Int, List,
+                        Property, Str, cached_property)
 
 
 class Label(HasStrictTraits):
-    """ A label used by overlays.
-
-    Label is not a Component; it's just an object encapsulating text settings
-    and appearance attributes.  It can be used by components that need text
-    labels to store state, perform layout, and render the text.
+    """ A Flyweight object for drawing text labels.
     """
 
-    # The label text.  Carriage returns (\n) are always connverted into
-    # line breaks.
+    # The label text.
     text = Str
 
-    # The angle of rotation of the label.
+    # The angle of rotation (in degrees) of the label.
     rotate_angle = Float(0)
 
     # The color of the label text.
@@ -46,6 +42,12 @@ class Label(HasStrictTraits):
     # Number of pixels of spacing between lines of text.
     line_spacing = Int(5)
 
+    x_origin = Enum('center', 'left', 'right')
+    y_origin = Enum('center', 'bottom', 'top')
+
+    _x_offset_factor = Property(Int, depends_on='x_origin')
+    _y_offset_factor = Property(Int, depends_on='y_origin')
+
     #------------------------------------------------------------------------
     # Private traits
     #------------------------------------------------------------------------
@@ -58,17 +60,26 @@ class Label(HasStrictTraits):
         super(Label, self).__init__(**traits)
         self._size = [0, 0]
 
-    def get_width_height(self, gc, text):
-        """ Returns the width and height of the label, in the rotated frame of
-        reference.
+    def get_size(self, gc, text):
+        """ Returns the label size as (width, height).
         """
         self._calc_line_positions(gc, text)
         return self._size
 
-    def get_size(self, gc, text):
-        """ Returns a rectangular bounding box for the Label as (width,height).
-        """
-        return self.get_width_height(gc, text)
+    def update_context(self, gc):
+        gc.set_fill_color(self.color_)
+        gc.set_stroke_color(self.color_)
+        gc.set_font(self.font)
+        gc.set_antialias(True)
+
+    def set_rotation_angle(self, gc, text):
+        bb_width, bb_height = self.get_size(gc, text)
+        width, height = self._size
+
+        # Rotate label about center of bounding box
+        gc.translate_ctm(bb_width / 2.0, bb_height / 2.0)
+        gc.rotate_ctm(pi / 180.0 * self.rotate_angle)
+        gc.translate_ctm(-width / 2.0, -height / 2.0)
 
     def draw(self, gc, text):
         """ Draws the label.
@@ -81,33 +92,46 @@ class Label(HasStrictTraits):
         self._calc_line_positions(gc, text)
 
         with gc:
-            bb_width, bb_height = self.get_size(gc, text)
-            width, height = self._size
-
-            # Rotate label about center of bounding box
-            gc.translate_ctm(bb_width/2.0, bb_height/2.0)
-            gc.rotate_ctm(pi/180.0*self.rotate_angle)
-            gc.translate_ctm(-width/2.0, -height/2.0)
-
-            gc.set_fill_color(self.color_)
-            gc.set_stroke_color(self.color_)
-            gc.set_font(self.font)
-            gc.set_antialias(True)
+            self.update_context(gc)
+            self.set_rotation_angle(gc, text)
 
             lines = text.split("\n")
             if self.border_visible:
                 gc.translate_ctm(self.border_width, self.border_width)
-            width, height = self.get_width_height(gc, text)
+            width, height = self.get_size(gc, text)
+
+            x_bbox_offset = self._x_offset_factor * width
+            y_bbox_offset = self._y_offset_factor * height
 
             for i, line in enumerate(lines):
-                x_offset = round(self._line_xpos[i])
-                y_offset = round(self._line_ypos[i])
+                x_offset = round(self._line_xpos[i]) + x_bbox_offset
+                y_offset = round(self._line_ypos[i]) + y_bbox_offset
                 gc.set_text_position(x_offset, y_offset)
                 gc.show_text(line)
 
     #------------------------------------------------------------------------
     # Private methods
     #------------------------------------------------------------------------
+
+    @cached_property
+    def _get__x_offset_factor(self):
+        # Fraction of label bounding-box width used to shift origin.
+        if self.x_origin == 'center':
+            return -0.5
+        elif self.x_origin == 'left':
+            return 0
+        elif self.x_origin == 'right':
+            return -1
+
+    @cached_property
+    def _get__y_offset_factor(self):
+        # Fraction of label bounding-box height used to shift origin.
+        if self.y_origin == 'center':
+            return -0.5
+        elif self.y_origin == 'top':
+            return -1
+        elif self.y_origin == 'bottom':
+            return 0
 
     def _calc_line_positions(self, gc, text):
         with gc:
