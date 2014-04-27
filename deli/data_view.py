@@ -5,9 +5,8 @@ import numpy as np
 
 from traits.api import Bool, Instance
 
-from .abstract_overlay import AbstractOverlay
-from .axis import XAxis, YAxis
-from .grid import PlotGrid, XGrid, YGrid
+from .axis import BaseAxis, XAxis, YAxis
+from .grid import BaseGrid, XGrid, YGrid
 from .layout.bbox_transform import BboxTransform
 from .layout.bounding_box import BoundingBox
 from .plot_containers import OverlayPlotContainer
@@ -37,16 +36,16 @@ class DataView(OverlayPlotContainer):
     #------------------------------------------------------------------------
 
     # The horizontal axis.
-    x_axis = Instance(AbstractOverlay)
+    x_axis = Instance(BaseAxis)
 
     # The vertical axis.
-    y_axis = Instance(AbstractOverlay)
+    y_axis = Instance(BaseAxis)
 
     # The grid that intersects the x-axis, i.e., a set of vertical lines.
-    x_grid = Instance(PlotGrid)
+    x_grid = Instance(BaseGrid)
 
     # The grid that intersects the y-axis, i.e., a set of horizontal lines.
-    y_grid = Instance(PlotGrid)
+    y_grid = Instance(BaseGrid)
 
     # Whether to automatically create the x_axis and y_axis if they were not
     # already set by the caller.

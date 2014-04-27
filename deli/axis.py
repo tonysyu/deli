@@ -1,4 +1,4 @@
-""" Defines the PlotAxis class, and associated validator and UI.
+""" Defines the XAxis and YAxis classes.
 """
 from numpy import array, around
 
@@ -16,7 +16,7 @@ def DEFAULT_TICK_FORMATTER(val):
     return ("%f"%val).rstrip("0").rstrip(".")
 
 
-class PlotAxis(AbstractOverlay):
+class BaseAxis(AbstractOverlay):
 
     # The font of the tick labels.
     tick_label_font = KivaFont('modern 10')
@@ -73,15 +73,22 @@ class PlotAxis(AbstractOverlay):
     _tick_ends = Array
 
     #------------------------------------------------------------------------
-    # Public methods
+    # Public interface
     #------------------------------------------------------------------------
 
     def __init__(self, component=None, **kwargs):
         # Override init so that our component gets set last.  We want the
         # _component_changed() event handler to get run last.
-        super(PlotAxis, self).__init__(**kwargs)
+        super(BaseAxis, self).__init__(**kwargs)
         if component is not None:
             self.component = component
+
+    #--------------------------------------------------------------------------
+    # Protected interface
+    #--------------------------------------------------------------------------
+
+    def _set_geometry_traits(self, component):
+        raise NotImplementedError()
 
     #------------------------------------------------------------------------
     # PlotComponent and AbstractOverlay interface
@@ -164,9 +171,6 @@ class PlotAxis(AbstractOverlay):
         self._end_axis_point = screen_size*self._major_axis + self._xy_origin
         self._axis_vector = self._end_axis_point - self._xy_origin
 
-    def _set_geometry_traits(self, component):
-        raise NotImplementedError()
-
     #------------------------------------------------------------------------
     # Event handlers
     #------------------------------------------------------------------------
@@ -180,7 +184,7 @@ class PlotAxis(AbstractOverlay):
             self.component.invalidate_draw()
 
 
-class XAxis(PlotAxis):
+class XAxis(BaseAxis):
 
     def _label_artist_default(self):
         return LabelArtist(font=self.tick_label_font,
@@ -205,7 +209,7 @@ class XAxis(PlotAxis):
         return component.screen_bbox.width
 
 
-class YAxis(PlotAxis):
+class YAxis(BaseAxis):
 
     def _label_artist_default(self):
         return LabelArtist(font=self.tick_label_font,

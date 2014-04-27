@@ -1,5 +1,4 @@
-""" Defines the PlotGrid class, and associated Traits UI View and validator
-function.
+""" Defines the XGrid and YGrid classes.
 """
 import numpy as np
 
@@ -11,7 +10,7 @@ from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
 from .utils.drawing import hline_segments, vline_segments
 
 
-class PlotGrid(AbstractOverlay):
+class BaseGrid(AbstractOverlay):
     """ An overlay that represents a grid.
 
     A grid is a set of parallel lines, horizontal or vertical. You can use
@@ -112,7 +111,7 @@ class PlotGrid(AbstractOverlay):
         self._visual_attr_changed()
 
 
-class XGrid(PlotGrid):
+class XGrid(BaseGrid):
 
     def _tick_grid_default(self):
         return XGridLayout(data_bbox=self.component.data_bbox)
@@ -133,7 +132,7 @@ class XGrid(PlotGrid):
         self._line_ends = np.around(ends)
 
 
-class YGrid(PlotGrid):
+class YGrid(BaseGrid):
 
     def _tick_grid_default(self):
         return YGridLayout(data_bbox=self.component.data_bbox)
