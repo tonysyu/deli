@@ -1,10 +1,11 @@
 """ Defines the XAxis and YAxis classes.
 """
-from numpy import array, around
+from numpy import array
 
 from enable.api import ColorTrait
 from kiva.trait_defs.kiva_font_trait import KivaFont
-from traits.api import Any, Float, Int, Event, Array, Instance, Callable
+from traits.api import (Array, Callable, Event, Float, Instance, Int, Property,
+                        cached_property)
 
 from .abstract_overlay import AbstractOverlay
 from .artist.label_artist import LabelArtist
@@ -63,14 +64,11 @@ class BaseAxis(AbstractOverlay):
 
     # Cached position calculations
 
-    _xy_tick = Any #List
-    _major_axis = Array
+    _tick_label_xy_offset = Property(Array, depends_on='tick_label_offset')
+    _xy_tick = Array
     _xy_origin = Array
-    _inside_vector = Array
     _axis_vector = Array
     _end_axis_point = Array
-    _tick_starts = Array
-    _tick_ends = Array
 
     #------------------------------------------------------------------------
     # Public interface
@@ -82,13 +80,6 @@ class BaseAxis(AbstractOverlay):
         super(BaseAxis, self).__init__(**kwargs)
         if component is not None:
             self.component = component
-
-    #--------------------------------------------------------------------------
-    # Protected interface
-    #--------------------------------------------------------------------------
-
-    def _set_geometry_traits(self, component):
-        raise NotImplementedError()
 
     #------------------------------------------------------------------------
     # PlotComponent and AbstractOverlay interface
@@ -131,26 +122,21 @@ class BaseAxis(AbstractOverlay):
     def _draw_ticks(self, gc):
         """ Draws the tick marks for the axis.
         """
+        tick_starts, tick_ends = self._compute_tick_positions()
         self.tick_artist.update_context(gc)
-        self.tick_artist.draw_segments(gc, self._tick_starts, self._tick_ends)
+        self.tick_artist.draw_segments(gc, tick_starts, tick_ends)
 
     def _draw_labels(self, gc):
         """ Draws the tick labels for the axis.
         """
-        inside_vector = self._inside_vector
-
         axial_offsets = self.tick_grid.axial_offsets
         for screen_point, data_offset in zip(self._xy_tick, axial_offsets):
-            text = str(data_offset)
+            tick_label = str(data_offset)
+            xy_screen = screen_point - self._tick_label_xy_offset
 
-            xy_screen = screen_point
-            axis_dist = self.tick_label_offset
-            xy_screen -= inside_vector * axis_dist
-
-            tlpos = around(xy_screen)
-            gc.translate_ctm(*tlpos)
-            self.label_artist.draw(gc, text)
-            gc.translate_ctm(*(-tlpos))
+            gc.translate_ctm(*xy_screen)
+            self.label_artist.draw(gc, tick_label)
+            gc.translate_ctm(*(-xy_screen))
 
     #------------------------------------------------------------------------
     # Private methods for computing positions and layout
@@ -161,15 +147,17 @@ class BaseAxis(AbstractOverlay):
         """
         x_norm = self.tick_grid.norm_axial_offsets[:, None]
         self._xy_tick = self._axis_vector * x_norm + self._xy_origin
-        self._tick_starts, self._tick_ends = self._get_tick_segments()
+        return self._get_tick_segments()
 
     def _calculate_geometry_overlay(self, component=None):
-        screen_size = self.screen_size(component)
+        end_xy_offset = self._get_end_xy_offset(component)
 
         self._set_geometry_traits(component)
-
-        self._end_axis_point = screen_size*self._major_axis + self._xy_origin
+        self._end_axis_point = end_xy_offset + self._xy_origin
         self._axis_vector = self._end_axis_point - self._xy_origin
+
+    def _set_geometry_traits(self, component):
+        self._xy_origin = array([self.component.x, self.component.y])
 
     #------------------------------------------------------------------------
     # Event handlers
@@ -186,6 +174,12 @@ class BaseAxis(AbstractOverlay):
 
 class XAxis(BaseAxis):
 
+    _tick_label_xy_offset = Property(Array, depends_on='tick_label_offset')
+
+    @cached_property
+    def _get__tick_label_xy_offset(self):
+        return array([0, self.tick_label_offset])
+
     def _label_artist_default(self):
         return LabelArtist(font=self.tick_label_font,
                            y_origin='top',
@@ -195,21 +189,22 @@ class XAxis(BaseAxis):
     def _tick_grid_default(self):
         return XGridLayout(data_bbox=self.component.data_bbox)
 
-    def _set_geometry_traits(self, component):
-        self._major_axis = array([1., 0.])
-        self._xy_origin = array([component.x, component.y])
-        self._inside_vector = array([0.0, 1.0])
-
     def _get_tick_segments(self):
         starts = self._xy_tick + [0, self.tick_in]
         ends = self._xy_tick - [0, self.tick_out]
         return starts, ends
 
-    def screen_size(self, component):
-        return component.screen_bbox.width
+    def _get_end_xy_offset(self, component):
+        return array([component.screen_bbox.width, 0])
 
 
 class YAxis(BaseAxis):
+
+    _tick_label_xy_offset = Property(Array, depends_on='tick_label_offset')
+
+    @cached_property
+    def _get__tick_label_xy_offset(self):
+        return array([self.tick_label_offset, 0])
 
     def _label_artist_default(self):
         return LabelArtist(font=self.tick_label_font,
@@ -220,15 +215,10 @@ class YAxis(BaseAxis):
     def _tick_grid_default(self):
         return YGridLayout(data_bbox=self.component.data_bbox)
 
-    def _set_geometry_traits(self, component):
-        self._major_axis = array([0., 1.])
-        self._xy_origin = array([component.x, component.y])
-        self._inside_vector = array([1.0, 0.0])
-
     def _get_tick_segments(self):
         starts = self._xy_tick + [self.tick_in, 0]
         ends = self._xy_tick - [self.tick_out, 0]
         return starts, ends
 
-    def screen_size(self, component):
-        return component.screen_bbox.height
+    def _get_end_xy_offset(self, component):
+        return array([0, component.screen_bbox.height])
