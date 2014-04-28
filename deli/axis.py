@@ -4,8 +4,7 @@ from numpy import array
 
 from enable.api import ColorTrait
 from kiva.trait_defs.kiva_font_trait import KivaFont
-from traits.api import (Array, Callable, Event, Float, Instance, Int, Property,
-                        cached_property)
+from traits.api import Array, Callable, Event, Float, Instance, Int
 
 from .abstract_overlay import AbstractOverlay
 from .artist.label_artist import LabelArtist
@@ -64,7 +63,6 @@ class BaseAxis(AbstractOverlay):
 
     # Cached position calculations
 
-    _tick_label_xy_offset = Property(Array, depends_on='tick_label_offset')
     _xy_tick = Array
     _xy_origin = Array
     _axis_vector = Array
@@ -130,10 +128,8 @@ class BaseAxis(AbstractOverlay):
         """ Draws the tick labels for the axis.
         """
         axial_offsets = self.tick_grid.axial_offsets
-        for screen_point, data_offset in zip(self._xy_tick, axial_offsets):
+        for xy_screen, data_offset in zip(self._xy_tick, axial_offsets):
             tick_label = str(data_offset)
-            xy_screen = screen_point - self._tick_label_xy_offset
-
             gc.translate_ctm(*xy_screen)
             self.label_artist.draw(gc, tick_label)
             gc.translate_ctm(*(-xy_screen))
@@ -174,15 +170,10 @@ class BaseAxis(AbstractOverlay):
 
 class XAxis(BaseAxis):
 
-    _tick_label_xy_offset = Property(Array, depends_on='tick_label_offset')
-
-    @cached_property
-    def _get__tick_label_xy_offset(self):
-        return array([0, self.tick_label_offset])
-
     def _label_artist_default(self):
         return LabelArtist(font=self.tick_label_font,
                            y_origin='top',
+                           y_offset=-self.tick_label_offset,
                            color=self.tick_label_color,
                            margin=self.tick_label_margin)
 
@@ -200,15 +191,10 @@ class XAxis(BaseAxis):
 
 class YAxis(BaseAxis):
 
-    _tick_label_xy_offset = Property(Array, depends_on='tick_label_offset')
-
-    @cached_property
-    def _get__tick_label_xy_offset(self):
-        return array([self.tick_label_offset, 0])
-
     def _label_artist_default(self):
         return LabelArtist(font=self.tick_label_font,
                            x_origin='right',
+                           x_offset=-self.tick_label_offset,
                            color=self.tick_label_color,
                            margin=self.tick_label_margin)
 

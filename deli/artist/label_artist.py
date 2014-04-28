@@ -45,6 +45,10 @@ class LabelArtist(HasStrictTraits):
     x_origin = Enum('center', 'left', 'right')
     y_origin = Enum('center', 'bottom', 'top')
 
+    #: Offset value from the current graphics-context position.
+    x_offset = Float(0)
+    y_offset = Float(0)
+
     _x_offset_factor = Property(Int, depends_on='x_origin')
     _y_offset_factor = Property(Int, depends_on='y_origin')
 
@@ -53,8 +57,8 @@ class LabelArtist(HasStrictTraits):
     #------------------------------------------------------------------------
 
     _size = List()
-    _line_xpos = Any()
-    _line_ypos = Any()
+    _x = Any()
+    _y = Any()
 
     def __init__(self, **traits):
         super(LabelArtist, self).__init__(**traits)
@@ -100,12 +104,12 @@ class LabelArtist(HasStrictTraits):
                 gc.translate_ctm(self.border_width, self.border_width)
             width, height = self.get_size(gc, text)
 
-            x_bbox_offset = self._x_offset_factor * width
-            y_bbox_offset = self._y_offset_factor * height
+            x_bbox_offset = self._x_offset_factor * width + self.x_offset
+            y_bbox_offset = self._y_offset_factor * height + self.y_offset
 
-            for i, line in enumerate(lines):
-                x_offset = round(self._line_xpos[i]) + x_bbox_offset
-                y_offset = round(self._line_ypos[i]) + y_bbox_offset
+            for x, y, line in zip(self._x, self._y, lines):
+                x_offset = x + x_bbox_offset
+                y_offset = y + y_bbox_offset
                 gc.set_text_position(x_offset, y_offset)
                 gc.show_text(line)
 
@@ -156,8 +160,8 @@ class LabelArtist(HasStrictTraits):
                 prev_y_pos = new_y_pos
                 prev_y_height = ascent
 
-        self._line_xpos = x_pos[::-1]
-        self._line_ypos = y_pos[::-1]
+        self._x = x_pos[::-1]
+        self._y = y_pos[::-1]
         border_width = self.border_width if self.border_visible else 0
         self._size[0] = max_width + 2*margin + 2*border_width
         self._size[1] = prev_y_pos + prev_y_height + margin \
