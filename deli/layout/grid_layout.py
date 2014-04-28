@@ -4,8 +4,8 @@ tick-related values (i.e., bounds and intervals).
 """
 import numpy as np
 
-from traits.api import (Array, cached_property, HasStrictTraits, Instance,
-                        Property)
+from traits.api import (Array, HasStrictTraits, Instance, Property,
+                        cached_property)
 
 from .bounding_box import BoundingBox
 
@@ -22,7 +22,7 @@ class BaseGridLayout(HasStrictTraits):
     axial_offsets = Property(Array, depends_on='data_limits')
 
     #: The grid positions, normalized to (0, 1).
-    norm_axial_offsets = Property(Array, depends_on='data_limits')
+    axial_offsets_norm = Property(Array, depends_on='data_limits')
 
     @cached_property
     def _get_axial_offsets(self):
@@ -30,7 +30,7 @@ class BaseGridLayout(HasStrictTraits):
         return np.array(auto_ticks(a_min, a_max), np.float64)
 
     @cached_property
-    def _get_norm_axial_offsets(self):
+    def _get_axial_offsets_norm(self):
         a_min, a_max = self.axial_limits
         return (self.axial_offsets - a_min) / (a_max - a_min)
 
@@ -52,29 +52,29 @@ class YGridLayout(BaseGridLayout):
 def auto_ticks(x_min, x_max):
     """ Finds locations for axis tick marks.
 
-        Calculates the locations for tick marks on an axis. The *x_min*,
-        *x_max*, and *tick_interval* parameters specify how the axis end
-        points and tick interval are calculated.
+    Calculates the locations for tick marks on an axis. The *x_min*,
+    *x_max*, and *tick_interval* parameters specify how the axis end
+    points and tick interval are calculated.
 
-        Parameters
-        ----------
-        x_min, x_max : 'auto', 'fit', or a number.
-            The lower and upper bounds of the axis. If the value is a number,
-            that value is used for the corresponding end point. If the value is
-            'auto', then the end point is calculated automatically. If the
-            value is 'fit', then the axis bound is set to the corresponding
-            *data_low* or *data_high* value.
-        tick_interval : can be 'auto' or a number
-            If the value is a positive number, it specifies the length
-            of the tick interval; a negative integer specifies the
-            number of tick intervals; 'auto' specifies that the number and
-            length of the tick intervals are automatically calculated, based
-            on the range of the axis.
+    Parameters
+    ----------
+    x_min, x_max : 'auto', 'fit', or a number.
+        The lower and upper bounds of the axis. If the value is a number,
+        that value is used for the corresponding end point. If the value is
+        'auto', then the end point is calculated automatically. If the
+        value is 'fit', then the axis bound is set to the corresponding
+        *data_low* or *data_high* value.
+    tick_interval : can be 'auto' or a number
+        If the value is a positive number, it specifies the length
+        of the tick interval; a negative integer specifies the
+        number of tick intervals; 'auto' specifies that the number and
+        length of the tick intervals are automatically calculated, based
+        on the range of the axis.
 
-        Returns
-        -------
-        An array of tick mark locations. The first and last tick entries are the
-        axis end points.
+    Returns
+    -------
+    An array of tick mark locations. The first and last tick entries are the
+    axis end points.
     """
     lower = float(x_min)
     upper = float(x_max)
@@ -95,18 +95,18 @@ def auto_ticks(x_min, x_max):
 def auto_interval(data_low, data_high):
     """ Calculates the tick interval for a range.
 
-        The boundaries for the data to be plotted on the axis are::
+    The boundaries for the data to be plotted on the axis are::
 
-            data_bounds = (data_low,data_high)
+        data_bounds = (data_low,data_high)
 
-        The function chooses the number of tick marks, which can be between
-        3 and 9 marks (including end points), and chooses tick intervals at
-        1, 2, 2.5, 5, 10, 20, ...
+    The function chooses the number of tick marks, which can be between
+    3 and 9 marks (including end points), and chooses tick intervals at
+    1, 2, 2.5, 5, 10, 20, ...
 
-        Returns
-        -------
-        interval : float
-            tick mark interval for axis
+    Returns
+    -------
+    interval : float
+        tick mark interval for axis
     """
     x_range = float(data_high ) - float(data_low)
 

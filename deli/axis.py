@@ -12,6 +12,9 @@ from .artist.line_artist import LineArtist
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
 
 
+DEFAULT_COLOR = 'dimgray'
+
+
 def DEFAULT_TICK_FORMATTER(val):
     return ("%f"%val).rstrip("0").rstrip(".")
 
@@ -22,7 +25,7 @@ class BaseAxis(AbstractOverlay):
     tick_label_font = KivaFont('modern 10')
 
     # The color of the tick labels.
-    tick_label_color = ColorTrait("black")
+    tick_label_color = ColorTrait(DEFAULT_COLOR)
 
     # The margin around the tick labels.
     tick_label_margin = Int(2)
@@ -53,20 +56,16 @@ class BaseAxis(AbstractOverlay):
     # Appearance traits
     #------------------------------------------------------------------------
 
-    tick_artist = Instance(LineArtist, ())
+    tick_artist = Instance(LineArtist, (), {'color': DEFAULT_COLOR})
 
-    line_artist = Instance(LineArtist, ())
+    line_artist = Instance(LineArtist, (), {'color': DEFAULT_COLOR})
 
     #------------------------------------------------------------------------
     # Private Traits
     #------------------------------------------------------------------------
 
     # Cached position calculations
-
     _xy_tick = Array
-    _xy_origin = Array
-    _axis_vector = Array
-    _end_axis_point = Array
 
     #------------------------------------------------------------------------
     # Public interface
@@ -96,31 +95,29 @@ class BaseAxis(AbstractOverlay):
         This method is preserved for backwards compatibility. Overrides
         PlotComponent.
         """
-        self._calculate_geometry_overlay(component)
-        self._compute_tick_positions()
+        xy_axis_limits = self._compute_xy_end_points(component)
+        tick_starts, tick_ends = self._compute_tick_positions(*xy_axis_limits)
 
         with gc:
             gc.set_antialias(False)
             gc.set_font(self.tick_label_font)
 
-            self._draw_axis_line(gc)
-            self._draw_ticks(gc)
+            self._draw_axis_line(gc, *xy_axis_limits)
+            self._draw_ticks(gc, tick_starts, tick_ends)
             self._draw_labels(gc)
 
     #------------------------------------------------------------------------
     # Private draw routines
     #------------------------------------------------------------------------
 
-    def _draw_axis_line(self, gc):
+    def _draw_axis_line(self, gc, xy_axis_min, xy_axis_max):
         """ Draws the line for the axis. """
         self.line_artist.update_context(gc)
-        self.line_artist.draw_segments(gc, self._xy_origin,
-                                           self._end_axis_point)
+        self.line_artist.draw_segments(gc, xy_axis_min, xy_axis_max)
 
-    def _draw_ticks(self, gc):
+    def _draw_ticks(self, gc, tick_starts, tick_ends):
         """ Draws the tick marks for the axis.
         """
-        tick_starts, tick_ends = self._compute_tick_positions()
         self.tick_artist.update_context(gc)
         self.tick_artist.draw_segments(gc, tick_starts, tick_ends)
 
@@ -138,22 +135,20 @@ class BaseAxis(AbstractOverlay):
     # Private methods for computing positions and layout
     #------------------------------------------------------------------------
 
-    def _compute_tick_positions(self):
+    def _compute_tick_positions(self, xy_axis_min, xy_axis_max):
         """ Calculates the positions for the tick marks.
         """
-        x_norm = self.tick_grid.norm_axial_offsets[:, None]
-        self._xy_tick = self._axis_vector * x_norm + self._xy_origin
+        x_norm = self.tick_grid.axial_offsets_norm[:, None]
+        axis_vector = xy_axis_max - xy_axis_min
+        self._xy_tick = axis_vector * x_norm + xy_axis_min
         return self._get_tick_segments()
 
-    def _calculate_geometry_overlay(self, component=None):
+    def _compute_xy_end_points(self, component=None):
         end_xy_offset = self._get_end_xy_offset(component)
 
-        self._set_geometry_traits(component)
-        self._end_axis_point = end_xy_offset + self._xy_origin
-        self._axis_vector = self._end_axis_point - self._xy_origin
-
-    def _set_geometry_traits(self, component):
-        self._xy_origin = array([self.component.x, self.component.y])
+        xy_axis_min = array([self.component.x, self.component.y])
+        xy_axis_max = end_xy_offset + xy_axis_min
+        return xy_axis_min, xy_axis_max
 
     #------------------------------------------------------------------------
     # Event handlers
