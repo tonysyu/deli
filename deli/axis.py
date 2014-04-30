@@ -2,21 +2,20 @@
 """
 from numpy import array
 
-from traits.api import Array, Float, Instance, Int
+from traits.api import Array, Instance, Int
 
 from .abstract_overlay import AbstractOverlay
 from .artist.label_artist import LabelArtist
+from .artist.tick_label_artist import XTickLabelArtist, YTickLabelArtist
 from .artist.line_artist import LineArtist
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
 
 
 DEFAULT_COLOR = 'dimgray'
+DEFAULT_OFFSET = 8.0
 
 
 class BaseAxis(AbstractOverlay):
-
-    # The distance of the tick label from the axis.
-    tick_label_offset = Float(8.)
 
     # The number of pixels by which the ticks extend into the plot area.
     tick_in = Int(5)
@@ -131,7 +130,7 @@ class BaseAxis(AbstractOverlay):
 class XAxis(BaseAxis):
 
     def _tick_label_artist_default(self):
-        return LabelArtist(y_origin='top', y_offset=-self.tick_label_offset)
+        return XTickLabelArtist(offset=-DEFAULT_OFFSET)
 
     def _tick_grid_default(self):
         return XGridLayout(data_bbox=self.component.data_bbox)
@@ -148,7 +147,7 @@ class XAxis(BaseAxis):
 class YAxis(BaseAxis):
 
     def _tick_label_artist_default(self):
-        return LabelArtist(x_origin='right', x_offset=-self.tick_label_offset)
+        return YTickLabelArtist(offset=-DEFAULT_OFFSET)
 
     def _tick_grid_default(self):
         return YGridLayout(data_bbox=self.component.data_bbox)

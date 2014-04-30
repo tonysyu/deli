@@ -1,3 +1,11 @@
+from __future__ import absolute_import
+
+from traits.api import Property
+
+
+def Alias(name):
+    return Property(lambda obj: getattr(obj, name),
+                    lambda obj, val: setattr(obj, name, val))
 
 
 def switch_trait_handler(old, new, observed_trait_name, handler):
