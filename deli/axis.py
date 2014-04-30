@@ -2,9 +2,7 @@
 """
 from numpy import array
 
-from enable.api import ColorTrait
-from kiva.trait_defs.kiva_font_trait import KivaFont
-from traits.api import Array, Callable, Event, Float, Instance, Int
+from traits.api import Array, Float, Instance, Int
 
 from .abstract_overlay import AbstractOverlay
 from .artist.label_artist import LabelArtist
@@ -15,30 +13,10 @@ from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
 DEFAULT_COLOR = 'dimgray'
 
 
-def DEFAULT_TICK_FORMATTER(val):
-    return ("%f"%val).rstrip("0").rstrip(".")
-
-
 class BaseAxis(AbstractOverlay):
-
-    # The font of the tick labels.
-    tick_label_font = KivaFont('modern 10')
-
-    # The color of the tick labels.
-    tick_label_color = ColorTrait(DEFAULT_COLOR)
-
-    # The margin around the tick labels.
-    tick_label_margin = Int(2)
 
     # The distance of the tick label from the axis.
     tick_label_offset = Float(8.)
-
-    # A callable that is passed the numerical value of each tick label and
-    # that returns a string.
-    tick_label_formatter = Callable(DEFAULT_TICK_FORMATTER)
-
-    #: Artist responsible for drawing tick labels.
-    label_artist = Instance(LabelArtist)
 
     # The number of pixels by which the ticks extend into the plot area.
     tick_in = Int(5)
@@ -49,16 +27,18 @@ class BaseAxis(AbstractOverlay):
     # A tick grid that controls tick positioning
     tick_grid = Instance(BaseGridLayout)
 
-    # Fired when the axis's range bounds change.
-    updated = Event
-
     #------------------------------------------------------------------------
     # Appearance traits
     #------------------------------------------------------------------------
 
-    tick_artist = Instance(LineArtist, (), {'color': DEFAULT_COLOR})
+    #: Artist responsible for drawing tick labels.
+    tick_label_artist = Instance(LabelArtist)
 
-    line_artist = Instance(LineArtist, (), {'color': DEFAULT_COLOR})
+    #: Artist responsible for drawing ticks.
+    tick_artist = Instance(LineArtist, {'color': DEFAULT_COLOR})
+
+    #: Artist responsible for drawing the axis line.
+    line_artist = Instance(LineArtist, {'color': DEFAULT_COLOR})
 
     #------------------------------------------------------------------------
     # Private Traits
@@ -99,9 +79,6 @@ class BaseAxis(AbstractOverlay):
         tick_starts, tick_ends = self._compute_tick_positions(*xy_axis_limits)
 
         with gc:
-            gc.set_antialias(False)
-            gc.set_font(self.tick_label_font)
-
             self._draw_axis_line(gc, *xy_axis_limits)
             self._draw_ticks(gc, tick_starts, tick_ends)
             self._draw_labels(gc)
@@ -128,7 +105,7 @@ class BaseAxis(AbstractOverlay):
         for xy_screen, data_offset in zip(self._xy_tick, axial_offsets):
             tick_label = str(data_offset)
             gc.translate_ctm(*xy_screen)
-            self.label_artist.draw(gc, tick_label)
+            self.tick_label_artist.draw(gc, tick_label)
             gc.translate_ctm(*(-xy_screen))
 
     #------------------------------------------------------------------------
@@ -150,27 +127,11 @@ class BaseAxis(AbstractOverlay):
         xy_axis_max = end_xy_offset + xy_axis_min
         return xy_axis_min, xy_axis_max
 
-    #------------------------------------------------------------------------
-    # Event handlers
-    #------------------------------------------------------------------------
-
-    def _bounds_changed_for_component(self):
-        self._layout_needed = True
-
-    def _invalidate(self):
-        self.invalidate_draw()
-        if self.component:
-            self.component.invalidate_draw()
-
 
 class XAxis(BaseAxis):
 
-    def _label_artist_default(self):
-        return LabelArtist(font=self.tick_label_font,
-                           y_origin='top',
-                           y_offset=-self.tick_label_offset,
-                           color=self.tick_label_color,
-                           margin=self.tick_label_margin)
+    def _tick_label_artist_default(self):
+        return LabelArtist(y_origin='top', y_offset=-self.tick_label_offset)
 
     def _tick_grid_default(self):
         return XGridLayout(data_bbox=self.component.data_bbox)
@@ -186,12 +147,8 @@ class XAxis(BaseAxis):
 
 class YAxis(BaseAxis):
 
-    def _label_artist_default(self):
-        return LabelArtist(font=self.tick_label_font,
-                           x_origin='right',
-                           x_offset=-self.tick_label_offset,
-                           color=self.tick_label_color,
-                           margin=self.tick_label_margin)
+    def _tick_label_artist_default(self):
+        return LabelArtist(x_origin='right', x_offset=-self.tick_label_offset)
 
     def _tick_grid_default(self):
         return YGridLayout(data_bbox=self.component.data_bbox)
