@@ -2,7 +2,7 @@
 """
 import numpy as np
 
-from traits.api import Array, Instance
+from traits.api import Array, DelegatesTo, Instance
 
 from .abstract_overlay import AbstractOverlay
 from .artist.label_artist import LabelArtist
@@ -131,10 +131,12 @@ class BaseAxis(AbstractOverlay):
 
 class XAxis(BaseAxis):
 
+    locus = DelegatesTo('component', 'y')
+
     def _tick_artist_default(self):
         return XTickArtist(color=DEFAULT_COLOR,
-                           position=self.component.y,
-                           offset_transform=self.data_to_screen)
+                           locus=self.locus,
+                           axial_transform=self.data_to_screen)
 
     def _tick_label_artist_default(self):
         return XTickLabelArtist(offset=-DEFAULT_OFFSET, color=DEFAULT_COLOR)
@@ -148,10 +150,12 @@ class XAxis(BaseAxis):
 
 class YAxis(BaseAxis):
 
+    locus = DelegatesTo('component', 'x')
+
     def _tick_artist_default(self):
         return YTickArtist(color=DEFAULT_COLOR,
-                           position=self.component.x,
-                           offset_transform=self.data_to_screen)
+                           locus=self.locus,
+                           axial_transform=self.data_to_screen)
 
     def _tick_label_artist_default(self):
         return YTickLabelArtist(offset=-DEFAULT_OFFSET, color=DEFAULT_COLOR)

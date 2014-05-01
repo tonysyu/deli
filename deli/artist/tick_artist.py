@@ -8,17 +8,19 @@ from ..layout.bbox_transform import BaseTransform
 from .line_artist import LineArtist
 
 
-def offsets_to_points(axial_offsets, axial_coordinate, ortho_position=0):
+def offsets_to_points(axial_offsets, axial_coordinate, locus=0):
     if axial_coordinate == 'x':
-        points = [axial_offsets, ortho_position]
+        points = [axial_offsets, locus]
     else:
-        points = [ortho_position, axial_offsets]
+        points = [locus, axial_offsets]
     return np.transpose(np.broadcast_arrays(*points))
 
 
 class BaseTickArtist(LineArtist):
 
-    position = Float(0)
+    #: The position of the axis in the dimension that's fixed;
+    #: i.e. x-position for a y-axis and y-position for an x-axis.
+    locus = Float(0)
 
     in_size = Float(5.0)
 
@@ -26,13 +28,13 @@ class BaseTickArtist(LineArtist):
 
     size = Property
 
-    #: Transform from offset values to screen-space.
-    offset_transform = Instance(BaseTransform)
+    #: Transform from axial values to screen-space.
+    axial_transform = Instance(BaseTransform)
 
-    #: Transform from position value to screen-space.
-    position_transform = Instance(BaseTransform, IdentityTransform())
+    #: Transform from values orthogonal to the axis to screen-space.
+    ortho_transform = Instance(BaseTransform, IdentityTransform())
 
-    #: Blended transform combining position and offset transforms.
+    #: Blended transform combining axial and orthogonal transforms.
     _transform = Property(Instance(BaseTransform))
 
     def _set_size(self, value):
@@ -54,11 +56,11 @@ class XTickArtist(BaseTickArtist):
 
     @cached_property
     def _get__transform(self):
-        return blended_transform_factory(self.offset_transform,
-                                         self.position_transform)
+        return blended_transform_factory(self.axial_transform,
+                                         self.ortho_transform)
 
     def _offsets_to_segments(self, offsets):
-        points = offsets_to_points(offsets, 'x', ortho_position=self.position)
+        points = offsets_to_points(offsets, 'x', locus=self.locus)
         centers = self._transform.transform(points)
         starts = centers + [0, self.in_size]
         ends = centers - [0, self.out_size]
@@ -71,11 +73,11 @@ class YTickArtist(BaseTickArtist):
 
     @cached_property
     def _get__transform(self):
-        return blended_transform_factory(self.position_transform,
-                                         self.offset_transform)
+        return blended_transform_factory(self.ortho_transform,
+                                         self.axial_transform)
 
     def _offsets_to_segments(self, offsets):
-        points = offsets_to_points(offsets, 'y', ortho_position=self.position)
+        points = offsets_to_points(offsets, 'y', locus=self.locus)
         centers = self._transform.transform(points)
         starts = centers + [self.in_size, 0]
         ends = centers - [self.out_size, 0]
