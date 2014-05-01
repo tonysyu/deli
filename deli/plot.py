@@ -66,8 +66,7 @@ class Plot(DataView):
             self.data = data
 
         # This doesn't work when moved to a trait-default definition (Why?)
-        self._title= PlotLabel(font="swiss 16", visible=False,
-                               overlay_position="top", component=self)
+        self._title= PlotLabel(font="swiss 16", visible=False, component=self)
         if title is not None:
             self.title = title
 
