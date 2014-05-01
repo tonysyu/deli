@@ -1,7 +1,7 @@
-from matplotlib.transforms import BboxTransform as MPLBboxTransform
+from matplotlib.transforms import BboxTransform as BaseTransform
 
 
-class BboxTransform(MPLBboxTransform):
+class BboxTransform(BaseTransform):
     """ Transform from one bounding box to another.
 
     This is a very thin wrapper around Matplotlib's `BboxTransform` to work
