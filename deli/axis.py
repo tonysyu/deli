@@ -1,16 +1,18 @@
 """ Defines the XAxis and YAxis classes.
 """
 import numpy as np
+from matplotlib.transforms import blended_transform_factory, IdentityTransform
 
-from traits.api import Array, DelegatesTo, Instance
+from traits.api import DelegatesTo, Instance, Property, cached_property
 
 from .abstract_overlay import AbstractOverlay
 from .artist.label_artist import LabelArtist
 from .artist.tick_artist import XTickArtist, YTickArtist
 from .artist.tick_label_artist import XTickLabelArtist, YTickLabelArtist
 from .artist.line_artist import LineArtist
-from .layout.bbox_transform import BboxTransform
+from .layout.bbox_transform import BaseTransform, BboxTransform
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
+from .utils.drawing import broadcast_points
 
 
 DEFAULT_COLOR = 'dimgray'
@@ -23,7 +25,7 @@ class BaseAxis(AbstractOverlay):
     tick_grid = Instance(BaseGridLayout)
 
     #: Transform from data-space to screen-space.
-    data_to_screen = Instance(BboxTransform)
+    data_to_screen = Instance(BaseTransform)
 
     #------------------------------------------------------------------------
     # Appearance traits
@@ -42,8 +44,15 @@ class BaseAxis(AbstractOverlay):
     # Private Traits
     #------------------------------------------------------------------------
 
-    # Cached position calculations
-    _xy_tick = Array
+    #: XXX Maybe rename data-to-screen to axial transform?
+    #: Transform from axial values to screen-space.
+    # axial_transform = Instance(BaseTransform)
+
+    #: Transform from values orthogonal to the axis to screen-space.
+    ortho_transform = Instance(BaseTransform, IdentityTransform())
+
+    #: Blended transform combining axial and orthogonal transforms.
+    transform = Property(Instance(BaseTransform))
 
     #------------------------------------------------------------------------
     # Public interface
@@ -73,11 +82,8 @@ class BaseAxis(AbstractOverlay):
         This method is preserved for backwards compatibility. Overrides
         PlotComponent.
         """
-        xy_axis_limits = self._compute_xy_end_points(component)
-        self._update_tick_positions(*xy_axis_limits)
-
         with gc:
-            self._draw_axis_line(gc, *xy_axis_limits)
+            self._draw_axis_line(gc)
             self._draw_ticks(gc)
             self._draw_labels(gc)
 
@@ -85,8 +91,9 @@ class BaseAxis(AbstractOverlay):
     # Private draw routines
     #------------------------------------------------------------------------
 
-    def _draw_axis_line(self, gc, xy_axis_min, xy_axis_max):
+    def _draw_axis_line(self, gc):
         """ Draws the line for the axis. """
+        xy_axis_min, xy_axis_max = self._compute_xy_end_points()
         self.line_artist.update_context(gc)
         self.line_artist.draw_segments(gc, xy_axis_min, xy_axis_max)
 
@@ -100,26 +107,18 @@ class BaseAxis(AbstractOverlay):
         """ Draws the tick labels for the axis.
         """
         axial_offsets = self.tick_grid.axial_offsets
-        for xy_screen, data_offset in zip(self._xy_tick, axial_offsets):
-            tick_label = str(data_offset)
+        xy_tick = self._get_tick_positions()
+        for xy_screen, data_offset in zip(xy_tick, axial_offsets):
             gc.translate_ctm(*xy_screen)
-            self.tick_label_artist.draw(gc, tick_label)
+            self.tick_label_artist.draw(gc, str(data_offset))
             gc.translate_ctm(*(-xy_screen))
 
     #------------------------------------------------------------------------
     # Private methods for computing positions and layout
     #------------------------------------------------------------------------
 
-    def _update_tick_positions(self, xy_axis_min, xy_axis_max):
-        """ Calculates the positions for the tick marks.
-        """
-        x_norm = self.tick_grid.axial_offsets_norm[:, None]
-        axis_vector = xy_axis_max - xy_axis_min
-        self._xy_tick = axis_vector * x_norm + xy_axis_min
-
-    def _compute_xy_end_points(self, component=None):
-        end_xy_offset = self._get_end_xy_offset(component)
-
+    def _compute_xy_end_points(self):
+        end_xy_offset = self._get_end_xy_offset(self.component)
         xy_axis_min = np.array([self.component.x, self.component.y])
         xy_axis_max = end_xy_offset + xy_axis_min
         return xy_axis_min, xy_axis_max
@@ -136,7 +135,7 @@ class XAxis(BaseAxis):
     def _tick_artist_default(self):
         return XTickArtist(color=DEFAULT_COLOR,
                            locus=self.locus,
-                           axial_transform=self.data_to_screen)
+                           transform=self.transform)
 
     def _tick_label_artist_default(self):
         return XTickLabelArtist(offset=-DEFAULT_OFFSET, color=DEFAULT_COLOR)
@@ -144,8 +143,17 @@ class XAxis(BaseAxis):
     def _tick_grid_default(self):
         return XGridLayout(data_bbox=self.component.data_bbox)
 
+    @cached_property
+    def _get_transform(self):
+        return blended_transform_factory(self.data_to_screen,
+                                         self.ortho_transform)
+
     def _get_end_xy_offset(self, component):
         return np.array([component.screen_bbox.width, 0])
+
+    def _get_tick_positions(self):
+        points = broadcast_points(self.tick_grid.axial_offsets, self.locus)
+        return self.transform.transform(points)
 
 
 class YAxis(BaseAxis):
@@ -155,7 +163,7 @@ class YAxis(BaseAxis):
     def _tick_artist_default(self):
         return YTickArtist(color=DEFAULT_COLOR,
                            locus=self.locus,
-                           axial_transform=self.data_to_screen)
+                           transform=self.transform)
 
     def _tick_label_artist_default(self):
         return YTickLabelArtist(offset=-DEFAULT_OFFSET, color=DEFAULT_COLOR)
@@ -163,5 +171,14 @@ class YAxis(BaseAxis):
     def _tick_grid_default(self):
         return YGridLayout(data_bbox=self.component.data_bbox)
 
+    @cached_property
+    def _get_transform(self):
+        return blended_transform_factory(self.ortho_transform,
+                                         self.data_to_screen)
+
     def _get_end_xy_offset(self, component):
         return np.array([0, component.screen_bbox.height])
+
+    def _get_tick_positions(self):
+        points = broadcast_points(self.locus, self.tick_grid.axial_offsets)
+        return self.transform.transform(points)

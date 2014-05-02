@@ -1,6 +1,21 @@
 import numpy as np
 
 
+def broadcast_points(x, y):
+    """ Return array of x- and y-points from x and y arrays or scalars.
+
+    Parameters
+    ----------
+    x, y : (N,) array or scalar
+        Scalar values will be
+
+    Returns
+    -------
+    points : (N, 2) array
+        x/y points with (x, y) values on each row.
+    """
+    return np.transpose(np.broadcast_arrays(x, y))
+
 def hline_segments(y, x_lo, x_hi):
     """ Return start and end points for horizontal line segments.
 
