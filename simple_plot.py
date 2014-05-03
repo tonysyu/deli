@@ -5,8 +5,10 @@ from enable.api import Component, ComponentEditor
 from traits.api import HasStrictTraits, Instance
 from traitsui.api import Item, Group, View
 
-from deli.utils.data_structures import NoisyDict
 from deli.plot import Plot
+from deli.tools.pan_tool import PanTool
+from deli.tools.zoom_tool import ZoomTool
+from deli.utils.data_structures import NoisyDict
 
 
 class Demo(HasStrictTraits):
@@ -34,6 +36,8 @@ class Demo(HasStrictTraits):
         plot = Plot(pd, title="Line Plot")
         plot.plot(('x', 'y0', 'y1', 'y2'), color='red')
         plot.plot(('x', 'y3'), color='blue')
+        plot.tools.append(ZoomTool(component=plot))
+        plot.tools.append(PanTool(component=plot))
 
         return plot
 

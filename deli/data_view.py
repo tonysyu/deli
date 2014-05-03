@@ -3,7 +3,7 @@ functions.
 """
 import numpy as np
 
-from traits.api import Bool, Instance
+from traits.api import Bool, Instance, Property
 
 from .axis import BaseAxis, XAxis, YAxis
 from .grid import BaseGrid, XGrid, YGrid
@@ -30,6 +30,14 @@ class DataView(OverlayPlotContainer):
 
     def _data_to_screen_default(self):
         return BboxTransform(self.data_bbox, self.screen_bbox)
+
+    #: Transform from data space to screen space.
+    screen_to_data = Property(Instance(BboxTransform),
+            depends_on='data_to_screen')
+
+    def _get_screen_to_data(self):
+        return self.data_to_screen.inverted()
+
 
     #------------------------------------------------------------------------
     # Axis and Grids
