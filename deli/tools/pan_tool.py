@@ -1,10 +1,10 @@
 import numpy as np
 from traits.api import CArray, Either, Enum
 
-from .base_tool import BaseTool
+from .base_tool import BaseHandlerMethodTool
 
 
-class PanTool(BaseTool):
+class PanTool(BaseHandlerMethodTool):
 
     _last_position = Either(None, CArray)
 
