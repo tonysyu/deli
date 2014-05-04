@@ -1,20 +1,26 @@
 import numpy as np
-from traits.api import CArray, Either, Enum
+from traits.api import CArray, Either
 
-from .base_tool import BaseHandlerMethodTool
+from .base_tool import BaseTool, BaseToolState
 
 
-class PanTool(BaseHandlerMethodTool):
+class PanTool(BaseTool):
+
+    def _state_handlers_default(self):
+        return {'dragging': DraggingState(self)}
+
+    def on_left_down(self, event):
+        self.state_change(event, new_state='dragging')
+
+
+class DraggingState(BaseToolState):
 
     _last_position = Either(None, CArray)
 
-    event_state = Enum('normal', 'dragging')
-
-    def normal_left_down(self, event):
-        self.event_state = 'dragging'
+    def on_enter(self, event):
         self._last_position = np.array((event.x, event.y))
 
-    def dragging_mouse_move(self, event):
+    def on_mouse_move(self, event):
         x0, y0, width, height = self.component.data_bbox.bounds
 
         position = np.array((event.x, event.y))
@@ -28,6 +34,6 @@ class PanTool(BaseHandlerMethodTool):
         self.component.data_bbox.bounds = x0 - dx, y0 - dy, width, height
         self.component.request_redraw()
 
-    def dragging_left_up(self, event):
-        self.event_state = 'normal'
+    def on_left_up(self, event):
         self._last_position = None
+        self.exit_state(event)

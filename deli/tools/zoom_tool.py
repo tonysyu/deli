@@ -1,6 +1,6 @@
 from traits.api import Float
 
-from .base_tool import BaseHandlerMethodTool
+from .base_tool import BaseTool
 from .key_spec import KeySpec
 
 
@@ -18,14 +18,14 @@ def zoom_in_centered_bounds(bounds, size_scale):
     return zoom_out_centered_bounds(bounds, size_scale, offset_scale)
 
 
-class ZoomTool(BaseHandlerMethodTool):
+class ZoomTool(BaseTool):
 
     key_zoom_in = KeySpec(['+', '='], ignore='shift')
     key_zoom_out = KeySpec('-')
 
     zoom_factor = Float(2)
 
-    def normal_key_pressed(self, event):
+    def on_key_pressed(self, event):
         bounds = self.component.data_bbox.bounds
         if self.key_zoom_in.match(event):
             new_bounds = zoom_in_centered_bounds(bounds, self.zoom_factor)

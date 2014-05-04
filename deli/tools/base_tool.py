@@ -1,29 +1,115 @@
 """
-Defines the base class for all Chaco tools.  See docs/event_handling.txt for an
-overview of how event handling works in Chaco.
+Base classes for tools and tool-states.
+
+Tools and tool-states can define any of the following methods to handle events
+of interest:
+
+- on_left_down
+- on_left_up
+- on_left_dclick
+- on_right_down
+- on_right_up
+- on_right_dclick
+- on_middle_down
+- on_middle_up
+- on_middle_dclick
+- on_mouse_move
+- on_mouse_wheel
+- on_mouse_enter
+- on_mouse_leave
+- on_key_pressed
+- on_key_released
+- on_character
+- on_dropped_on
+- on_drag_over
+- on_drag_enter
+- on_drag_leave
+
 """
 from enable.component import Component
-from traits.api import HasStrictTraits, Instance, Str
+from traits.api import Dict, HasStrictTraits, Instance, Str, WeakRef
 
 
-class BaseTool(HasStrictTraits):
+NULL_HANDLER = lambda x: None
+
+
+class AbstractTool(HasStrictTraits):
     """ The base class for Deli tools. """
 
     # The component that this tool is attached to.
     component = Instance(Component)
 
 
-class BaseHandlerMethodTool(BaseTool):
-    """ The base class for Deli tools. """
+class BaseToolState(AbstractTool):
+    """ Base class for State objects that handle events while a tool is in
+    a given state.
 
-    # Name of the object's event state.  Used as a prefix when looking up
-    # which set of event handlers should be used for MouseEvents and KeyEvents.
-    # Subclasses should override this with an enumeration of their possible
-    # states.
-    event_state = Str("normal")
+    This tool-state can define any methods to handle any event of interest.
+    See module docstring for details.
+
+    If an event triggers the state to exit, this object should call its
+    `exit_state` method and, optionally, set the new state of the parent tool.
+    """
+
+    # The parent tool for this tool-state object.
+    parent = WeakRef(AbstractTool)
+
+    def __init__(self, parent, **kwtraits):
+        super(BaseToolState, self).__init__(**kwtraits)
+        self.parent = parent
+        self.component = parent.component
+
+    def on_enter(self, event):
+        pass
+
+    def exit_state(self, event, new_state=None):
+        self.parent.state_change(event, new_state=new_state)
+        self.on_exit(event, new_state=new_state)
+
+    def on_exit(self, event, new_state=None):
+        pass
+
+
+class BaseTool(AbstractTool):
+    """ Base class for tools
+
+    Different event states are delegated to state-objects which handle events.
+
+    Subclasses should define a dictionary of `state_handlers`, which maps
+    state-names to `BaseToolState` objects that handle events. If the
+    `active_handler` is set to `None`, then this tool will handle events
+    directly.
+    """
+
+    state_handlers = Dict(Str, BaseToolState)
+
+    active_handler = Instance(AbstractTool)
+
+    @classmethod
+    def attach_to(cls, component):
+        instance = cls(component=component)
+        component.tools.append(instance)
+        return instance
 
     def dispatch(self, event, suffix):
         """ Dispatch interactive event to the appropriate handler method. """
-        handler = getattr(self, self.event_state + "_" + suffix, None)
-        if handler is not None:
-            handler(event)
+        if self.active_handler is None:
+            self.active_handler = self
+            self.active_handler.on_enter(event)
+
+        handler = getattr(self.active_handler, 'on_' + suffix, NULL_HANDLER)
+        handler(event)
+
+    def state_change(self, event, new_state=None):
+        """ React to an event that changes the tool's state.
+
+        The active handler will be updated in response to the state change.
+        """
+        if new_state is None:
+            self.active_handler = self
+        else:
+            self.active_handler = self.state_handlers[new_state]
+        self.active_handler.on_enter(event)
+
+    def on_enter(self, event):
+        pass

@@ -36,8 +36,9 @@ class Demo(HasStrictTraits):
         plot = Plot(pd, title="Line Plot")
         plot.plot(('x', 'y0', 'y1', 'y2'), color='red')
         plot.plot(('x', 'y3'), color='blue')
-        plot.tools.append(ZoomTool(component=plot))
-        plot.tools.append(PanTool(component=plot))
+
+        ZoomTool.attach_to(plot)
+        PanTool.attach_to(plot)
 
         return plot
 
