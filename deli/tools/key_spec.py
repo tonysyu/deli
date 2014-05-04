@@ -1,45 +1,59 @@
+
+def wrap_string_in_list(value):
+    if value is None or isinstance(value, basestring):
+        value = [value]
+    return value
+
+
 class KeySpec(object):
+    """ A key specification to facilitate tools interacting with the keyboard.
+
+    A key-spec should be added to a class as follows:
+
+    >>> magic_key = KeySpec('Right', modifier='control', ignore='shift')
+
+    and then it is used check to see if the key was pressed by calling::
+
+    >>> if self.magic_key.match(event):
+    ...     print 'do stuff...'
+
+    Note that all fields---`key`, `modifier` and `ignore`---can be either
+    strings or lists of strings.
+
+    If you want to use modifier keys by themselves,as action keys, there are
+    convenient instances of KeySpec (`shift_key`, `control_key`, and `alt_key`)
+    to facilitate that usage.
     """
-    Creates a key specification to facilitate tools interacting with the
-    keyboard. A tool can declare either a class attribute::
+    def __init__(self, key, modifier=None, ignore=None):
+        self.modifier_names = ('alt', 'shift', 'control')
 
-        magic_key = KeySpec("Right", "control", ignore=['shift'])
+        ignore = ignore or []
+        modifier = modifier or []
 
-    or a trait::
-
-        magic_key = Instance(KeySpec, args=("Right", "control"), kw={'ignore': ['shift']})
-
-    and then check to see if the key was pressed by calling::
-
-        if self.magic_key.match(event):
-            # do stuff...
-
-    The names of the keys come from Enable, so both examples above
-    are specifying the user pressing Ctrl + Right_arrow with Alt not pressed
-    and Shift either pressed or not.
-    """
-    def __init__(self, key, *modifiers, **kwmods):
-        """ Creates this key spec with the given modifiers. """
-        if isinstance(key, basestring):
-            key = [key]
-        ignore = kwmods.get('ignore', [])
-        if isinstance(ignore, basestring):
-            ignore = [ignore]
+        key = wrap_string_in_list(key)
+        ignore = wrap_string_in_list(ignore)
+        modifier = wrap_string_in_list(modifier)
+        modifier = set(m.lower() for m in modifier)
 
         self.keys = key
-        mods = set(m.lower() for m in modifiers)
-        self.alt = "alt" in mods
-        self.shift = "shift" in mods
-        self.control = "control" in mods
-        self.ignore = set(m.lower() for m in ignore)
+        self.ignore = set(key.lower() for key in ignore)
+        self.modifier = {key: key in modifier for key in self.modifier_names}
+        # XXX: Add menu-modifier (Ctrl-key = "Menu" in OSX)
 
     def match(self, event):
-        """
-        Returns True if the given Enable key_pressed event matches this key
-        specification.
-        """
+        """ Returns True if event matches this key specification. """
         pressed_key = getattr(event, 'character', None)
-        return (pressed_key in self.keys) and \
-           ('alt' in self.ignore or self.alt == event.alt_down) and \
-           ('control' in self.ignore or self.control == event.control_down) and \
-           ('shift' in self.ignore or self.shift == event.shift_down)
+        mod = (self._modifier_match(key, event) for key in self.modifier_names)
+        return (pressed_key in self.keys) and all(mod)
+
+    def _modifier_match(self, name, event):
+        modifier_spec = self.modifier[name]
+        modifier_down = getattr(event, '{}_down'.format(name))
+        return (name in self.ignore) or (modifier_down == modifier_spec)
+
+
+# Key-specs to use modifier-keys as key-matches, rather than as a modifier to
+# another key press.
+alt_key = KeySpec('Alt', ignore='alt')
+control_key = KeySpec('Control', ignore='control')
+shift_key = KeySpec('Shift', ignore='shift')
