@@ -93,8 +93,3 @@ class TestSetProperties(TestCase, UnittestTools):
         with self.assert_bbox_updated():
             self.bbox.y_limits = (20, 40)
         assert_allclose(self.bbox.y_limits, (20, 40))
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

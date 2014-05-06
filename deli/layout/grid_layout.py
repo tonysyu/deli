@@ -19,10 +19,10 @@ class BaseGridLayout(HasStrictTraits):
     axial_limits = Property(Array, depends_on='data_bbox.updated')
 
     #: The grid positions in data space.
-    axial_offsets = Property(Array, depends_on='data_limits')
+    axial_offsets = Property(Array, depends_on='axial_limits')
 
     #: The grid positions, normalized to (0, 1).
-    axial_offsets_norm = Property(Array, depends_on='data_limits')
+    axial_offsets_norm = Property(Array, depends_on='axial_limits')
 
     @cached_property
     def _get_axial_offsets(self):

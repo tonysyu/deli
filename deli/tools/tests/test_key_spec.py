@@ -78,8 +78,3 @@ def test_control_key():
 def test_shift_key():
     assert shift_key.match(MockEvent(character='Shift'))
     assert shift_key.match(MockEvent(character='Shift', shift_down=True))
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

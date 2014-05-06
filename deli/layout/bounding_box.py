@@ -120,6 +120,9 @@ class BoundingBox(HasStrictTraits):
         bbox.changed.connect(instance._bbox_updated)
         return instance
 
+    def copy(self):
+        return self.__class__.from_bounds(*self.bounds)
+
     def _bbox_updated(self):
         """Callback method for observer pattern."""
         self.updated = True

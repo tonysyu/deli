@@ -33,11 +33,10 @@ class DataView(OverlayPlotContainer):
 
     #: Transform from data space to screen space.
     screen_to_data = Property(Instance(BboxTransform),
-            depends_on='data_to_screen')
+                              depends_on='data_to_screen')
 
     def _get_screen_to_data(self):
         return self.data_to_screen.inverted()
-
 
     #------------------------------------------------------------------------
     # Axis and Grids

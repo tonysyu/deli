@@ -14,8 +14,3 @@ class TestDict(TestCase, UnittestTools):
         obj_with_dict = Foo()
         with self.assertTraitChanges(obj_with_dict, 'data', count=1):
             obj_with_dict.data['a'] = 1
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

@@ -88,8 +88,3 @@ def test_transform_array():
     expected = [(LARGE.x0, LARGE.y0),
                 (LARGE.x1, LARGE.y1)]
     assert_allclose(result, expected)
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
