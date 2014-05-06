@@ -17,8 +17,7 @@ class LineArtist(HasStrictTraits):
     # The thickness, in pixels, of the grid lines.
     width = CFloat(1)
 
-    def update_context(self, gc):
-        # XXX: Rename to update_style since "context" is overloaded.
+    def update_style(self, gc):
         gc.set_line_width(self.width)
         gc.set_line_dash(self.style_)
         gc.set_stroke_color(self.color_)

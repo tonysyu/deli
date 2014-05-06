@@ -70,7 +70,7 @@ class LabelArtist(HasStrictTraits):
         self._calc_line_positions(gc, text)
         return self._size
 
-    def update_context(self, gc):
+    def update_style(self, gc):
         gc.set_fill_color(self.color_)
         gc.set_stroke_color(self.color_)
         gc.set_font(self.font)
@@ -96,7 +96,7 @@ class LabelArtist(HasStrictTraits):
         self._calc_line_positions(gc, text)
 
         with gc:
-            self.update_context(gc)
+            self.update_style(gc)
             self.set_rotation_angle(gc, text)
 
             lines = text.split("\n")
