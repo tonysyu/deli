@@ -3,7 +3,7 @@
 import numpy as np
 
 from enable.api import black_color_trait, LineStyle
-from traits.api import Enum, Float, List, Property, Tuple, cached_property
+from traits.api import Float, Property, Tuple, cached_property
 
 from .base_xy_plot import BaseXYPlot
 
@@ -17,7 +17,7 @@ class LinePlot(BaseXYPlot):
     # The RGBA tuple for rendering lines.  It is always a tuple of length 4.
     # It has the same RGB values as color_, and its alpha value is the alpha
     # value of self.color multiplied by self.alpha.
-    effective_color = Property(Tuple, depends_on=['color', 'alpha'])
+    _effective_color = Property(Tuple, depends_on=['color', 'alpha'])
 
     # The thickness of the line.
     line_width = Float(1.0)
@@ -25,15 +25,9 @@ class LinePlot(BaseXYPlot):
     # The line dash style.
     line_style = LineStyle
 
-    render_style = Enum("connectedpoints", "hold", "connectedhold")
-
     #------------------------------------------------------------------------
     # Private traits
     #------------------------------------------------------------------------
-
-    _cached_data_pts = List
-
-    _cached_screen_pts = List
 
     def get_screen_points(self):
         x = self.x_src.get_data()
@@ -52,7 +46,7 @@ class LinePlot(BaseXYPlot):
             gc.clip_to_rect(*self.screen_bbox.bounds)
 
             # Render using the normal style
-            gc.set_stroke_color(self.effective_color)
+            gc.set_stroke_color(self._effective_color)
             gc.set_line_width(self.line_width)
             gc.set_line_dash(self.line_style_)
             self._render_normal(gc, points)
@@ -70,7 +64,7 @@ class LinePlot(BaseXYPlot):
         self.request_redraw()
 
     @cached_property
-    def _get_effective_color(self):
+    def _get__effective_color(self):
         alpha = self.color_[-1] if len(self.color_) == 4 else 1
         c = self.color_[:3] + (alpha * self.alpha,)
         return c
