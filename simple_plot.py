@@ -25,7 +25,8 @@ class Demo(HasStrictTraits):
         for i in range(5):
             pd['y' + str(i)] = jn(i, x)
 
-        plot = Plot(pd, title="Line Plot")
+        plot = Plot(data=pd)
+        plot.title.text = "Line Plot"
         plot.plot(('x', 'y0', 'y1', 'y2'), color='red')
         plot.plot(('x', 'y3'), color='blue')
 

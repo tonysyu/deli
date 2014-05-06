@@ -55,7 +55,8 @@ class Demo(HasStrictTraits):
         x = y = linspace(0, 1)
         pd = NoisyDict(x=x, y=y)
 
-        plot = Plot(pd, title="Line Plot")
+        plot = Plot(data=pd)
+        plot.title.text = "Line Plot"
         plot.plot(('x', 'y'))
 
         PrintTool.attach_to(plot)

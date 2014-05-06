@@ -12,6 +12,13 @@ from .layout.bounding_box import BoundingBox
 from .plot_containers import OverlayPlotContainer
 
 
+def replace_in_list(a_list, old, new):
+    if old in a_list:
+        a_list.remove(old)
+    if new is not None:
+        a_list.append(new)
+
+
 class DataView(OverlayPlotContainer):
     """ Represents a mapping from 2-D data space into 2-D screen space.
 
@@ -103,25 +110,19 @@ class DataView(OverlayPlotContainer):
     #-------------------------------------------------------------------------
 
     def _x_grid_changed(self, old, new):
-        self._underlay_change_helper(old, new)
+        self._replace_underlay(old, new)
 
     def _y_grid_changed(self, old, new):
-        self._underlay_change_helper(old, new)
+        self._replace_underlay(old, new)
 
     def _x_axis_changed(self, old, new):
-        self._underlay_change_helper(old, new)
+        self._replace_underlay(old, new)
 
     def _y_axis_changed(self, old, new):
-        self._underlay_change_helper(old, new)
+        self._replace_underlay(old, new)
 
-    def _underlay_change_helper(self, old, new):
-        if old in self.underlays:
-            self.underlays.remove(old)
-        if new is not None:
-            self.underlays.append(new)
+    def _replace_underlay(self, old, new):
+        replace_in_list(self.underlays, old, new)
 
-    def _overlay_change_helper(self, old, new):
-        if old in self.overlays:
-            self.overlays.remove(old)
-        if new is not None:
-            self.overlays.append(new)
+    def _replace_overlay(self, old, new):
+        replace_in_list(self.overlays, old, new)

@@ -37,26 +37,12 @@ class Plot(DataView):
     # Annotations and decorations
     #------------------------------------------------------------------------
 
-    # The title of the plot.
-    title = Property()
-
     # The PlotLabel object that contains the title.
-    _title = Instance(PlotLabel)
+    title = Instance(PlotLabel)
 
     #------------------------------------------------------------------------
     # Public methods
     #------------------------------------------------------------------------
-
-    def __init__(self, data=None, **kwtraits):
-        title = kwtraits.pop('title')
-        super(Plot, self).__init__(**kwtraits)
-        if data is not None:
-            self.data = data
-
-        # This doesn't work when moved to a trait-default definition (Why?)
-        self._title= PlotLabel(font="swiss 16", visible=False, component=self)
-        if title is not None:
-            self.title = title
 
     def plot(self, data, **styles):
         """ Adds a new sub-plot using the given data and plot style.
@@ -78,7 +64,7 @@ class Plot(DataView):
             self.data_bbox.update_from_y_data(y_src.get_data())
 
             renderer = LineRenderer(x_src=x_src, y_src=y_src,
-                                data_bbox=self.data_bbox, **styles)
+                                    data_bbox=self.data_bbox, **styles)
 
             self.add(renderer)
             new_renderers.append(renderer)
@@ -103,9 +89,7 @@ class Plot(DataView):
 
         return self.datasources[name]
 
-    def __title_changed(self, old, new):
-        self._overlay_change_helper(old, new)
-
-    def _set_title(self, text):
-        self._title.text = text
-        self._title.visible = True
+    def _title_default(self):
+        title = PlotLabel(font="swiss 16", component=self)
+        self.overlays.append(title)
+        return title

@@ -15,13 +15,16 @@ class PlotLabel(AbstractOverlay):
     This class wraps a simple LabelArtist, and delegates some traits to it.
     """
 
-    # The text of the label.
+    #: The text of the label.
     text = LabelDelegate
 
-    # The font for the label text.
+    #: The font for the label text.
     font = LabelDelegate
 
-    draw_layer = "plot"
+    #: Visibility of label. Off by default, but turned on when text is set.
+    visible = False
+
+    draw_layer = 'overlay'
 
     # The Label instance this plot label is wrapping.
     _label = Instance(LabelArtist, {'x_origin': 'center'})
@@ -67,11 +70,9 @@ class PlotLabel(AbstractOverlay):
 
     def _text_changed(self, old, new):
         self._label.text = new
+        self.visible = (new is not None and len(new) > 0)
         self.do_layout()
 
     def _font_changed(self, old, new):
         self._label.font = new
         self.do_layout()
-
-    def _component_changed(self, old, new):
-        self.draw_layer = "overlay"
