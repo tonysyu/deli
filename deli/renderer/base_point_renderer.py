@@ -2,16 +2,14 @@
 """
 from traits.api import Instance, Range
 
-from .abstract_data_source import AbstractDataSource
-from .array_data_source import ArrayDataSource
-from .plot_component import PlotComponent
-from .layout.bounding_box import BoundingBox
-from .layout.bbox_transform import BboxTransform
+from ..abstract_data_source import AbstractDataSource
+from ..array_data_source import ArrayDataSource
+from .base_renderer import BaseRenderer
 
 
-class BaseXYPlot(PlotComponent):
-    """ Base class for simple X-vs-Y plots that consist of a single x
-    data array and a single y data array.
+class BasePointRenderer(BaseRenderer):
+    """ Base class for simple point data plots that consist of a single x data
+    array and a single y data array.
 
     Subclasses handle the actual rendering, but this base class takes care of
     most of making sure events are wired up between mappers and data or screen
@@ -27,15 +25,6 @@ class BaseXYPlot(PlotComponent):
 
     # The data source to use as y points.
     y_src = Instance(AbstractDataSource)
-
-    #: Bounding box for data in plot.
-    data_bbox = Instance(BoundingBox)
-
-    #: Transform from data space to screen space.
-    data_to_screen = Instance(BboxTransform)
-
-    def _data_to_screen_default(self):
-        return BboxTransform(self.data_bbox, self.screen_bbox)
 
     #------------------------------------------------------------------------
     # Appearance-related traits

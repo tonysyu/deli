@@ -1,15 +1,13 @@
-""" Defines the LinePlot class.
-"""
 import numpy as np
 
 from enable.api import black_color_trait, LineStyle
 from traits.api import Float, Property, Tuple, cached_property
 
-from .base_xy_plot import BaseXYPlot
+from .base_point_renderer import BasePointRenderer
 
 
-class LinePlot(BaseXYPlot):
-    """ A plot consisting of a line.
+class LineRenderer(BasePointRenderer):
+    """ A renderer for a line plot.
     """
     # The color of the line.
     color = black_color_trait
@@ -36,9 +34,9 @@ class LinePlot(BaseXYPlot):
 
         return [self.data_to_screen.transform(xy_points)]
 
-    #------------------------------------------------------------------------
-    # Private methods; implements the BaseXYPlot stub methods
-    #------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
+    #  Private interface
+    #--------------------------------------------------------------------------
 
     def _render(self, gc, points, selected_points=None):
         with gc:

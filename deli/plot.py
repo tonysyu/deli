@@ -5,10 +5,10 @@ from traits.api import Delegate, Dict, Instance, List, Property, Str
 from .abstract_data_source import AbstractDataSource
 from .array_data_source import ArrayDataSource
 from .data_view import DataView
-from .lineplot import LinePlot
 from .plot_label import PlotLabel
 from .utils.data_structures import NoisyDict
 from .utils.misc import new_item_name
+from .renderer.line_renderer import LineRenderer
 
 
 class Plot(DataView):
@@ -88,8 +88,8 @@ class Plot(DataView):
             y_src = self._get_or_create_datasource(y_name)
             self.data_bbox.update_from_y_data(y_src.get_data())
 
-            plot = LinePlot(x_src=x_src, y_src=y_src,
-                            data_bbox=self.data_bbox, **styles)
+            plot = LineRenderer(x_src=x_src, y_src=y_src,
+                                data_bbox=self.data_bbox, **styles)
 
             self.add(plot)
             new_plots.append(plot)
