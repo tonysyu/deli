@@ -1,6 +1,6 @@
 """ Defines the Plot class.
 """
-from traits.api import Delegate, Dict, Instance, List, Property, Str
+from traits.api import Dict, Instance, List, Property, Str
 
 from .abstract_data_source import AbstractDataSource
 from .array_data_source import ArrayDataSource
@@ -30,8 +30,8 @@ class Plot(DataView):
     # General plotting traits
     #------------------------------------------------------------------------
 
-    # Mapping of plot names to *lists* of plot renderers.
-    plots = Dict(Str, List)
+    # Mapping of renderer names to *lists* of plot renderers.
+    renderers = Dict(Str, List)
 
     #------------------------------------------------------------------------
     # Annotations and decorations
@@ -39,18 +39,6 @@ class Plot(DataView):
 
     # The title of the plot.
     title = Property()
-
-    # The font to use for the title.
-    title_font = Property()
-
-    # Convenience attribute for title.overlay_position; can be "top",
-    # "bottom", "left", or "right".
-    title_position = Property()
-
-    # Use delegates to expose the other PlotLabel attributes of the plot title
-    title_text = Delegate("_title", prefix="text", modify=True)
-    title_color = Delegate("_title", prefix="color", modify=True)
-    title_angle = Delegate("_title", prefix="angle", modify=True)
 
     # The PlotLabel object that contains the title.
     _title = Instance(PlotLabel)
@@ -75,27 +63,28 @@ class Plot(DataView):
 
         Returns
         -------
-        [renderers] -> list of renderers created in response to this call to plot()
+        renderers : list
+            Renderers created in response to this call to plot()
         """
-        name = new_item_name(self.plots, name_template='plot_{}')
+        name = new_item_name(self.renderers, name_template='plot_{}')
 
         x_src = self._get_or_create_datasource(data[0])
         self.data_bbox.update_from_x_data(x_src.get_data())
         data = data[1:]
 
-        new_plots = []
+        new_renderers = []
         for y_name in data:
             y_src = self._get_or_create_datasource(y_name)
             self.data_bbox.update_from_y_data(y_src.get_data())
 
-            plot = LineRenderer(x_src=x_src, y_src=y_src,
+            renderer = LineRenderer(x_src=x_src, y_src=y_src,
                                 data_bbox=self.data_bbox, **styles)
 
-            self.add(plot)
-            new_plots.append(plot)
-        self.plots[name] = new_plots
+            self.add(renderer)
+            new_renderers.append(renderer)
+        self.renderers[name] = new_renderers
 
-        return self.plots[name]
+        return self.renderers[name]
 
     #------------------------------------------------------------------------
     # Private methods
