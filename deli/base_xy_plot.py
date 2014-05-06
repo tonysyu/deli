@@ -1,15 +1,15 @@
 """ Defines the base class for XY plots.
 """
-from traits.api import Disallow, Instance, Property, Range
+from traits.api import Instance, Property, Range
 
-from .abstract_plot_renderer import AbstractPlotRenderer
 from .abstract_data_source import AbstractDataSource
 from .array_data_source import ArrayDataSource
+from .plot_component import PlotComponent
 from .layout.bounding_box import BoundingBox
 from .layout.bbox_transform import BboxTransform
 
 
-class BaseXYPlot(AbstractPlotRenderer):
+class BaseXYPlot(PlotComponent):
     """ Base class for simple X-vs-Y plots that consist of a single x
     data array and a single y data array.
 
@@ -17,8 +17,6 @@ class BaseXYPlot(AbstractPlotRenderer):
     most of making sure events are wired up between mappers and data or screen
     space changes, etc.
     """
-
-    _ = Disallow
 
     #------------------------------------------------------------------------
     # Data-related traits
@@ -56,13 +54,6 @@ class BaseXYPlot(AbstractPlotRenderer):
     y_axis = Property
     # Read-only property for labels.
     labels = Property
-
-    #------------------------------------------------------------------------
-    # Other public traits
-    #------------------------------------------------------------------------
-
-    # Overrides the default background color trait in PlotComponent.
-    bgcolor = "transparent"
 
     #------------------------------------------------------------------------
     # PlotComponent interface
