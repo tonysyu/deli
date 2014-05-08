@@ -1,6 +1,6 @@
 import numpy as np
 
-from traits.api import DelegatesTo, Instance, Property, Tuple, cached_property
+from traits.api import DelegatesTo, Instance
 
 from ..artist.line_artist import LineArtist
 from .base_point_renderer import BasePointRenderer
@@ -13,11 +13,6 @@ class LineRenderer(BasePointRenderer):
     color = DelegatesTo('line')
 
     line = Instance(LineArtist, ())
-
-    # The RGBA tuple for rendering lines.  It is always a tuple of length 4.
-    # It has the same RGB values as color_, and its alpha value is the alpha
-    # value of self.color multiplied by self.alpha.
-    _effective_color = Property(Tuple, depends_on=['color', 'alpha'])
 
     #------------------------------------------------------------------------
     # Private traits
@@ -44,9 +39,3 @@ class LineRenderer(BasePointRenderer):
     def _color_changed(self):
         self.invalidate_draw()
         self.request_redraw()
-
-    @cached_property
-    def _get__effective_color(self):
-        alpha = self.color_[-1] if len(self.color_) == 4 else 1
-        c = self.color_[:3] + (alpha * self.alpha,)
-        return c
