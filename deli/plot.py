@@ -1,6 +1,6 @@
 """ Defines the Plot class.
 """
-from traits.api import Dict, Instance, List, Property, Str
+from traits.api import Dict, Instance, List, Str
 
 from .abstract_data_source import AbstractDataSource
 from .array_data_source import ArrayDataSource

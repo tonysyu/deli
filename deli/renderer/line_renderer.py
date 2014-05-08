@@ -1,8 +1,8 @@
 import numpy as np
 
-from enable.api import black_color_trait, LineStyle
-from traits.api import Float, Property, Tuple, cached_property
+from traits.api import DelegatesTo, Instance, Property, Tuple, cached_property
 
+from ..artist.line_artist import LineArtist
 from .base_point_renderer import BasePointRenderer
 
 
@@ -10,18 +10,14 @@ class LineRenderer(BasePointRenderer):
     """ A renderer for a line plot.
     """
     # The color of the line.
-    color = black_color_trait
+    color = DelegatesTo('line')
+
+    line = Instance(LineArtist, ())
 
     # The RGBA tuple for rendering lines.  It is always a tuple of length 4.
     # It has the same RGB values as color_, and its alpha value is the alpha
     # value of self.color multiplied by self.alpha.
     _effective_color = Property(Tuple, depends_on=['color', 'alpha'])
-
-    # The thickness of the line.
-    line_width = Float(1.0)
-
-    # The line dash style.
-    line_style = LineStyle
 
     #------------------------------------------------------------------------
     # Private traits
@@ -38,24 +34,12 @@ class LineRenderer(BasePointRenderer):
     #  Private interface
     #--------------------------------------------------------------------------
 
-    def _render(self, gc, points, selected_points=None):
+    def _render(self, gc, line_segments, selected_points=None):
         with gc:
-            gc.set_antialias(True)
             gc.clip_to_rect(*self.screen_bbox.bounds)
-
-            # Render using the normal style
-            gc.set_stroke_color(self._effective_color)
-            gc.set_line_width(self.line_width)
-            gc.set_line_dash(self.line_style_)
-            self._render_normal(gc, points)
-
-    @classmethod
-    def _render_normal(cls, gc, points):
-        for line in points:
-            if len(line) > 0:
-                gc.begin_path()
-                gc.lines(line)
-                gc.stroke_path()
+            self.line.update_style(gc)
+            for points in line_segments:
+                self.line.draw(gc, points)
 
     def _color_changed(self):
         self.invalidate_draw()
