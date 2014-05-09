@@ -21,9 +21,6 @@ class LabelArtist(HasStrictTraits):
     # The color of the label text.
     color = black_color_trait
 
-    # The background color of the label.
-    bgcolor = transparent_color_trait
-
     # The width of the label border. If it is 0, then it is not shown.
     border_width = Int(0)
 

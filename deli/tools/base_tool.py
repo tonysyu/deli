@@ -89,6 +89,8 @@ class BaseTool(AbstractTool):
     def attach_to(cls, component):
         instance = cls(component=component)
         component.tools.append(instance)
+        if hasattr(instance, 'overlay'):
+            component.overlays.append(instance.overlay)
         return instance
 
     def dispatch(self, event, suffix):

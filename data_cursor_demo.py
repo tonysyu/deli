@@ -25,12 +25,7 @@ class Demo(HasStrictTraits):
         plot.title.text = "Line Plot"
         renderer = plot.plot(('x', 'y'))[0]
 
-        # DataCursorTool.attach_to(renderer)
-        tool = DataCursorTool(component=renderer)
-        renderer.overlays.append(tool)
-        renderer.tools.append(tool)
-        renderer.active_tool = tool
-        plot.active_tool = tool
+        DataCursorTool.attach_to(renderer)
         return plot
 
 
