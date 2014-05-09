@@ -8,7 +8,4 @@ As a result, renderers may use a few different artists to compose a plot;
 for example, a box-and-whisker plot might have separate artists to draw
 rectangles, error-bars (whiskers), and points (outliers).
 
-
-.. [GoF] Design Patterns: Elements of Reusable Object Oriented Software,
-         Gamma et al., Addison-Wesley, 1996.
 """

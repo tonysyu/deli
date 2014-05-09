@@ -1,6 +1,6 @@
 """ Defines the base class for XY plots.
 """
-from traits.api import Instance
+from traits.api import Instance, Property
 
 from ..plot_component import PlotComponent
 from ..layout.bounding_box import BoundingBox
@@ -28,5 +28,12 @@ class BaseRenderer(PlotComponent):
     #: Transform from data space to screen space.
     data_to_screen = Instance(BboxTransform)
 
+    #: Transform from data space to screen space.
+    screen_to_data = Property(Instance(BboxTransform),
+                              depends_on='data_to_screen')
+
     def _data_to_screen_default(self):
         return BboxTransform(self.data_bbox, self.screen_bbox)
+
+    def _get_screen_to_data(self):
+        return self.data_to_screen.inverted()
