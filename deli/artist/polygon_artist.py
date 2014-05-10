@@ -3,6 +3,8 @@ from traits.api import HasStrictTraits
 
 
 class PolygonArtist(HasStrictTraits):
+    """ A Flyweight object for drawing filled polygons.
+    """
 
     fill_color = ColorTrait('yellow')
     edge_color = ColorTrait('black')

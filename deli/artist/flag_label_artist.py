@@ -51,13 +51,9 @@ class FlagLabelArtist(HasStrictTraits):
         text : str
             The text for the displayed label.
         """
-        width, height = self.label.get_size(gc, text)
+        x, y, width, height = self.label.text_rect(gc, text)
+        x_offset, y_offset = self.label.bbox_offset(gc, text, width, height)
+        rect = (x_offset, y_offset, width, height)
 
-        x_bbox_offset = (self.label._x_offset_factor * width
-                         + self.label.x_offset)
-        y_bbox_offset = (self.label._y_offset_factor * height
-                         + self.label.y_offset)
-
-        rect = (x_bbox_offset, y_bbox_offset, width, height)
         self.flag.draw(gc, rect)
         self.label.draw(gc, text)

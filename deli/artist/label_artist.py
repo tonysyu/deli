@@ -36,31 +36,17 @@ class LabelArtist(HasStrictTraits):
     y_origin = Enum('center', 'bottom', 'top')
 
     #: Factor of width and height used to shift label to desired origin.
-    _x_offset_factor = Property(Int, depends_on='x_origin')
-    _y_offset_factor = Property(Int, depends_on='y_origin')
+    _x_origin_factor = Property(Int, depends_on='x_origin')
+    _y_origin_factor = Property(Int, depends_on='y_origin')
 
     def __init__(self, **traits):
         super(LabelArtist, self).__init__(**traits)
-
-    def get_size(self, gc, text):
-        """ Returns the label size as (width, height).
-        """
-        x, y, width, height = self._calc_text_rect(gc, text)
-        return (width, height)
 
     def update_style(self, gc):
         gc.set_fill_color(self.color_)
         gc.set_stroke_color(self.color_)
         gc.set_font(self.font)
         gc.set_antialias(True)
-
-    def set_rotation_angle(self, gc, text):
-        width, height = self.get_size(gc, text)
-
-        # Rotate label about center of bounding box
-        gc.translate_ctm(width / 2.0, height / 2.0)
-        gc.rotate_ctm(pi / 180.0 * self.rotate_angle)
-        gc.translate_ctm(-width / 2.0, -height / 2.0)
 
     def draw(self, gc, text):
         """ Draws the label.
@@ -69,47 +55,18 @@ class LabelArtist(HasStrictTraits):
         correct position such that the origin is at the lower left-hand corner
         of this text label's box.
         """
-        x, y, width, height = self._calc_text_rect(gc, text)
+        x, y, width, height = self.text_rect(gc, text)
+        x_offset, y_offset = self.bbox_offset(gc, text, width, height)
 
         with gc:
             self.update_style(gc)
-            self.set_rotation_angle(gc, text)
+            self._set_rotation_angle(gc, text, width, height)
 
-            width, height = self.get_size(gc, text)
-
-            x_bbox_offset = self._x_offset_factor * width + self.x_offset
-            y_bbox_offset = self._y_offset_factor * height + self.y_offset
-
-            x_offset = x + x_bbox_offset
-            y_offset = y + y_bbox_offset
-            gc.set_text_position(x_offset, y_offset)
+            gc.set_text_position(x + x_offset, y + y_offset)
             gc.show_text(text)
 
-    #------------------------------------------------------------------------
-    # Private methods
-    #------------------------------------------------------------------------
-
-    @cached_property
-    def _get__x_offset_factor(self):
-        # Fraction of label bounding-box width used to shift origin.
-        if self.x_origin == 'center':
-            return -0.5
-        elif self.x_origin == 'left':
-            return 0
-        elif self.x_origin == 'right':
-            return -1
-
-    @cached_property
-    def _get__y_offset_factor(self):
-        # Fraction of label bounding-box height used to shift origin.
-        if self.y_origin == 'center':
-            return -0.5
-        elif self.y_origin == 'top':
-            return -1
-        elif self.y_origin == 'bottom':
-            return 0
-
-    def _calc_text_rect(self, gc, text):
+    def text_rect(self, gc, text):
+        """ Return bounding rectangle for text, including margin. """
         with gc:
             gc.set_font(self.font)
             text_extent = gc.get_full_text_extent(text)
@@ -120,3 +77,44 @@ class LabelArtist(HasStrictTraits):
         width += 2 * self.margin
         height += 2 * self.margin - abs(descent)
         return x, y, width, height
+
+    def bbox_offset(self, gc, text, width, height):
+        """ Return offset distance for text rendering.
+
+        If the origin is at the bottom-left, offsets are zero, and the margin
+        is zero, then the returned offset values will be zero; otherwise, the
+        returned offsets shift the text to account for these values.
+        """
+        x_bbox_offset = self._x_origin_factor * width + self.x_offset
+        y_bbox_offset = self._y_origin_factor * height + self.y_offset
+        return x_bbox_offset, y_bbox_offset
+
+    #------------------------------------------------------------------------
+    # Private methods
+    #------------------------------------------------------------------------
+
+    def _set_rotation_angle(self, gc, text, width, height):
+        # Rotate label about center of bounding box
+        gc.translate_ctm(width / 2.0, height / 2.0)
+        gc.rotate_ctm(pi / 180.0 * self.rotate_angle)
+        gc.translate_ctm(-width / 2.0, -height / 2.0)
+
+    @cached_property
+    def _get__x_origin_factor(self):
+        # Fraction of label bounding-box width used to shift origin.
+        if self.x_origin == 'center':
+            return -0.5
+        elif self.x_origin == 'left':
+            return 0
+        elif self.x_origin == 'right':
+            return -1
+
+    @cached_property
+    def _get__y_origin_factor(self):
+        # Fraction of label bounding-box height used to shift origin.
+        if self.y_origin == 'center':
+            return -0.5
+        elif self.y_origin == 'top':
+            return -1
+        elif self.y_origin == 'bottom':
+            return 0
