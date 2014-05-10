@@ -2,28 +2,17 @@ from enable.api import ColorTrait
 from traits.api import HasStrictTraits, Instance, Property
 
 from .label_artist import LabelArtist
+from .polygon_artist import PolygonArtist
 
 
 DEFAULT_LABEL_STYLE = {'x_origin': 'left', 'x_offset': 20, 'margin': 5}
 
 
-class FlagArtist(HasStrictTraits):
+class FlagArtist(PolygonArtist):
 
-    fill_color = ColorTrait('yellow')
-    edge_color = ColorTrait('black')
-
-    # XXX Move this to a PolygonArtist class
     def draw(self, gc, rect, origin=(0, 0)):
-        with gc:
-            if self.fill_color is not 'none':
-                gc.set_fill_color(self.fill_color_)
-                gc.lines(self._poly_vertices(origin, rect))
-                gc.fill_path()
-            if self.edge_color is not 'none':
-                gc.set_stroke_color(self.edge_color_)
-                gc.lines(self._poly_vertices(origin, rect))
-                gc.close_path()
-                gc.stroke_path()
+        vertices = self._poly_vertices(origin, rect)
+        super(FlagArtist, self).draw(gc, vertices)
 
     def _poly_vertices(self, origin, rect):
         x, y, width, height = rect
