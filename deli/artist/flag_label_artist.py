@@ -1,5 +1,5 @@
 from enable.api import ColorTrait
-from traits.api import HasStrictTraits, Instance
+from traits.api import HasStrictTraits, Instance, Property
 
 from .label_artist import LabelArtist
 
@@ -35,10 +35,21 @@ class FlagArtist(HasStrictTraits):
 
 class FlagLabelArtist(HasStrictTraits):
 
-    text_color = ColorTrait('black')
+    text_color = Property(ColorTrait)
+    fill_color = Property(ColorTrait)
+    edge_color = Property(ColorTrait)
 
     label = Instance(LabelArtist, DEFAULT_LABEL_STYLE)
     flag = Instance(FlagArtist, ())
+
+    def _set_text_color(self, value):
+        self.label.color = value
+
+    def _set_fill_color(self, value):
+        self.flag.fill_color = value
+
+    def _set_edge_color(self, value):
+        self.flag.edge_color = value
 
     def draw(self, gc, text):
         """ Draw the given text with a flag-label decoration.

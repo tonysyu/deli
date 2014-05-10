@@ -7,14 +7,16 @@ from ..renderer.base_point_renderer import BasePointRenderer
 from .base_tool import BaseTool
 
 
+def choose_black_or_white(contrasting_color, threshold=0.33):
+    """ Return black or white to maximize contrast with an input color.
 
-
-def draw_box(gc, rect, edge_color, fill_color):
-    with gc:
-        gc.set_stroke_color(edge_color)
-        gc.set_fill_color(fill_color)
-        gc.draw_rect([int(a) for a in rect])
-        gc.fill_path()
+    Parameters
+    ----------
+    contrasting_color : array, length 3 or 4
+        The color which we want to contrast with.
+    """
+    gray = np.mean(contrasting_color[:3])
+    return 'black' if gray > threshold else 'white'
 
 
 class DataCursorOverlay(AbstractOverlay):
@@ -60,6 +62,13 @@ class DataCursorTool(BaseTool):
 
     def _overlay_default(self):
         return DataCursorOverlay(component=self.component)
+
+    def _component_changed(self):
+        flag_color_name = self.component.line.color
+        flag_color = self.component.line.color_
+        self.overlay.label.edge_color = flag_color_name
+        self.overlay.label.fill_color = flag_color_name
+        self.overlay.label.text_color = choose_black_or_white(flag_color)
 
     def on_mouse_move(self, event):
         x_data = self.component.x_src.get_data()

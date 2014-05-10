@@ -1,4 +1,4 @@
-from numpy import linspace
+import numpy as np
 
 from enable.api import Component, ComponentEditor
 from traits.api import HasStrictTraits, Instance
@@ -18,14 +18,16 @@ class Demo(HasStrictTraits):
     )
 
     def _plot_default(self):
-        x = y = linspace(0, 1)
-        pd = NoisyDict(x=x, y=y)
+        x = np.linspace(0, 2 * np.pi)
+        pd = NoisyDict(x=x, y1=np.sin(x), y2=np.cos(x))
 
         plot = Plot(data=pd)
         plot.title.text = "Line Plot"
-        renderer = plot.plot(('x', 'y'))[0]
 
-        DataCursorTool.attach_to(renderer)
+        for y_name, color in zip(('y1', 'y2'), ('black', 'red')):
+            renderer = plot.plot(('x', y_name), color=color)[0]
+            DataCursorTool.attach_to(renderer)
+
         return plot
 
 
