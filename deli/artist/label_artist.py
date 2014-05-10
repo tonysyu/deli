@@ -2,7 +2,7 @@
 """
 from math import pi
 
-from enable.api import black_color_trait, transparent_color_trait
+from enable.api import black_color_trait
 from kiva.trait_defs.kiva_font_trait import KivaFont
 from traits.api import (Any, Bool, Enum, Float, HasStrictTraits, Int, List,
                         Property, Str, cached_property)
@@ -12,40 +12,42 @@ class LabelArtist(HasStrictTraits):
     """ A Flyweight object for drawing text labels.
     """
 
-    # The label text.
+    #: The label text.
     text = Str
 
-    # The angle of rotation (in degrees) of the label.
+    #: The angle of rotation (in degrees) of the label.
     rotate_angle = Float(0)
 
-    # The color of the label text.
+    #: The color of the label text.
     color = black_color_trait
 
-    # The width of the label border. If it is 0, then it is not shown.
+    #: The width of the label border. If it is 0, then it is not shown.
     border_width = Int(0)
 
-    # The color of the border.
+    #: The color of the border.
     border_color = black_color_trait
 
-    # Whether or not the border is visible
+    #: Whether or not the border is visible
     border_visible = Bool(True)
 
-    # The font of the label text.
+    #: The font of the label text.
     font = KivaFont("modern 10")
 
-    # Number of pixels of margin around the label, for both X and Y dimensions.
+    #: Number of pixels of margin around the label, for both X and Y dimensions.
     margin = Int(2)
 
-    # Number of pixels of spacing between lines of text.
+    #: Number of pixels of spacing between lines of text.
     line_spacing = Int(5)
-
-    x_origin = Enum('center', 'left', 'right')
-    y_origin = Enum('center', 'bottom', 'top')
 
     #: Offset value from the current graphics-context position.
     x_offset = Float(0)
     y_offset = Float(0)
 
+    #: Origin of the text label, which can be placed on edges and mid-points.
+    x_origin = Enum('center', 'left', 'right')
+    y_origin = Enum('center', 'bottom', 'top')
+
+    #: Factor of width and height used to shift label to desired origin.
     _x_offset_factor = Property(Int, depends_on='x_origin')
     _y_offset_factor = Property(Int, depends_on='y_origin')
 
@@ -54,6 +56,8 @@ class LabelArtist(HasStrictTraits):
     #------------------------------------------------------------------------
 
     _size = List()
+
+    #: Local origin (depends on origin-location, relative-offset, and margin).
     _x = Any()
     _y = Any()
 
@@ -64,7 +68,7 @@ class LabelArtist(HasStrictTraits):
     def get_size(self, gc, text):
         """ Returns the label size as (width, height).
         """
-        self._calc_line_positions(gc, text)
+        self._calc_geometry(gc, text)
         return self._size
 
     def update_style(self, gc):
@@ -90,13 +94,12 @@ class LabelArtist(HasStrictTraits):
         of this text label's box.
         """
         # For this version we're not supporting rotated text.
-        self._calc_line_positions(gc, text)
+        self._calc_geometry(gc, text)
 
         with gc:
             self.update_style(gc)
             self.set_rotation_angle(gc, text)
 
-            lines = text.split("\n")
             if self.border_visible:
                 gc.translate_ctm(self.border_width, self.border_width)
             width, height = self.get_size(gc, text)
@@ -104,7 +107,7 @@ class LabelArtist(HasStrictTraits):
             x_bbox_offset = self._x_offset_factor * width + self.x_offset
             y_bbox_offset = self._y_offset_factor * height + self.y_offset
 
-            for x, y, line in zip(self._x, self._y, lines):
+            for x, y, line in zip(self._x, self._y, text.split("\n")):
                 x_offset = x + x_bbox_offset
                 y_offset = y + y_bbox_offset
                 gc.set_text_position(x_offset, y_offset)
@@ -134,7 +137,7 @@ class LabelArtist(HasStrictTraits):
         elif self.y_origin == 'bottom':
             return 0
 
-    def _calc_line_positions(self, gc, text):
+    def _calc_geometry(self, gc, text):
         with gc:
             gc.set_font(self.font)
             # The bottommost line starts at postion (0, 0).
@@ -161,5 +164,4 @@ class LabelArtist(HasStrictTraits):
         self._y = y_pos[::-1]
         border_width = self.border_width if self.border_visible else 0
         self._size[0] = max_width + 2*margin + 2*border_width
-        self._size[1] = prev_y_pos + prev_y_height + margin \
-            + 2*border_width
+        self._size[1] = prev_y_pos + prev_y_height + margin + 2*border_width
