@@ -1,13 +1,12 @@
 import numpy as np
-from traits.api import CArray, Instance, Str
+from traits.api import CArray, HasStrictTraits, Instance, Str
 
 from ..abstract_overlay import AbstractOverlay
-from ..artist.label_artist import LabelArtist
+from ..artist.flag_label_artist import FlagLabelArtist
 from ..renderer.base_point_renderer import BasePointRenderer
 from .base_tool import BaseTool
 
 
-DEFAULT_LABEL_STYLE = {'x_origin': 'left', 'x_offset': 20}
 
 
 def draw_box(gc, rect, edge_color, fill_color):
@@ -20,11 +19,14 @@ def draw_box(gc, rect, edge_color, fill_color):
 
 class DataCursorOverlay(AbstractOverlay):
 
-    label = Instance(LabelArtist, DEFAULT_LABEL_STYLE)
+    label = Instance(HasStrictTraits)
 
     _origin = CArray
 
     _text = Str
+
+    def _label_default(self):
+        return FlagLabelArtist()
 
     def update_point(self, data_point, screen_point):
         self._text = self.data_point_to_string(data_point)
@@ -45,15 +47,6 @@ class DataCursorOverlay(AbstractOverlay):
 
         with gc:
             gc.translate_ctm(*self._origin)
-            width, height = self.label.get_size(gc, self._text)
-
-            x_bbox_offset = (self.label._x_offset_factor * width
-                             + self.label.x_offset)
-            y_bbox_offset = (self.label._y_offset_factor * height
-                             + self.label.y_offset)
-
-            rect = (x_bbox_offset, y_bbox_offset, width, height)
-            draw_box(gc, rect, (0, 0, 0, 1), (1, 1, 0, 1))
             self.label.draw(gc, self._text)
 
 
