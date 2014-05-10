@@ -90,6 +90,6 @@ class Plot(DataView):
         return self.datasources[name]
 
     def _title_default(self):
-        title = PlotLabel(font="swiss 16", component=self)
+        title = PlotLabel(font='default 16', component=self)
         self.overlays.append(title)
         return title

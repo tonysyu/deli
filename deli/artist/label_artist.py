@@ -31,7 +31,7 @@ class LabelArtist(HasStrictTraits):
     border_visible = Bool(True)
 
     #: The font of the label text.
-    font = KivaFont("modern 10")
+    font = KivaFont('default 13')
 
     #: Number of pixels of margin around the label, for both X and Y dimensions.
     margin = Int(2)
