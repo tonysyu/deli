@@ -4,7 +4,21 @@ from traits.api import CArray, HasStrictTraits, Instance, Str
 from ..abstract_overlay import AbstractOverlay
 from ..artist.flag_label_artist import FlagLabelArtist
 from ..renderer.base_point_renderer import BasePointRenderer
+from ..utils.text import switch_delimiters
 from .base_tool import BaseTool
+
+
+def format_floats(array, significant_digits=3):
+    """ Return string version of floats in array. """
+    max_digit = np.max(np.abs(array))
+    if max_digit != 0:
+        max_digit = np.log10(max_digit)
+    max_digit -= (significant_digits - 1)
+    if max_digit < 0:
+        precision = np.ceil(-max_digit)
+    text = np.array2string(np.asarray(array), separator=',',
+                           precision=precision)
+    return switch_delimiters(text, '[]', '()')
 
 
 def choose_black_or_white(contrasting_color, threshold=0.4):
@@ -38,7 +52,7 @@ class DataCursorOverlay(AbstractOverlay):
         self.component.request_redraw()
 
     def data_point_to_string(self, point):
-        return str(point)
+        return format_floats(point)
 
     def overlay(self, component, gc, view_bounds=None, mode="normal"):
         self._draw_overlay(gc, view_bounds, mode)
