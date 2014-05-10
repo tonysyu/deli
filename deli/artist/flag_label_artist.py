@@ -12,6 +12,7 @@ class FlagArtist(HasStrictTraits):
     fill_color = ColorTrait('yellow')
     edge_color = ColorTrait('black')
 
+    # XXX Move this to a PolygonArtist class
     def draw(self, gc, rect, origin=(0, 0)):
         with gc:
             if self.fill_color is not 'none':

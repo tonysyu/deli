@@ -7,7 +7,7 @@ from ..renderer.base_point_renderer import BasePointRenderer
 from .base_tool import BaseTool
 
 
-def choose_black_or_white(contrasting_color, threshold=0.33):
+def choose_black_or_white(contrasting_color, threshold=0.4):
     """ Return black or white to maximize contrast with an input color.
 
     Parameters
