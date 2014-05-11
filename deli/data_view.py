@@ -89,22 +89,6 @@ class DataView(OverlayPlotContainer):
         super(DataView, self).__init__(**kwtraits)
         self._init_components()
 
-    #------------------------------------------------------------------------
-    # Private methods
-    #------------------------------------------------------------------------
-
-    def _init_components(self):
-        if not self.x_grid and self.auto_grid:
-            self.x_grid = XGrid(component=self)
-        if not self.y_grid and self.auto_grid:
-            self.y_grid = YGrid(component=self)
-
-        if not self.x_axis and self.auto_axis:
-            self.x_axis = XAxis(component=self)
-
-        if not self.y_axis and self.auto_axis:
-            self.y_axis = YAxis(component=self)
-
     #-------------------------------------------------------------------------
     # Event handlers
     #-------------------------------------------------------------------------
@@ -120,6 +104,22 @@ class DataView(OverlayPlotContainer):
 
     def _y_axis_changed(self, old, new):
         self._replace_underlay(old, new)
+
+    #------------------------------------------------------------------------
+    # Private methods
+    #------------------------------------------------------------------------
+
+    def _init_components(self):
+        if not self.x_grid and self.auto_grid:
+            self.x_grid = XGrid(component=self)
+        if not self.y_grid and self.auto_grid:
+            self.y_grid = YGrid(component=self)
+
+        if not self.x_axis and self.auto_axis:
+            self.x_axis = XAxis(component=self)
+
+        if not self.y_axis and self.auto_axis:
+            self.y_axis = YAxis(component=self)
 
     def _replace_underlay(self, old, new):
         replace_in_list(self.underlays, old, new)

@@ -20,24 +20,21 @@ class Plot(DataView):
     # Data-related traits
     #------------------------------------------------------------------------
 
-    # The PlotData instance that drives this plot.
+    #: The PlotData instance that drives this plot.
     data = Instance(NoisyDict)
-
-    # Mapping of data names from self.data to their respective datasources.
-    datasources = Dict(Str, Instance(AbstractDataSource))
 
     #------------------------------------------------------------------------
     # General plotting traits
     #------------------------------------------------------------------------
 
-    # Mapping of renderer names to *lists* of plot renderers.
+    #: Mapping of renderer names to *lists* of plot renderers.
     renderers = Dict(Str, List)
 
     #------------------------------------------------------------------------
     # Annotations and decorations
     #------------------------------------------------------------------------
 
-    # The PlotLabel object that contains the title.
+    #: The PlotLabel object that contains the title.
     title = Instance(PlotLabel)
 
     #------------------------------------------------------------------------
@@ -54,13 +51,12 @@ class Plot(DataView):
         """
         name = new_item_name(self.renderers, name_template='plot_{}')
 
-        x_src = self._get_or_create_datasource(data[0])
+        x_src = ArrayDataSource(self.data[data[0]])
         self.data_bbox.update_from_x_data(x_src.get_data())
-        data = data[1:]
 
         new_renderers = []
-        for y_name in data:
-            y_src = self._get_or_create_datasource(y_name)
+        for y_name in data[1:]:
+            y_src = ArrayDataSource(self.data[y_name])
             self.data_bbox.update_from_y_data(y_src.get_data())
 
             renderer = LineRenderer(x_src=x_src, y_src=y_src,
@@ -76,20 +72,7 @@ class Plot(DataView):
     # Private methods
     #------------------------------------------------------------------------
 
-    def _get_or_create_datasource(self, name):
-        """ Returns the data source associated with the given name, or creates
-        it if it doesn't exist.
-        """
-        if name not in self.datasources:
-            data = self.data[name]
-
-            if len(data.shape) == 1:
-                ds = ArrayDataSource(data)
-            self.datasources[name] = ds
-
-        return self.datasources[name]
-
     def _title_default(self):
-        title = PlotLabel(font='default 16', component=self)
+        title = PlotLabel(font='modern 16', component=self)
         self.overlays.append(title)
         return title

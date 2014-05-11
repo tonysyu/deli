@@ -22,7 +22,7 @@ class LabelArtist(HasStrictTraits):
     color = black_color_trait
 
     #: The font of the label text.
-    font = KivaFont('default 13')
+    font = KivaFont('modern 13')
 
     #: Number of pixels of margin around the label, for both X and Y dimensions.
     margin = Int(2)
