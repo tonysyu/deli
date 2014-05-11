@@ -2,16 +2,15 @@
 """
 from traits.api import Dict, Instance, List, Str
 
-from .abstract_data_source import AbstractDataSource
 from .array_data_source import ArrayDataSource
-from .data_view import DataView
+from .data_canvas import DataCanvas
 from .plot_label import PlotLabel
 from .utils.data_structures import NoisyDict
 from .utils.misc import new_item_name
 from .renderer.line_renderer import LineRenderer
 
 
-class Plot(DataView):
+class PlotCanvas(DataCanvas):
     """ Represents a correlated set of data, renderers, and axes in a single
     screen region.
     """

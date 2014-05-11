@@ -1,4 +1,4 @@
-""" Defines the DataView class, and associated property traits and property
+""" Defines the DataCanvas class, and associated property traits and property
 functions.
 """
 import numpy as np
@@ -19,7 +19,7 @@ def replace_in_list(a_list, old, new):
         a_list.append(new)
 
 
-class DataView(OverlayPlotContainer):
+class DataCanvas(OverlayPlotContainer):
     """ Represents a mapping from 2-D data space into 2-D screen space.
 
     It can house renderers and other plot components, and otherwise behaves
@@ -86,7 +86,7 @@ class DataView(OverlayPlotContainer):
     #------------------------------------------------------------------------
 
     def __init__(self, **kwtraits):
-        super(DataView, self).__init__(**kwtraits)
+        super(DataCanvas, self).__init__(**kwtraits)
         self._init_components()
 
     #-------------------------------------------------------------------------

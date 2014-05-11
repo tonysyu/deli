@@ -4,7 +4,7 @@ from enable.api import Component, ComponentEditor
 from traits.api import HasStrictTraits, Instance
 from traitsui.api import UItem, View
 
-from deli.plot import Plot
+from deli.plot_canvas import PlotCanvas
 from deli.renderer.image_renderer import ImageRenderer
 from deli.tools.pan_tool import PanTool
 from deli.tools.zoom_tool import ZoomTool
@@ -15,29 +15,29 @@ WIDTH = 900
 HEIGHT = 500
 
 class Demo(HasStrictTraits):
-    plot = Instance(Component)
+    canvas = Instance(Component)
 
     traits_view = View(
-        UItem('plot', editor=ComponentEditor(size=(WIDTH, HEIGHT))),
+        UItem('canvas', editor=ComponentEditor(size=(WIDTH, HEIGHT))),
         resizable=True, title="Basic x-y plots"
     )
 
-    def _plot_default(self):
+    def _canvas_default(self):
         image = data.lena()
         pd = NoisyDict(image=image)
 
-        plot = Plot(data=pd)
+        canvas = PlotCanvas(data=pd)
         height, width = image.shape[:2]
-        plot.data_bbox.bounds = (0, 0, width, height)
+        canvas.data_bbox.bounds = (0, 0, width, height)
 
-        renderer = ImageRenderer(data=image, data_bbox=plot.data_bbox)
-        plot.add(renderer)
-        plot.renderers['image'] = [renderer]
-        PanTool.attach_to(plot)
-        ZoomTool.attach_to(plot)
+        renderer = ImageRenderer(data=image, data_bbox=canvas.data_bbox)
+        canvas.add(renderer)
+        canvas.renderers['image'] = [renderer]
+        PanTool.attach_to(canvas)
+        ZoomTool.attach_to(canvas)
 
-        plot.data_bbox.bounds = (0, 0, 2*width, height)
-        return plot
+        canvas.data_bbox.bounds = (0, 0, 2*width, height)
+        return canvas
 
 
 if __name__ == '__main__':
