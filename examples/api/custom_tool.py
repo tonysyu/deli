@@ -1,9 +1,8 @@
 from numpy import linspace
 
-from enable.api import Component, ComponentEditor
-from traits.api import HasStrictTraits, Instance
-from traitsui.api import UItem, View
+from traits.api import Instance
 
+from deli.demo_utils import Window
 from deli.plot_canvas import PlotCanvas
 from deli.tools.base_tool import BaseTool, BaseToolState
 from deli.tools.key_spec import KeySpec, shift_key
@@ -43,15 +42,9 @@ class PrintOnMove(BaseToolState):
             self.exit_state(event)
 
 
-class Demo(HasStrictTraits):
-    canvas = Instance(Component)
+class Demo(Window):
 
-    traits_view = View(
-        UItem('canvas', editor=ComponentEditor(size=(900, 500))),
-        resizable=True, title="Basic x-y plots"
-    )
-
-    def _canvas_default(self):
+    def setup_canvas(self):
         x = y = linspace(0, 1)
         pd = NoisyDict(x=x, y=y)
 

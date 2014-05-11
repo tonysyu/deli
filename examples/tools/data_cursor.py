@@ -1,23 +1,14 @@
 import numpy as np
 
-from enable.api import Component, ComponentEditor
-from traits.api import HasStrictTraits, Instance
-from traitsui.api import UItem, View
-
+from deli.demo_utils import Window
 from deli.plot_canvas import PlotCanvas
 from deli.tools.data_cursor_tool import DataCursorTool
 from deli.utils.data_structures import NoisyDict
 
 
-class Demo(HasStrictTraits):
-    canvas = Instance(Component)
+class Demo(Window):
 
-    traits_view = View(
-        UItem('canvas', editor=ComponentEditor(size=(900, 500))),
-        resizable=True, title="Basic x-y plots"
-    )
-
-    def _canvas_default(self):
+    def setup_canvas(self):
         x = np.linspace(0, 2 * np.pi)
         pd = NoisyDict(x=x, y1=np.sin(x), y2=np.cos(x))
 
