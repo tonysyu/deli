@@ -5,6 +5,7 @@ from traits.api import Dict, Instance, List, Str
 from .array_data_source import ArrayDataSource
 from .data_canvas import DataCanvas
 from .plot_label import PlotLabel
+from .style import config
 from .utils.data_structures import NoisyDict
 from .utils.misc import new_item_name
 from .renderer.line_renderer import LineRenderer
@@ -72,6 +73,6 @@ class PlotCanvas(DataCanvas):
     #------------------------------------------------------------------------
 
     def _title_default(self):
-        title = PlotLabel(font='modern 16', component=self)
+        title = PlotLabel(font=config.get('title.font'), component=self)
         self.overlays.append(title)
         return title

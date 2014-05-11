@@ -12,11 +12,8 @@ from .artist.tick_label_artist import XTickLabelArtist, YTickLabelArtist
 from .artist.line_artist import LineArtist
 from .layout.bbox_transform import BaseTransform, BboxTransform
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
+from .style import config
 from .utils.drawing import broadcast_points
-
-
-DEFAULT_COLOR = 'dimgray'
-DEFAULT_OFFSET = 8.0
 
 
 class BaseAxis(AbstractOverlay):
@@ -38,7 +35,7 @@ class BaseAxis(AbstractOverlay):
     tick_artist = Instance(LineArtist)
 
     #: Artist responsible for drawing the axis line.
-    line_artist = Instance(LineArtist, {'color': DEFAULT_COLOR})
+    line_artist = Instance(LineArtist)
 
     #------------------------------------------------------------------------
     # Private Traits
@@ -132,13 +129,17 @@ class XAxis(BaseAxis):
 
     locus = DelegatesTo('component', 'y')
 
+    def _line_artist_default(self):
+        return LineArtist(color=config.get('axis.line.color'))
+
     def _tick_artist_default(self):
-        return XTickArtist(color=DEFAULT_COLOR,
+        return XTickArtist(color=config.get('axis.tick.color'),
                            locus=self.locus,
                            transform=self.transform)
 
     def _tick_label_artist_default(self):
-        return XTickLabelArtist(offset=-DEFAULT_OFFSET, color=DEFAULT_COLOR)
+        return XTickLabelArtist(offset=-config.get('axis.tick_label.offset'),
+                                color=config.get('axis.tick_label.color'))
 
     def _tick_grid_default(self):
         return XGridLayout(data_bbox=self.component.data_bbox)
@@ -160,13 +161,17 @@ class YAxis(BaseAxis):
 
     locus = DelegatesTo('component', 'x')
 
+    def _line_artist_default(self):
+        return LineArtist(color=config.get('axis.line.color'))
+
     def _tick_artist_default(self):
-        return YTickArtist(color=DEFAULT_COLOR,
+        return YTickArtist(color=config.get('axis.tick.color'),
                            locus=self.locus,
                            transform=self.transform)
 
     def _tick_label_artist_default(self):
-        return YTickLabelArtist(offset=-DEFAULT_OFFSET, color=DEFAULT_COLOR)
+        return YTickLabelArtist(offset=-config.get('axis.tick_label.offset'),
+                                color=config.get('axis.tick_label.color'))
 
     def _tick_grid_default(self):
         return YGridLayout(data_bbox=self.component.data_bbox)

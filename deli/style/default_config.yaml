@@ -1,0 +1,14 @@
+color: 'black'
+edge_color: 'black'
+fill_color: 'cornflowerblue'
+
+line.style: 'solid'
+line.width: 1
+
+font: 'modern 13'
+
+title.font: 'modern 15'
+
+axis.color: 'dimgray'
+axis.tick_label.offset: 8.0
+

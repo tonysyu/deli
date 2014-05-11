@@ -3,19 +3,21 @@ import numpy as np
 from enable.api import ColorTrait, LineStyle
 from traits.api import CFloat, HasStrictTraits, Range
 
+from ..style import config
+
 
 class LineArtist(HasStrictTraits):
     """ A Flyweight object for drawing lines.
     """
 
     # The color of the grid lines.
-    color = ColorTrait('black')
+    color = ColorTrait(config.get('line.color'))
 
     # The style (i.e., dash pattern) of the grid lines.
-    style = LineStyle('solid')
+    style = LineStyle(config.get('line.style'))
 
     # The thickness, in pixels, of the grid lines.
-    width = CFloat(1)
+    width = CFloat(config.get('line.width'))
 
     # Overall alpha value of the image. Ranges from 0.0 for transparent to 1.0
     alpha = Range(0.0, 1.0, 1.0)

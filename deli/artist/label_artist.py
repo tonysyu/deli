@@ -2,10 +2,12 @@
 """
 from math import pi
 
-from enable.api import black_color_trait
+from enable.api import ColorTrait
 from kiva.trait_defs.kiva_font_trait import KivaFont
 from traits.api import (Enum, Float, HasStrictTraits, Int, Property, Str,
                         cached_property)
+
+from ..style import config
 
 
 class LabelArtist(HasStrictTraits):
@@ -19,10 +21,10 @@ class LabelArtist(HasStrictTraits):
     rotate_angle = Float(0)
 
     #: The color of the label text.
-    color = black_color_trait
+    color = ColorTrait(config.get('text.label.color'))
 
     #: The font of the label text.
-    font = KivaFont('modern 13')
+    font = KivaFont(config.get('text.label.font'))
 
     #: Number of pixels of margin around the label, for both X and Y dimensions.
     margin = Int(2)
