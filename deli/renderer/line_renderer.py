@@ -15,7 +15,7 @@ class LineRenderer(BasePointRenderer):
     line = Instance(LineArtist, ())
 
     #------------------------------------------------------------------------
-    # Private traits
+    #  Public interface
     #------------------------------------------------------------------------
 
     def get_screen_points(self):

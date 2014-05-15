@@ -18,7 +18,6 @@ class Demo(Window):
 
         renderer = ImageRenderer(data=image, data_bbox=canvas.data_bbox)
         canvas.add(renderer)
-        canvas.renderers['image'] = [renderer]
         return canvas
 
 

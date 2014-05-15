@@ -68,6 +68,12 @@ class PlotCanvas(DataCanvas):
 
         return self.renderers[name]
 
+    def add(self, renderer, name=None):
+        if name is None:
+            name = new_item_name(self.renderers, name_template='plot_{}')
+        super(PlotCanvas, self).add(renderer)
+        self.renderers[name] = [renderer]
+
     #------------------------------------------------------------------------
     # Private methods
     #------------------------------------------------------------------------
