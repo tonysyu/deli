@@ -2,21 +2,23 @@ import numpy as np
 
 from deli.demo_utils import Window
 from deli.plot_canvas import PlotCanvas
+from deli.renderer.line_renderer import LineRenderer
 from deli.tools.data_cursor_tool import DataCursorTool
-from deli.utils.data_structures import NoisyDict
 
 
 class Demo(Window):
 
     def setup_canvas(self):
         x = np.linspace(0, 2 * np.pi)
-        pd = NoisyDict(x=x, y1=np.sin(x), y2=np.cos(x))
+        y1 = np.sin(x)
+        y2 = np.cos(x)
 
-        canvas = PlotCanvas(data=pd)
-        canvas.title.text = "Line Plot"
+        canvas = PlotCanvas()
+        canvas.title.text = "Data cursor"
 
-        for y_name, color in zip(('y1', 'y2'), ('black', 'red')):
-            renderer = canvas.plot(('x', y_name), color=color)[0]
+        for y, color in zip((y1, y2), ('black', 'red')):
+            renderer = LineRenderer(x_data=x, y_data=y, color=color)
+            canvas.add(renderer)
             DataCursorTool.attach_to(renderer)
 
         return canvas

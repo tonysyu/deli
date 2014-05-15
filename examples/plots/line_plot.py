@@ -3,21 +3,20 @@ from scipy.special import jn
 
 from deli.demo_utils import Window
 from deli.plot_canvas import PlotCanvas
-from deli.utils.data_structures import NoisyDict
+from deli.renderer.line_renderer import LineRenderer
 
 
 class Demo(Window):
 
     def setup_canvas(self):
-        x = linspace(-2.0, 10.0, 100)
-        pd = NoisyDict(x=x)
-        for i in range(5):
-            pd['y' + str(i)] = jn(i, x)
-
-        canvas = PlotCanvas(data=pd)
+        canvas = PlotCanvas()
         canvas.title.text = "Line Plot"
-        canvas.plot(('x', 'y0', 'y1', 'y2'), color='red')
-        canvas.plot(('x', 'y3'), color='blue')
+
+        x = linspace(-2.0, 10.0, 100)
+        for i, color in enumerate(('red', 'green', 'blue')):
+            y = jn(i, x)
+            renderer = LineRenderer(x_data=x, y_data=y, color=color)
+            canvas.add(renderer)
         return canvas
 
 

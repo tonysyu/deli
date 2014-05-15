@@ -1,6 +1,6 @@
 """ Defines the base class for XY plots.
 """
-from traits.api import Instance, Range
+from traits.api import CArray, Instance, Property, Range
 
 from ..abstract_data_source import AbstractDataSource
 from ..array_data_source import ArrayDataSource
@@ -20,17 +20,23 @@ class BasePointRenderer(BaseRenderer):
     # Data-related traits
     #------------------------------------------------------------------------
 
-    # The data source to use for the x coordinate.
+    #: The data source to use for the x coordinate.
     x_src = Instance(ArrayDataSource)
 
-    # The data source to use as y points.
+    #: The data source to use as y points.
     y_src = Instance(AbstractDataSource)
+
+    #: Convenience property for creating `x_src`.
+    x_data = Property(CArray)
+
+    #: Convenience property for creating `y_src`.
+    y_data = Property(CArray)
 
     #------------------------------------------------------------------------
     # Appearance-related traits
     #------------------------------------------------------------------------
 
-    # Overall alpha value of the image. Ranges from 0.0 for transparent to 1.0
+    #: Overall alpha value of the image. Ranges from 0.0 for transparent to 1.0
     alpha = Range(0.0, 1.0, 1.0)
 
     #------------------------------------------------------------------------
@@ -42,3 +48,22 @@ class BasePointRenderer(BaseRenderer):
         """
         pts = self.get_screen_points()
         self._render(gc, pts)
+
+    #--------------------------------------------------------------------------
+    #  BaseRenderer interface
+    #--------------------------------------------------------------------------
+
+    def _get_data_extents(self):
+        x = self.x_src.get_data()
+        y = self.y_src.get_data()
+        return (x.min(), y.min(), x.max(), y.max())
+
+    #--------------------------------------------------------------------------
+    #  Traits definitions
+    #--------------------------------------------------------------------------
+
+    def _set_x_data(self, x):
+        self.x_src = ArrayDataSource(x)
+
+    def _set_y_data(self, y):
+        self.y_src = ArrayDataSource(y)

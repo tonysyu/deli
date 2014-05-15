@@ -4,9 +4,9 @@ from traits.api import Instance
 
 from deli.demo_utils import Window
 from deli.plot_canvas import PlotCanvas
+from deli.renderer.line_renderer import LineRenderer
 from deli.tools.base_tool import BaseTool, BaseToolState
 from deli.tools.key_spec import KeySpec, shift_key
-from deli.utils.data_structures import NoisyDict
 
 
 class PrintTool(BaseTool):
@@ -45,12 +45,12 @@ class PrintOnMove(BaseToolState):
 class Demo(Window):
 
     def setup_canvas(self):
-        x = y = linspace(0, 1)
-        pd = NoisyDict(x=x, y=y)
-
-        canvas = PlotCanvas(data=pd)
+        canvas = PlotCanvas()
         canvas.title.text = "Line Plot"
-        canvas.plot(('x', 'y'))
+
+        x = y = linspace(0, 1)
+        renderer = LineRenderer(x_data=x, y_data=y)
+        canvas.add(renderer)
 
         PrintTool.attach_to(canvas)
         return canvas
