@@ -14,9 +14,8 @@ class Demo(Window):
 
         canvas = PlotCanvas(data=pd)
         height, width = image.shape[:2]
-        canvas.data_bbox.bounds = (0, 0, width, height)
 
-        renderer = ImageRenderer(data=image, data_bbox=canvas.data_bbox)
+        renderer = ImageRenderer(data=image)
         canvas.add(renderer)
         return canvas
 

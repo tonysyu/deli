@@ -158,3 +158,10 @@ class BoundingBox(HasStrictTraits):
         y_span = calc_bounds(y_data, self.y_limits)
         if y_span is not None:
             self.y_limits = y_span
+
+    def update_from_extents(self, x_min, y_min, x_max, y_max):
+        x0 = min(x_min, self.x_limits[0])
+        x1 = max(x_max, self.x_limits[1])
+        y0 = min(y_min, self.y_limits[0])
+        y1 = max(y_max, self.y_limits[1])
+        self.bounds = (x0, y0, x1 - x0, y1 - y0)

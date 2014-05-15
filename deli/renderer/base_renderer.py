@@ -1,6 +1,6 @@
 """ Defines the base class for XY plots.
 """
-from traits.api import Instance, Property
+from traits.api import Instance, Property, Tuple
 
 from ..plot_component import PlotComponent
 from ..layout.bounding_box import BoundingBox
@@ -22,7 +22,12 @@ class BaseRenderer(PlotComponent):
     # Data-related traits
     #------------------------------------------------------------------------
 
-    #: Bounding box for data in plot.
+    #: The extents of the data (x_min, y_min, x_max, y_max)
+    data_extents = Property(Tuple)
+
+    #: Bounding box for data in the plot canvas. Note that this bounding box
+    #: does not just describe the data in this renderer; it's the currently
+    #: displayed limits of the plot in data space.
     data_bbox = Instance(BoundingBox)
 
     #: Transform from data space to screen space.
@@ -37,3 +42,11 @@ class BaseRenderer(PlotComponent):
 
     def _get_screen_to_data(self):
         return self.data_to_screen.inverted()
+
+    #--------------------------------------------------------------------------
+    #  BaseRenderer interface
+    #--------------------------------------------------------------------------
+
+    def _get_data_extents(self):
+        msg = "`BaseRenderer` subclasses must implement `_get_data_extents`"
+        raise NotImplementedError(msg)

@@ -49,12 +49,9 @@ class PlotCanvas(DataCanvas):
         renderers : list
             Renderers created in response to this call to plot()
         """
-        name = new_item_name(self.renderers, name_template='plot_{}')
-
         x_src = ArrayDataSource(self.data[data[0]])
         self.data_bbox.update_from_x_data(x_src.get_data())
 
-        new_renderers = []
         for y_name in data[1:]:
             y_src = ArrayDataSource(self.data[y_name])
             self.data_bbox.update_from_y_data(y_src.get_data())
@@ -63,16 +60,15 @@ class PlotCanvas(DataCanvas):
                                     data_bbox=self.data_bbox, **styles)
 
             self.add(renderer)
-            new_renderers.append(renderer)
-        self.renderers[name] = new_renderers
-
-        return self.renderers[name]
+        return [renderer]
 
     def add(self, renderer, name=None):
         if name is None:
             name = new_item_name(self.renderers, name_template='plot_{}')
         super(PlotCanvas, self).add(renderer)
         self.renderers[name] = [renderer]
+        self.data_bbox.update_from_extents(*renderer.data_extents)
+        renderer.data_bbox = self.data_bbox
 
     #------------------------------------------------------------------------
     # Private methods

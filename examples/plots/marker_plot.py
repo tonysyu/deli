@@ -16,12 +16,10 @@ class Demo(Window):
 
         canvas = PlotCanvas(data=pd)
         canvas.title.text = "Scatter Plot"
-        canvas.data_bbox.bounds = (x.min(), y.min(), x.ptp(), y.ptp())
 
         x_src = ArrayDataSource(x)
         y_src = ArrayDataSource(y)
-        renderer = MarkerRenderer(x_src=x_src, y_src=y_src,
-                                  data_bbox=canvas.data_bbox)
+        renderer = MarkerRenderer(x_src=x_src, y_src=y_src)
         canvas.add(renderer)
         return canvas
 

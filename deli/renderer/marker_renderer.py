@@ -26,6 +26,15 @@ class MarkerRenderer(BasePointRenderer):
         return self.data_to_screen.transform(xy_points)
 
     #--------------------------------------------------------------------------
+    #  BaseRenderer interface
+    #--------------------------------------------------------------------------
+
+    def _get_data_extents(self):
+        x = self.x_src.get_data()
+        y = self.y_src.get_data()
+        return (x.min(), y.min(), x.max(), y.max())
+
+    #--------------------------------------------------------------------------
     #  Private interface
     #--------------------------------------------------------------------------
 

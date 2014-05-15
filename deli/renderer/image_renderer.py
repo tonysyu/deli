@@ -21,3 +21,7 @@ class ImageRenderer(BaseRenderer):
         with gc:
             gc.clip_to_rect(*self.screen_bbox.bounds)
             self.image.draw(gc, self.data, rect)
+
+    def _get_data_extents(self):
+        height, width = self.data.shape[:2]
+        return (0, 0, width, height)
