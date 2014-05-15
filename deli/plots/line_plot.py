@@ -3,11 +3,11 @@ import numpy as np
 from traits.api import DelegatesTo, Instance
 
 from ..artist.line_artist import LineArtist
-from .base_point_renderer import BasePointRenderer
+from .base_point_plot import BasePointPlot
 
 
-class LineRenderer(BasePointRenderer):
-    """ A renderer for a line plot.
+class LinePlot(BasePointPlot):
+    """ A plot for line data.
     """
     # The color of the line.
     color = DelegatesTo('line')

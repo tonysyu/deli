@@ -4,7 +4,7 @@ from traits.api import Instance
 
 from deli.demo_utils import Window
 from deli.plot_canvas import PlotCanvas
-from deli.renderer.line_renderer import LineRenderer
+from deli.plots.line_plot import LinePlot
 from deli.tools.base_tool import BaseTool, BaseToolState
 from deli.tools.key_spec import KeySpec, shift_key
 
@@ -49,8 +49,8 @@ class Demo(Window):
         canvas.title.text = "Line Plot"
 
         x = y = linspace(0, 1)
-        renderer = LineRenderer(x_data=x, y_data=y)
-        canvas.add(renderer)
+        plot = LinePlot(x_data=x, y_data=y)
+        canvas.add(plot)
 
         PrintTool.attach_to(canvas)
         return canvas

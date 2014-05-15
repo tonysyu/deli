@@ -3,7 +3,7 @@ from traits.api import CArray, HasStrictTraits, Instance, Str
 
 from ..abstract_overlay import AbstractOverlay
 from ..artist.flag_label_artist import FlagLabelArtist
-from ..renderer.base_point_renderer import BasePointRenderer
+from ..plots.base_point_plot import BasePointPlot
 from ..utils.text import switch_delimiters
 from .base_tool import BaseTool
 
@@ -68,7 +68,7 @@ class DataCursorOverlay(AbstractOverlay):
 
 class DataCursorTool(BaseTool):
 
-    component = Instance(BasePointRenderer)
+    component = Instance(BasePointPlot)
 
     overlay = Instance(AbstractOverlay)
 

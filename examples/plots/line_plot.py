@@ -3,7 +3,7 @@ from scipy.special import jn
 
 from deli.demo_utils import Window
 from deli.plot_canvas import PlotCanvas
-from deli.renderer.line_renderer import LineRenderer
+from deli.plots.line_plot import LinePlot
 
 
 class Demo(Window):
@@ -15,8 +15,8 @@ class Demo(Window):
         x = linspace(-2.0, 10.0, 100)
         for i, color in enumerate(('red', 'green', 'blue')):
             y = jn(i, x)
-            renderer = LineRenderer(x_data=x, y_data=y, color=color)
-            canvas.add(renderer)
+            plot = LinePlot(x_data=x, y_data=y, color=color)
+            canvas.add(plot)
         return canvas
 
 

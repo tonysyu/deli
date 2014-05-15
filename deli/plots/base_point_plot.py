@@ -4,14 +4,14 @@ from traits.api import CArray, Instance, Property, Range
 
 from ..abstract_data_source import AbstractDataSource
 from ..array_data_source import ArrayDataSource
-from .base_renderer import BaseRenderer
+from .base_plot import BasePlot
 
 
-class BasePointRenderer(BaseRenderer):
+class BasePointPlot(BasePlot):
     """ Base class for simple point data plots that consist of a single x data
     array and a single y data array.
 
-    Subclasses handle the actual rendering, but this base class takes care of
+    Subclasses handle the actual plotting, but this base class takes care of
     most of making sure events are wired up between mappers and data or screen
     space changes, etc.
     """
@@ -50,7 +50,7 @@ class BasePointRenderer(BaseRenderer):
         self._render(gc, pts)
 
     #--------------------------------------------------------------------------
-    #  BaseRenderer interface
+    #  BasePlot interface
     #--------------------------------------------------------------------------
 
     def _get_data_extents(self):

@@ -22,7 +22,7 @@ def replace_in_list(a_list, old, new):
 class DataCanvas(OverlayPlotContainer):
     """ Represents a mapping from 2-D data space into 2-D screen space.
 
-    It can house renderers and other plot components, and otherwise behaves
+    It can house plots and other plot components, and otherwise behaves
     just like a normal PlotContainer.
     """
 

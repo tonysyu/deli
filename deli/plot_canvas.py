@@ -1,15 +1,16 @@
 """ Defines the Plot class.
 """
-from traits.api import Dict, Instance, List, Str
+from traits.api import Dict, Instance, Str
 
 from .data_canvas import DataCanvas
 from .plot_label import PlotLabel
+from .plots.base_plot import BasePlot
 from .style import config
 from .utils.misc import new_item_name
 
 
 class PlotCanvas(DataCanvas):
-    """ Represents a correlated set of data, renderers, and axes in a single
+    """ Represents a correlated set of data, plots, and axes in a single
     screen region.
     """
 
@@ -17,8 +18,8 @@ class PlotCanvas(DataCanvas):
     # General plotting traits
     #------------------------------------------------------------------------
 
-    #: Mapping of renderer names to *lists* of plot renderers.
-    renderers = Dict(Str, List)
+    #: Mapping of plot names to *lists* of plots.
+    plots = Dict(Str, Instance(BasePlot))
 
     #------------------------------------------------------------------------
     # Annotations and decorations
@@ -31,13 +32,13 @@ class PlotCanvas(DataCanvas):
     # Public methods
     #------------------------------------------------------------------------
 
-    def add(self, renderer, name=None):
+    def add(self, plot, name=None):
         if name is None:
-            name = new_item_name(self.renderers, name_template='plot_{}')
-        super(PlotCanvas, self).add(renderer)
-        self.renderers[name] = [renderer]
-        self.data_bbox.update_from_extents(*renderer.data_extents)
-        renderer.data_bbox = self.data_bbox
+            name = new_item_name(self.plots, name_template='plot_{}')
+        super(PlotCanvas, self).add(plot)
+        self.plots[name] = plot
+        self.data_bbox.update_from_extents(*plot.data_extents)
+        plot.data_bbox = self.data_bbox
 
     #------------------------------------------------------------------------
     # Private methods

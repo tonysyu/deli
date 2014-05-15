@@ -2,7 +2,7 @@ import numpy as np
 
 from deli.demo_utils import Window
 from deli.plot_canvas import PlotCanvas
-from deli.renderer.line_renderer import LineRenderer
+from deli.plots.line_plot import LinePlot
 from deli.tools.data_cursor_tool import DataCursorTool
 
 
@@ -17,9 +17,9 @@ class Demo(Window):
         canvas.title.text = "Data cursor"
 
         for y, color in zip((y1, y2), ('black', 'red')):
-            renderer = LineRenderer(x_data=x, y_data=y, color=color)
-            canvas.add(renderer)
-            DataCursorTool.attach_to(renderer)
+            plot = LinePlot(x_data=x, y_data=y, color=color)
+            canvas.add(plot)
+            DataCursorTool.attach_to(plot)
 
         return canvas
 

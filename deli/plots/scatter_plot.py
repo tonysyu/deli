@@ -3,11 +3,11 @@ import numpy as np
 from traits.api import DelegatesTo, Instance
 
 from ..artist.marker_artist import MarkerArtist
-from .base_point_renderer import BasePointRenderer
+from .base_point_plot import BasePointPlot
 
 
-class MarkerRenderer(BasePointRenderer):
-    """ A renderer for a marker (scatter) plot.
+class ScatterPlot(BasePointPlot):
+    """ A plot for a data points that should display as markers
     """
     # The color of the markers.
     color = DelegatesTo('marker')

@@ -1,13 +1,11 @@
-""" Defines the renderer for images.
-"""
 from traits.api import Array, Instance
 
 from ..artist.image_artist import ImageArtist
-from .base_renderer import BaseRenderer
+from .base_plot import BasePlot
 
 
-class ImageRenderer(BaseRenderer):
-    """ Renderer for images. """
+class ImagePlot(BasePlot):
+    """ A plot for image data. """
 
     data = Array
 
