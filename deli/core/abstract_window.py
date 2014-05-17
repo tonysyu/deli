@@ -24,15 +24,15 @@ def Alias(name):
 class AbstractWindow(HasTraits):
 
     # The top-level component that this window houses
-    component     = Instance(Component)
+    component = Instance(Component)
 
     # A reference to the nested component that has focus.  This is part of the
     # manual mechanism for determining keyboard focus.
-    focus_owner   = Instance(Interactor)
+    focus_owner = Instance(Interactor)
 
     # If set, this is the component to which all mouse events are passed,
     # bypassing the normal event propagation mechanism.
-    mouse_owner   = Instance(Interactor)
+    mouse_owner = Instance(Interactor)
 
     # The transform to apply to mouse event positions to put them into the
     # relative coordinates of the mouse_owner component.
