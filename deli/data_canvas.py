@@ -1,12 +1,11 @@
 import numpy as np
 
 from enable.api import Container
-from enable.simple_layout import (simple_container_get_preferred_size,
-                                  simple_container_do_layout)
-from traits.api import Instance, Property, Str
+from traits.api import Callable, Instance, Property, Str
 
 from .layout.bbox_transform import BboxTransform
 from .layout.bounding_box import BoundingBox
+from .layout.box_layout import enforce_screen_aspect_ratio
 from .plot_component import DEFAULT_DRAWING_ORDER
 
 
@@ -72,14 +71,11 @@ class DataCanvas(Container):
     #  Layout
     #--------------------------------------------------------------------------
 
-    def get_preferred_size(self, components=None):
-        """ Returns the preferred size (width, height) for this component.
+    calculate_layout = Callable
 
-        Overrides PlotComponent
-        """
-        return simple_container_get_preferred_size(self, components=components)
+    def _calculate_layout_default(self):
+        return enforce_screen_aspect_ratio
 
     def _do_layout(self):
-        """ Actually performs a layout (called by do_layout()).
-        """
-        simple_container_do_layout(self)
+        """ Adjust component layout (called by do_layout()). """
+        self.calculate_layout(self)

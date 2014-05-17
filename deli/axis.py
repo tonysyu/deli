@@ -3,7 +3,8 @@
 import numpy as np
 from matplotlib.transforms import blended_transform_factory, IdentityTransform
 
-from traits.api import DelegatesTo, Instance, Property, cached_property
+from traits.api import (Array, DelegatesTo, Instance, Property,
+                        cached_property, on_trait_change)
 
 from .abstract_overlay import AbstractOverlay
 from .artist.label_artist import LabelArtist
@@ -51,6 +52,15 @@ class BaseAxis(AbstractOverlay):
     #: Blended transform combining axial and orthogonal transforms.
     transform = Property(Instance(BaseTransform))
 
+    #--------------------------------------------------------------------------
+    #  Protected interface
+    #--------------------------------------------------------------------------
+
+    locus = Array
+
+    @on_trait_change('component.position')
+    def _update_locus(self):
+        self.tick_artist.locus = self.locus
     #------------------------------------------------------------------------
     # Public interface
     #------------------------------------------------------------------------
