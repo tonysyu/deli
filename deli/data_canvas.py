@@ -1,8 +1,8 @@
 import numpy as np
 
-from enable.api import Container
 from traits.api import Callable, Instance, Property, Str
 
+from .core.container import Container
 from .layout.bbox_transform import BboxTransform
 from .layout.bounding_box import BoundingBox
 from .layout.box_layout import enforce_screen_aspect_ratio

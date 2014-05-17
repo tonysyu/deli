@@ -1,8 +1,8 @@
 """ Defines the PlotComponent class.
 """
-from enable.api import Component
 from traits.api import Disallow, Instance, Str
 
+from .core.component import Component
 from .layout.bounding_box import BoundingBox
 
 

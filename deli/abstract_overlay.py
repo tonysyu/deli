@@ -3,9 +3,9 @@
 This class is primarily used so that tools can easily distinguish between
 data-related plot items and the decorators on them.
 """
-from enable.api import Component
 from traits.api import Instance
 
+from .core.component import Component
 from .plot_component import PlotComponent
 
 

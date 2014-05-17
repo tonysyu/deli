@@ -26,8 +26,9 @@ of interest:
 - on_drag_leave
 
 """
-from enable.component import Component
 from traits.api import Dict, HasStrictTraits, Instance, Str, WeakRef
+
+from ..core.component import Component
 
 
 NULL_HANDLER = lambda x: None

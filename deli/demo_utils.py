@@ -1,9 +1,9 @@
 from abc import abstractmethod
 
-from enable.api import ComponentEditor
 from traits.api import ABCHasStrictTraits, Bool, Instance, Str, Tuple
 from traitsui.api import UItem, View
 
+from deli.core.component_editor import ComponentEditor
 from deli.plot_canvas import PlotCanvas
 from deli.tools.pan_tool import PanTool
 from deli.tools.zoom_tool import ZoomTool
