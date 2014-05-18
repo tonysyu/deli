@@ -13,6 +13,13 @@ from .coordinate_box import CoordinateBox
 DRAWING_ORDER = ['background', 'underlay', 'border', 'overlay']
 
 
+class NullDispatch(object):
+
+    @staticmethod
+    def dispatch(event, suffix):
+        pass
+
+
 class Component(CoordinateBox):
     """ Component is the base class for most objects.
 
@@ -302,52 +309,32 @@ class Component(CoordinateBox):
     def dispatch(self, event, suffix):
         """ Dispatches a mouse event based on the current event state.
 
-        The following objects get a chance to handle the event:
-
-        1. Any overlays, in reverse order that they were added and are drawn.
-        2. The component itself.
-        3. Any underlays, in reverse order that they were added and are drawn.
-        4. Any listener tools.
-
         If any object in this sequence handles the event, the method returns
-        without proceeding any further through the sequence. If nothing
-        handles the event, the method simply returns.
+        without proceeding any further through the sequence.
 
         Parameters
         ----------
-        event : an Enable MouseEvent
-            A mouse event.
+        event : BaseEvent
+            A mouse or key event.
         suffix : string
             The name of the mouse event as a suffix to the event state name,
-            e.g. "_left_down" or "_window_enter".
+            e.g. "left_down" or "window_enter".
 
         """
         if event.handled:
             return
 
-        # Dispatch to overlays in reverse of draw/added order
-        for overlay in self.overlays[::-1]:
-            overlay.dispatch(event, suffix)
+        inherited = getattr(super(Component, self), 'dispatch', NullDispatch)
+        # Dispatch to components in reverse of drawn/added order
+        dispatch_chain = (reversed(self.overlays), [inherited],
+                          reversed(self.underlays), reversed(self.tools))
+        self._dispatch_to_component_chain(dispatch_chain, event, suffix)
+
+    def _dispatch_to_component_chain(self, component_lists, event, suffix):
+        for component in chain(*component_lists):
+            component.dispatch(event, suffix)
             if event.handled:
-                break
-
-        if not event.handled:
-            parent = super(Component, self)
-            if hasattr(parent, 'dispatch'):
-                parent.dispatch(event, suffix)
-
-        if not event.handled:
-            # Dispatch to underlays in reverse of draw/added order
-            for underlay in self.underlays[::-1]:
-                underlay.dispatch(event, suffix)
-                if event.handled:
-                    break
-
-        # Now that everyone who might veto/handle the event has had a chance
-        # to receive it, dispatch it to our list of listener tools.
-        if not event.handled:
-            for tool in self.tools:
-                tool.dispatch(event, suffix)
+                return
 
     def _get_layout_needed(self):
         return self._layout_needed
