@@ -202,7 +202,6 @@ class AbstractWindow(HasStrictTraits):
             # Test to see if we need to generate a mouse_leave event
             if self._prev_event_handler:
                 if not self._prev_event_handler.is_in(mouse_event.x, mouse_event.y):
-                    self._prev_event_handler.dispatch(mouse_event, "pre_mouse_leave")
                     mouse_event.handled = False
                     self._prev_event_handler.dispatch(mouse_event, "mouse_leave")
                     self._prev_event_handler = None
@@ -211,12 +210,10 @@ class AbstractWindow(HasStrictTraits):
                 # Test to see if we need to generate a mouse_enter event
                 if self._prev_event_handler != self.component:
                     self._prev_event_handler = self.component
-                    self.component.dispatch(mouse_event, "pre_mouse_enter")
                     mouse_event.handled = False
                     self.component.dispatch(mouse_event, "mouse_enter")
 
                 # Fire the actual event
-                self.component.dispatch(mouse_event, "pre_" + event_name)
                 mouse_event.handled = False
                 self.component.dispatch(mouse_event, event_name)
         return mouse_event.handled

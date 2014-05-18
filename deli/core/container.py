@@ -271,28 +271,22 @@ class Container(Component):
             try:
                 component_set = set(components)
 
-                # For 'real' mouse events (i.e., not pre_mouse_* events),
-                # notify the previous listening components of a mouse leave
-                if not suffix.startswith('pre_'):
-                    components_left = self._prev_event_handlers - component_set
-                    self._notify_if_mouse_event(components_left, event,
-                                                'mouse_leave')
+                components_left = self._prev_event_handlers - component_set
+                self._notify_if_mouse_event(components_left, event,
+                                            'mouse_leave')
 
-                    if suffix != 'mouse_leave':
-                        components_entered = (component_set
-                                              - self._prev_event_handlers)
-                        self._notify_if_mouse_event(components_entered, event,
+                if suffix != 'mouse_leave':
+                    components_entered = (component_set
+                                          - self._prev_event_handlers)
+                    self._notify_if_mouse_event(components_entered, event,
                                                     'mouse_enter')
                 # Handle the actual event
                 # Only add event handlers to the list of previous event handlers
-                # if they actually receive the event (and the event is not a
-                # pre_* event.
-                if not suffix.startswith('pre_'):
-                    self._prev_event_handlers = set()
+                # if they actually receive the event
+                self._prev_event_handlers = set()
                 for component in components:
                     component.dispatch(event, suffix)
-                    if not suffix.startswith('pre_'):
-                        self._prev_event_handlers.add(component)
+                    self._prev_event_handlers.add(component)
                     if event.handled:
                         break
             finally:
@@ -307,7 +301,6 @@ class Container(Component):
 
         if isinstance(event, MouseEvent):
             for component in components:
-                component.dispatch(event, 'pre_' + suffix)
                 component.dispatch(event, suffix)
                 event.handled = False
 
