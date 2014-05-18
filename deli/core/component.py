@@ -1,4 +1,6 @@
 """ Defines the Component class """
+from itertools import chain
+
 import numpy as np
 
 from enable.colors import black_color_trait, white_color_trait
@@ -246,10 +248,14 @@ class Component(CoordinateBox, Interactor):
                 its best effort to render as fast as possible, even if there is
                 an aesthetic cost.
         """
+        if not self.visible:
+            return
+
         if self.layout_needed:
             self.do_layout()
 
-        self._draw(gc, view_bounds, mode)
+        for layer in self.draw_order:
+            self._dispatch_draw(layer, gc, view_bounds, mode)
 
     def request_redraw(self):
         """
@@ -257,24 +263,6 @@ class Component(CoordinateBox, Interactor):
         its parent for a repaint.
         """
         self._request_redraw()
-
-    def invalidate_draw(self, self_relative=False):
-        """ Invalidates any backbuffer that may exist, and notifies our parents
-        of any damaged regions.
-
-        Call this method whenever a component's internal state
-        changes such that it must be redrawn on the next draw() call.
-        """
-        if self.container is not None:
-            self.container.invalidate_draw(self_relative=True)
-
-        if self._window is not None:
-            self._window.invalidate_draw(self_relative=True)
-
-    def invalidate_and_redraw(self):
-        """Convenience method to invalidate our contents and request redraw"""
-        self.invalidate_draw()
-        self.request_redraw()
 
     def is_in(self, x, y):
         # A basic implementation of is_in(); subclasses should provide their
@@ -320,18 +308,14 @@ class Component(CoordinateBox, Interactor):
                 self.bounds = size
             self._do_layout()
             self._layout_needed = False
-        for underlay in self.underlays:
-            if underlay.visible or underlay.invisible_layout:
-                underlay.do_layout()
-        for overlay in self.overlays:
-            if overlay.visible or overlay.invisible_layout:
-                overlay.do_layout()
+
+        for layer in chain(self.underlays, self.overlays):
+            if layer.visible or layer.invisible_layout:
+                layer.do_layout()
 
     def get_preferred_size(self):
-        """ Returns the size (width,height) that is preferred for this component
-        """
-        size = [0, 0]
-        return size
+        """ Return the preferred size (width, height) for this component. """
+        return [0, 0]
 
     #------------------------------------------------------------------------
     # Protected methods
@@ -342,25 +326,6 @@ class Component(CoordinateBox, Interactor):
             self.container.request_redraw()
         elif self._window:
             self._window.redraw()
-
-    def _draw(self, gc, view_bounds=None, mode="default"):
-        """ Draws the component, paying attention to **draw_order**, including
-        overlays, underlays, and the like.
-
-        This method is the main draw handling logic in plot components.
-        The reason for implementing _draw() instead of overriding the top-level
-        draw() method is that the Enable base classes may do things in draw()
-        that mustn't be interfered with (e.g., the Viewable mix-in).
-
-        """
-        if not self.visible:
-            return
-
-        if self.layout_needed:
-            self.do_layout()
-
-        for layer in self.draw_order:
-            self._dispatch_draw(layer, gc, view_bounds, mode)
 
     def _dispatch_draw(self, layer, gc, view_bounds, mode):
         """ Renders the named *layer* of this component.
@@ -480,7 +445,7 @@ class Component(CoordinateBox, Interactor):
         return self._layout_needed
 
     def _tools_items_changed(self):
-        self.invalidate_and_redraw()
+        self.request_redraw()
 
     #------------------------------------------------------------------------
     # Event handlers

@@ -103,7 +103,6 @@ class BaseGrid(AbstractOverlay):
         """ Called when an attribute that affects the appearance of the grid
         is changed.
         """
-        self.component.invalidate_draw()
         self.component.request_redraw()
 
     def _orientation_changed(self):

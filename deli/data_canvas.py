@@ -44,7 +44,6 @@ class DataCanvas(Container):
 
     def _update_bbox(self):
         self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
-        self.invalidate_draw()
 
     #--------------------------------------------------------------------------
     #  Transformations

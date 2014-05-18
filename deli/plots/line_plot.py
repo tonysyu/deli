@@ -37,5 +37,4 @@ class LinePlot(BasePointPlot):
                 self.line.draw(gc, points)
 
     def _color_changed(self):
-        self.invalidate_draw()
         self.request_redraw()

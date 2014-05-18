@@ -154,7 +154,6 @@ class AbstractWindow(HasTraits):
 
     def _component_changed(self, old, new):
         if old is not None:
-            old.on_trait_change(self.component_bounds_changed, 'bounds', remove=True)
             old.window = None
 
         if new is None:
@@ -167,21 +166,10 @@ class AbstractWindow(HasTraits):
         # toolkit control
         size = self._get_control_size()
         if (size is not None) and hasattr(self.component, "bounds"):
-            new.on_trait_change(self.component_bounds_changed, 'bounds')
             self.component.outer_position = [0, 0]
             self.component.outer_bounds = list(size)
         self._update_region = None
         self.redraw()
-
-    def component_bounds_changed(self, bounds):
-        """
-        Dynamic trait listener that handles our component changing its size;
-        bounds is a length-2 list of [width, height].
-        """
-        self.invalidate_draw()
-
-    def invalidate_draw(self, self_relative=False):
-        pass
 
     #---------------------------------------------------------------------------
     #  Generic keyboard event handler:

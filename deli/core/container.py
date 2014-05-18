@@ -59,6 +59,10 @@ class Container(Component):
     # under the component layers of the same name.
     container_under_layers = Tuple('background', 'underlay')
 
+    # The layers that the container will draw last, so that they appear
+    # over the component layers of the same name.
+    container_over_layers = Tuple('overlay', 'border')
+
     #------------------------------------------------------------------------
     # DOM-related traits
     # (Note: These are unused as of 8/13/2007)
@@ -103,8 +107,6 @@ class Container(Component):
             component.container = self
         self._components.extend(components)
 
-        self.invalidate_draw()
-
     def components_at(self, x, y):
         """
         Returns a list of the components underneath the given point (given in
@@ -133,7 +135,6 @@ class Container(Component):
         if self._components:
             for component in self._components:
                 component.cleanup(window)
-        return
 
     #------------------------------------------------------------------------
     # Protected methods
@@ -152,9 +153,7 @@ class Container(Component):
         # Give the container a chance to draw first for the layers that are
         # considered "under" or "at" the main layer level
         if layer in self.container_under_layers:
-            draw = getattr(self, '_draw_container_' + layer, None)
-            if draw:
-                draw(gc, view_bounds, mode)
+            self._draw_container_layer(layer, gc, view_bounds, mode)
 
         # Now transform coordinates and draw the children
         visible_components = self._get_visible_components(new_bounds)
@@ -164,12 +163,10 @@ class Container(Component):
                 for component in visible_components:
                     component._dispatch_draw(layer, gc, new_bounds, mode)
 
-        # The container's annotation and overlay layers draw over those of
-        # its components.
-        # FIXME: This needs to be abstracted so that when subclasses override
-        # the draw_order list, these are pulled from the subclass list instead
-        # of hardcoded here.
-        if layer in ('overlay', 'border'):
+        if layer in self.container_over_layers:
+            self._draw_container_layer(layer, gc, view_bounds, mode)
+
+    def _draw_container_layer(self, layer, gc, view_bounds, mode):
             draw = getattr(self, '_draw_container_' + layer, None)
             if draw:
                 draw(gc, view_bounds, mode)
@@ -331,7 +328,6 @@ class Container(Component):
         # event handling problem
         super(Container, self)._bounds_changed(old, new)
         self._layout_needed = True
-        self.invalidate_draw()
 
     def __components_items_changed(self, event):
         self._layout_needed = True
