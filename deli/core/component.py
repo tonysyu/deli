@@ -1,7 +1,7 @@
 """ Defines the Component class """
 
 from enable.colors import black_color_trait, white_color_trait
-from enable.enable_traits import bounds_trait, coordinate_trait, LineStyle
+from enable.enable_traits import LineStyle
 from kiva.constants import FILL
 from traits.api import (Any, Bool, Enum, Float, Instance, Int, List,
                         Property, Str, Trait)
@@ -210,18 +210,6 @@ class Component(CoordinateBox, Interactor):
     bgcolor = white_color_trait
 
     #------------------------------------------------------------------------
-    # Backbuffer traits
-    #------------------------------------------------------------------------
-
-    # drawn_outer_position specifies the outer position this component was drawn to
-    # on the last draw cycle.  This is used to determine what areas of the screen
-    # are damaged.
-    drawn_outer_position = coordinate_trait
-    # drawn_outer_bounds specifies the bounds of this component on the last draw
-    # cycle.  Used in conjunction with outer_position_last_draw
-    drawn_outer_bounds = bounds_trait
-
-    #------------------------------------------------------------------------
     # New layout/object containment hierarchy traits
     # These are not used yet.
     #------------------------------------------------------------------------
@@ -315,27 +303,18 @@ class Component(CoordinateBox, Interactor):
         """
         self._request_redraw()
 
-    def invalidate_draw(self, damaged_regions=None, self_relative=False):
+    def invalidate_draw(self, self_relative=False):
         """ Invalidates any backbuffer that may exist, and notifies our parents
         of any damaged regions.
 
         Call this method whenever a component's internal state
         changes such that it must be redrawn on the next draw() call.
         """
-        if damaged_regions is None:
-            damaged_regions = self._default_damaged_regions()
-
-        if self_relative:
-            damaged_regions = [[x + self.x, y + self.y, width, height]
-                               for x, y, width, height in damaged_regions]
-
         if self.container is not None:
-            self.container.invalidate_draw(damaged_regions=damaged_regions,
-                                           self_relative=True)
+            self.container.invalidate_draw(self_relative=True)
 
         if self._window is not None:
-            self._window.invalidate_draw(damaged_regions=damaged_regions,
-                                         self_relative=True)
+            self._window.invalidate_draw(self_relative=True)
 
     def invalidate_and_redraw(self):
         """Convenience method to invalidate our contents and request redraw"""
@@ -435,14 +414,6 @@ class Component(CoordinateBox, Interactor):
         elif self._window:
             self._window.redraw()
 
-    def _default_damaged_regions(self):
-        """Returns the default damaged regions for this Component.  This consists
-        of the current position/bounds, and the last drawn position/bounds"""
-        outer_bbox = list(self.outer_position) + list(self.outer_bounds)
-        drawn_outer_bbox = (list(self.drawn_outer_position) +
-                            list(self.drawn_outer_bounds))
-        return [outer_bbox, drawn_outer_bbox]
-
     def _draw(self, gc, view_bounds=None, mode="default"):
         """ Draws the component, paying attention to **draw_order**, including
         overlays, underlays, and the like.
@@ -458,9 +429,6 @@ class Component(CoordinateBox, Interactor):
 
         if self.layout_needed:
             self.do_layout()
-
-        self.drawn_outer_position = list(self.outer_position[:])
-        self.drawn_outer_bounds = list(self.outer_bounds[:])
 
         for layer in self.draw_order:
             self._dispatch_draw(layer, gc, view_bounds, mode)

@@ -57,9 +57,6 @@ class AbstractWindow(HasTraits):
     # to the new size of the window, expressed as a tuple (dx, dy).
     resized = Event
 
-    # Whether to enable damaged region handling
-    use_damaged_region = Bool(False)
-
     # The previous component that handled an event.  Used to generate
     # mouse_enter and mouse_leave events.  Right now this can only be
     # None, self.component, or self.overlay.
@@ -122,15 +119,7 @@ class AbstractWindow(HasTraits):
         layout and draw.  This is called every time through the paint loop.
         """
         gc = self._gc
-        if self._update_region == [] or not self.use_damaged_region:
-            self._update_region = None
-        if self._update_region is None:
-            gc.clear(self.bgcolor_)
-        else:
-            # Fixme: should use clip_to_rects
-            update_union = reduce(union_bounds, self._update_region)
-            gc.clip_to_rect(*update_union)
-        return
+        gc.clear(self.bgcolor_)
 
     def _window_paint(self, event):
         "Do a GUI toolkit specific screen update"
@@ -206,13 +195,9 @@ class AbstractWindow(HasTraits):
         bounds is a length-2 list of [width, height].
         """
         self.invalidate_draw()
-        pass
 
-    def invalidate_draw(self, damaged_regions=None, self_relative=False):
-        if damaged_regions is not None and self._update_region is not None:
-            self._update_region += damaged_regions
-        else:
-            self._update_region = None
+    def invalidate_draw(self, self_relative=False):
+        pass
 
     #---------------------------------------------------------------------------
     #  Generic keyboard event handler:
@@ -379,15 +364,9 @@ class AbstractWindow(HasTraits):
         gc = self._gc
         self.component.draw(gc, view_bounds=(0, 0, size[0], size[1]))
 
-        # FIXME: consolidate damaged regions if necessary
-        if not self.use_damaged_region:
-            self._update_region = None
-
         # Perform a paint of the GC to the window (only necessary on backends
         # that render to an off-screen buffer)
         self._window_paint(event)
-
-        self._update_region = []
 
     #---------------------------------------------------------------------------
     # Wire up the mouse event handlers
