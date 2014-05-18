@@ -1,4 +1,4 @@
-from pyface.qt import QtCore, QtGui, QtOpenGL
+from pyface.qt import QtCore, QtGui
 
 from enable.events import KeyEvent, MouseEvent
 from traits.api import Instance
@@ -108,7 +108,6 @@ class _QtWindowHandler(object):
 
         the final size hint will be (500, 400)
         """
-
         preferred_size = self._enable_window.component.get_preferred_size()
         q_size = self._enable_window.control.size()
         window_size = (q_size.width(), q_size.height())
@@ -174,51 +173,6 @@ class _QtWindow(QtGui.QWidget):
         return self.handler.sizeHint(qt_size_hint)
 
 
-class _QtGLWindow(QtOpenGL.QGLWidget):
-    def __init__(self, parent, enable_window):
-        super(_QtGLWindow, self).__init__(parent)
-        self.handler = _QtWindowHandler(self, enable_window)
-
-    def closeEvent(self, event):
-        self.handler.closeEvent(event)
-        return super(_QtGLWindow, self).closeEvent(event)
-
-    def paintEvent(self, event):
-        super(_QtGLWindow, self).paintEvent(event)
-        self.handler.paintEvent(event)
-
-    def resizeEvent(self, event):
-        super(_QtGLWindow, self).resizeEvent(event)
-        self.handler.resizeEvent(event)
-
-    def keyPressEvent(self, event):
-        self.handler.keyPressEvent(event)
-
-    def keyReleaseEvent(self, event):
-        self.handler.keyReleaseEvent(event)
-
-    def enterEvent(self, event):
-        self.handler.enterEvent(event)
-
-    def leaveEvent(self, event):
-        self.handler.leaveEvent(event)
-
-    def mouseDoubleClickEvent(self, event):
-        self.handler.mouseDoubleClickEvent(event)
-
-    def mouseMoveEvent(self, event):
-        self.handler.mouseMoveEvent(event)
-
-    def mousePressEvent(self, event):
-        self.handler.mousePressEvent(event)
-
-    def mouseReleaseEvent(self, event):
-        self.handler.mouseReleaseEvent(event)
-
-    def wheelEvent(self, event):
-        self.handler.wheelEvent(event)
-
-
 class _Window(AbstractWindow):
 
     control = Instance(QtGui.QWidget)
@@ -239,16 +193,6 @@ class _Window(AbstractWindow):
     #------------------------------------------------------------------------
     # Implementations of abstract methods in AbstractWindow
     #------------------------------------------------------------------------
-
-    def _capture_mouse ( self ):
-        "Capture all future mouse events"
-        # Nothing needed with Qt.
-        pass
-
-    def _release_mouse ( self ):
-        "Release the mouse capture"
-        # Nothing needed with Qt.
-        pass
 
     def _create_key_event(self, event_type, event):
         if self.component is None:
@@ -358,12 +302,6 @@ class _Window(AbstractWindow):
     def _on_key_pressed(self, event):
         return self._handle_key_event('key_pressed', event)
 
-    def get_pointer_position(self):
-        pos = self.control.mapFromGlobal(QtGui.QCursor.pos())
-        x = pos.x()
-        y = self._flip_y(pos.y())
-        return x, y
-
     #------------------------------------------------------------------------
     # Private methods
     #------------------------------------------------------------------------
@@ -373,17 +311,8 @@ class _Window(AbstractWindow):
         return int(self._size[1] - y - 1)
 
 
-class BaseGLWindow(_Window):
-    # The toolkit control
-    control = Instance(_QtGLWindow)
-
-    def _create_control(self, parent, enable_window):
-        """ Create the toolkit control.
-        """
-        return _QtGLWindow(parent, enable_window)
-
-
 class BaseWindow(_Window):
+
     # The toolkit control
     control = Instance(_QtWindow)
 

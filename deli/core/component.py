@@ -37,9 +37,6 @@ class Component(CoordinateBox):
     # Does the component use space in the layout even if it is not visible?
     invisible_layout = Bool(False)
 
-    # Fill the padding area with the background color?
-    fill_padding = Bool(False)
-
     #------------------------------------------------------------------------
     # Object/containment hierarchy traits
     #------------------------------------------------------------------------
@@ -271,11 +268,7 @@ class Component(CoordinateBox):
         """ Draws the background layer of a component.
         """
         if self.bgcolor not in ("clear", "transparent", "none"):
-            if self.fill_padding:
-                size = (self.outer_width-1, self.outer_height-1)
-                rect = tuple(self.outer_position) + size
-            else:
-                rect = tuple(self.position) + (self.width-1, self.height-1)
+            rect = tuple(self.position) + (self.width-1, self.height-1)
 
             with gc:
                 gc.set_antialias(False)

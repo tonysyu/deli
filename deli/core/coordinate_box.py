@@ -59,29 +59,17 @@ class CoordinateBox(HasStrictTraits):
         return self.bounds[0]
 
     def _set_width(self, val):
-
-        if isinstance(val, basestring):
-            try:
-                val = float(val)
-            except:
-                pass
-
         old_value = self.bounds[0]
         self.bounds[0] = val
-        self.trait_property_changed( 'width', old_value, val )
+        self.trait_property_changed('width', old_value, val)
 
     def _get_height(self):
         return self.bounds[1]
 
     def _set_height(self, val):
-        if isinstance(val, basestring):
-            try:
-                val = float(val)
-            except:
-                pass
         old_value = self.bounds[1]
         self.bounds[1] = val
-        self.trait_property_changed( 'height', old_value, val )
+        self.trait_property_changed('height', old_value, val)
 
     def _get_x2(self):
         if self.bounds[0] == 0: return self.position[0]

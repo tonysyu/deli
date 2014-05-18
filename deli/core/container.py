@@ -5,41 +5,22 @@ from contextlib import contextmanager
 from enable.base import empty_rectangle, intersect_bounds
 from enable.events import MouseEvent
 from kiva import affine
-from traits.api import Bool, HasStrictTraits, Instance, List, Property, Tuple
+from traits.api import Bool, Instance, List, Property, Tuple
 
 from .component import Component
 
 
-class AbstractResolver(HasStrictTraits):
-    """
-    A Resolver traverses a component DB and matches a specifier.
-    """
-
-    def match(self, db, query):
-        """ Queries a component DB using a dict of keyword-val conditions.
-        Each resolver defines its set of allowed keywords.
-        """
-        raise NotImplementedError
-
-
 class Container(Component):
-    """
-    A Container is a logical container that holds other Components within it and
-    provides an origin for Components to position themselves.  Containers can
-    be "nested" (although "overlayed" is probably a better term).
+    """ A Container that holds other Components (or containers).
 
     If auto_size is True, the container will automatically update its bounds to
     enclose all of the components handed to it, so that a container's bounds
-    serve as abounding box (although not necessarily a minimal bounding box) of
-    its contained components.
+    serve as a bounding box (although not necessarily a minimal bounding box)
+    of its contained components.
     """
 
     # The list of components within this frame
     components = Property    # List(Component)
-
-    # If true, the container get events before its children.  Otherwise, it
-    # gets them afterwards.
-    intercept_events = Bool(True)
 
     # Whether or not the container should auto-size itself to fit all of its
     # components.
@@ -57,14 +38,6 @@ class Container(Component):
     container_over_layers = Tuple('overlay', 'border')
 
     #------------------------------------------------------------------------
-    # DOM-related traits
-    # (Note: These are unused as of 8/13/2007)
-    #------------------------------------------------------------------------
-
-    # This object resolves queries for components
-    resolver = Instance(AbstractResolver)
-
-    #------------------------------------------------------------------------
     # Private traits
     #------------------------------------------------------------------------
 
@@ -79,18 +52,6 @@ class Container(Component):
     #------------------------------------------------------------------------
     # Public methods
     #------------------------------------------------------------------------
-
-    def __init__(self, *components, **traits):
-        Component.__init__(self, **traits)
-        for component in components:
-            self.add(component)
-        if 'bounds' in traits.keys() and 'auto_size' not in traits.keys():
-            self.auto_size = False
-
-        if 'intercept_events' in traits:
-            warnings.warn("'intercept_events' is a deprecated trait",
-                    warnings.DeprecationWarning)
-        return
 
     def add(self, *components):
         """ Adds components to this container """
@@ -113,13 +74,6 @@ class Container(Component):
                 if component.is_in(xprime, yprime):
                     result.append(component)
         return result
-
-    def get(self, **kw):
-        """
-        Allows for querying of this container's components.
-        """
-        # TODO: cache requests
-        return self.resolver.query(self._components, kw)
 
     def cleanup(self, window):
         """When a window viewing or containing a component is destroyed,
@@ -163,10 +117,6 @@ class Container(Component):
             draw = getattr(self, '_draw_container_' + layer, None)
             if draw:
                 draw(gc, view_bounds)
-
-    def _draw_container(self, gc):
-        "Draw the container background in a specified graphics context"
-        pass
 
     def _draw_container_background(self, gc, view_bounds=None):
         self._draw_background(gc, view_bounds)

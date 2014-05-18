@@ -48,20 +48,9 @@ class AbstractWindow(HasStrictTraits):
     # (dx, dy) integer size of the Window.
     _size = Trait(None, Tuple)
 
-    # The regions to update upon redraw
-    _update_region = Any
-
     #---------------------------------------------------------------------------
     #  Abstract methods that must be implemented by concrete subclasses
     #---------------------------------------------------------------------------
-
-    def _capture_mouse(self):
-        "Capture all future mouse events"
-        raise NotImplementedError
-
-    def _release_mouse(self):
-        "Release the mouse capture"
-        raise NotImplementedError
 
     def _create_key_event(self, event):
         "Convert a GUI toolkit key event into a KeyEvent"
@@ -116,16 +105,11 @@ class AbstractWindow(HasStrictTraits):
         "Returns local window coordinates for given global screen coordinates"
         raise NotImplementedError
 
-    def get_pointer_position(self):
-        "Returns the current pointer position in local window coordinates"
-        raise NotImplementedError
-
     #------------------------------------------------------------------------
     # Public methods
     #------------------------------------------------------------------------
 
     def __init__(self, **traits):
-        self._update_region = None
         self._gc = None
         super(HasStrictTraits, self).__init__(**traits)
 
@@ -149,7 +133,6 @@ class AbstractWindow(HasStrictTraits):
         if (size is not None) and hasattr(self.component, "bounds"):
             self.component.outer_position = [0, 0]
             self.component.outer_bounds = list(size)
-        self._update_region = None
         self.redraw()
 
     #---------------------------------------------------------------------------
