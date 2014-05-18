@@ -3,11 +3,9 @@ from itertools import chain
 
 import numpy as np
 
-from enable.colors import black_color_trait, white_color_trait
-from enable.enable_traits import LineStyle
+from enable.colors import white_color_trait
 from kiva.constants import FILL
-from traits.api import (Any, Bool, Float, Instance, Int, List,
-                        Property, Str, Trait)
+from traits.api import Any, Bool, Float, Instance, Int, List, Property, Trait
 
 from .coordinate_box import CoordinateBox
 from .interactor import Interactor
@@ -17,15 +15,10 @@ DRAWING_ORDER = ['background', 'underlay', 'border', 'overlay']
 
 
 class Component(CoordinateBox, Interactor):
-    """
-    Component is the base class for most Enable objects.  In addition to the
-    basic position and container features of Component, it also supports
-    Viewports and has finite bounds.
+    """ Component is the base class for most objects.
 
     Since Components can have a border and padding, there is an additional set
-    of bounds and position attributes that define the "outer box" of the
-    components. These cannot be set, since they are secondary attributes
-    (computed from the component's "inner" size and margin-area attributes).
+    of bounds and position attributes to define the "outer box" of components.
     """
 
     #------------------------------------------------------------------------
@@ -45,53 +38,39 @@ class Component(CoordinateBox, Interactor):
     # Object/containment hierarchy traits
     #------------------------------------------------------------------------
 
-    # Our container object
+    # The parent container for this component.
     container = Any    # Instance("Container")
 
-    # The top-level Window.  This is stored as a shadow
-    # attribute if this component is the direct child of the Window; otherwise,
-    # the getter function recurses up the containment hierarchy.
+    # The top-level Window.
     window = Property   # Instance("Window")
+
+    # Only gets set if this is the top-level enable component in a Window.
+    _window = Any    # Instance("Window")
 
     #------------------------------------------------------------------------
     # Layout traits
     #------------------------------------------------------------------------
 
-    # The ratio of the component's width to its height.  This is used by
-    # the component itself to maintain bounds when the bounds are changed
-    # independently, and is also used by the layout system.
+    # The ratio of the component's width to its height.
     aspect_ratio = Trait(None, None, Float)
 
-    # When the component's bounds are set to a (width,height) tuple that does
-    # not conform to the set aspect ratio, does the component center itself
-    # in the free space?
-    auto_center = Bool(True)
-
     # A read-only property that returns True if this component needs layout.
-    # It is a reflection of both the value of the component's private
-    # _layout_needed attribute as well as any logical layout dependencies with
-    # other components.
     layout_needed = Property
+
+    _layout_needed = Bool(True)
 
     #------------------------------------------------------------------------
     # Overlays and underlays
     #------------------------------------------------------------------------
 
-    # A list of underlays for this plot.  By default, underlays get a chance to
-    # draw onto the plot area underneath plot itself but above any images and
-    # backgrounds of the plot.
+    # A list of underlays for this plot.
     underlays = List  #[AbstractOverlay]
 
-    # A list of overlays for the plot.  By default, overlays are drawn above the
-    # plot and its annotations.
+    # A list of overlays for the plot.
     overlays = List   #[AbstractOverlay]
 
     #------------------------------------------------------------------------
     # Padding-related traits
-    # Padding in each dimension is defined as the number of pixels that are
-    # part of the component but outside of its position and bounds.  Containers
-    # need to be aware of padding when doing layout, object collision/overlay
-    # calculations, etc.
     #------------------------------------------------------------------------
 
     # The amount of space to put on the left side of the component
@@ -106,11 +85,9 @@ class Component(CoordinateBox, Interactor):
     # The amount of space to put below the component
     padding_bottom = Int(0)
 
-    # This property allows a way to set the padding in bulk.  It can either be
+    # This property allows a way to set the padding in bulk. It can either be
     # set to a single Int (which sets padding on all sides) or a tuple/list of
-    # 4 Ints representing the left, right, top, bottom padding amounts.  When
-    # it is read, this property always returns the padding as a list of four
-    # elements even if they are all the same.
+    # 4 Ints representing the (left, right, top, bottom) padding amounts.
     padding = Property
 
     # Readonly property expressing the total amount of horizontal padding
@@ -119,22 +96,14 @@ class Component(CoordinateBox, Interactor):
     # Readonly property expressing the total amount of vertical padding
     vpadding = Property
 
-    # Does the component respond to mouse events over the padding area?
-    padding_accepts_focus = Bool(True)
-
     #------------------------------------------------------------------------
     # Position and bounds of outer box (encloses the padding and border area)
     #------------------------------------------------------------------------
 
-    # The x,y point of the lower left corner of the padding outer box around
-    # the component.  Setting this position will move the component, but
-    # will not change the padding or bounds.
+    # The lower left corner of the padding outer box around the component.
     outer_position = Property
 
     # The number of horizontal and vertical pixels in the padding outer box.
-    # Setting these bounds will modify the bounds of the component, but
-    # will not change the lower-left position (self.outer_position) or
-    # the padding.
     outer_bounds = Property
 
     #------------------------------------------------------------------------
@@ -142,65 +111,20 @@ class Component(CoordinateBox, Interactor):
     #------------------------------------------------------------------------
 
     # The order in which various rendering classes on this component are drawn.
-    # Note that if this component is placed in a container, in most cases
-    # the container's draw order is used, since the container calls
-    # each of its contained components for each rendering pass.
-    # Typically, the definitions of the layers are:
-    #
-    # #. 'background': Background image, shading, and (possibly) borders
-    # #. 'border': A special layer for rendering the border on top of the
-    #     component instead of under its main layer (see **overlay_border**)
-    # #. 'overlay': Legends, selection regions, and other tool-drawn visual
-    #     elements
     draw_order = Instance(list, args=(DRAWING_ORDER,))
-
-    # Draw the border as part of the overlay layer? If False, draw the
-    # border as part of the background layer.
-    overlay_border = Bool(True)
 
     #------------------------------------------------------------------------
     # Border and background traits
     #------------------------------------------------------------------------
 
-    # The width of the border around this component.  This is taken into account
-    # during layout, but only if the border is visible.
+    # The width of the border around this component.
     border_width = Int(1)
 
-    # Is the border visible?  If this is false, then all the other border
-    # properties are not used.
+    # Visibility of border.
     border_visible = Bool(False)
 
-    # The line style (i.e. dash pattern) of the border.
-    border_dash = LineStyle
-
-    # The color of the border.  Only used if border_visible is True.
-    border_color = black_color_trait
-
-    # The background color of this component.  By default all components have
-    # a white background.  This can be set to "transparent" or "none" if the
-    # component should be see-through.
+    # The background color of this component.
     bgcolor = white_color_trait
-
-    #------------------------------------------------------------------------
-    # New layout/object containment hierarchy traits
-    # These are not used yet.
-    #------------------------------------------------------------------------
-
-    # The optional element ID of this component.
-    id = Str("")
-
-    #------------------------------------------------------------------------
-    # Private traits
-    #------------------------------------------------------------------------
-
-    # Shadow trait for self.window.  Only gets set if this is the top-level
-    # enable component in a Window.
-    _window = Any    # Instance("Window")
-
-    # Whether or not component itself needs to be laid out.  Some times
-    # components are composites of others, in which case the layout
-    # invalidation relationships should be implemented in layout_needed.
-    _layout_needed = Bool(True)
 
     #------------------------------------------------------------------------
     # Abstract methods
@@ -267,10 +191,10 @@ class Component(CoordinateBox, Interactor):
         elif self._window:
             self._window.redraw()
 
-    def is_in(self, x, y):
+    def is_in(self, x, y, include_padding=True):
         # A basic implementation of is_in(); subclasses should provide their
         # own if they are more accurate/faster/shinier.
-        if self.padding_accepts_focus:
+        if include_padding:
             width, height = self.outer_bounds
             x_pos, y_pos = self.outer_position
         else:

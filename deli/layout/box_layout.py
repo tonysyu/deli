@@ -1,7 +1,7 @@
 """Helper functions for a simple layout algorithm.
 """
 
-def enforce_screen_aspect_ratio(container, components=None):
+def enforce_screen_aspect_ratio(container, components=None, auto_center=True):
     """ Adjust the size of the component to match the aspect ratio. """
     if components is None:
         components = container.components
@@ -22,13 +22,13 @@ def enforce_screen_aspect_ratio(container, components=None):
         # Increase aspect-ratio: Use the width and compute a smaller height.
         new_width = old_width
         new_height = new_width / ratio
-        if container.auto_center:
+        if auto_center:
             new_position[1] += (old_height - new_height) / 2.0
     else:
         # Decrease aspect-ratio: Use the height and compute a smaller width.
         new_height = old_height
         new_width = new_height * ratio
-        if container.auto_center:
+        if auto_center:
             new_position[0] += (old_width - new_width) / 2.0
 
     new_size = (new_width, new_height)

@@ -44,8 +44,8 @@ class AbstractWindow(HasStrictTraits):
     # backwards compatibility but should not be used in new code.
     bg_color = Alias("bgcolor")
 
-    alt_pressed   = Bool(False)
-    ctrl_pressed  = Bool(False)
+    alt_pressed = Bool(False)
+    control_pressed = Bool(False)
     shift_pressed = Bool(False)
 
     # A container that gets drawn after & on top of the main component, and
@@ -188,9 +188,9 @@ class AbstractWindow(HasStrictTraits):
         if key_event is None:
             return False
 
-        self.shift_pressed = key_event.shift_down
         self.alt_pressed = key_event.alt_down
         self.control_pressed = key_event.control_down
+        self.shift_pressed = key_event.shift_down
 
         # Dispatch the event to the correct component
         mouse_owner = self.mouse_owner
@@ -263,7 +263,6 @@ class AbstractWindow(HasStrictTraits):
         """
         if self.component is not None:
             self.component.cleanup(self)
-            self.component.parent = None
             self.component.window = None
             self.component = None
 

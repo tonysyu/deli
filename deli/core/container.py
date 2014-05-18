@@ -36,14 +36,6 @@ class Container(Component):
     # The list of components within this frame
     components = Property    # List(Component)
 
-    # Whether or not the container should automatically maximize itself to
-    # fit inside the Window, if this is a top-level container.
-    #
-    # NOTE: the way that a Container determines that it's a top-level window is
-    # that someone has explicitly set its .window attribute. If you need to do
-    # this for some other reason, you may want to turn fit_window off.
-    fit_window = Bool(True)
-
     # If true, the container get events before its children.  Otherwise, it
     # gets them afterwards.
     intercept_events = Bool(True)
