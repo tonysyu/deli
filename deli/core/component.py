@@ -136,7 +136,7 @@ class Component(CoordinateBox, Interactor):
         """
         pass
 
-    def _draw_component(self, gc, view_bounds=None, mode="normal"):
+    def _draw_component(self, gc, view_bounds=None):
         """ Renders the component.
 
         Subclasses must implement this method to actually render themselves.
@@ -148,7 +148,7 @@ class Component(CoordinateBox, Interactor):
     # Public methods
     #------------------------------------------------------------------------
 
-    def draw(self, gc, view_bounds=None, mode="default"):
+    def draw(self, gc, view_bounds=None):
         """ Draws the plot component.
 
         Parameters
@@ -157,20 +157,6 @@ class Component(CoordinateBox, Interactor):
             The graphics context to draw the component on
         view_bounds : 4-tuple of integers
             (x, y, width, height) of the area to draw
-        mode : string
-            The drawing mode to use; can be one of:
-
-            'normal'
-                Normal, antialiased, high-quality rendering
-            'overlay'
-                The plot component is being rendered over something else,
-                so it renders more quickly, and possibly omits rendering
-                its background and certain tools
-            'interactive'
-                The plot component is being asked to render in
-                direct response to realtime user interaction, and needs to make
-                its best effort to render as fast as possible, even if there is
-                an aesthetic cost.
         """
         if not self.visible:
             return
@@ -179,7 +165,7 @@ class Component(CoordinateBox, Interactor):
             self.do_layout()
 
         for layer in self.draw_order:
-            self._dispatch_draw(layer, gc, view_bounds, mode)
+            self._dispatch_draw(layer, gc, view_bounds)
 
     def request_redraw(self):
         """
@@ -248,7 +234,7 @@ class Component(CoordinateBox, Interactor):
     # Protected methods
     #------------------------------------------------------------------------
 
-    def _dispatch_draw(self, layer, gc, view_bounds, mode):
+    def _dispatch_draw(self, layer, gc, view_bounds):
         """ Renders the named *layer* of this component.
 
         This method can be used by container classes that group many components
@@ -262,9 +248,9 @@ class Component(CoordinateBox, Interactor):
 
         handler = getattr(self, "_draw_" + layer, None)
         if handler:
-            handler(gc, view_bounds, mode)
+            handler(gc, view_bounds)
 
-    def _draw_border(self, gc, view_bounds=None, mode="default"):
+    def _draw_border(self, gc, view_bounds=None):
         """ Utility method to draw the borders around this component. """
         pass
 
@@ -272,7 +258,7 @@ class Component(CoordinateBox, Interactor):
     # Protected methods for subclasses to implement
     #------------------------------------------------------------------------
 
-    def _draw_background(self, gc, view_bounds=None, mode="default"):
+    def _draw_background(self, gc, view_bounds=None):
         """ Draws the background layer of a component.
         """
         if self.bgcolor not in ("clear", "transparent", "none"):
@@ -287,21 +273,21 @@ class Component(CoordinateBox, Interactor):
                 gc.set_fill_color(self.bgcolor_)
                 gc.draw_rect(rect, FILL)
 
-    def _draw_overlay(self, gc, view_bounds=None, mode="normal"):
+    def _draw_overlay(self, gc, view_bounds=None):
         """ Draws the overlay layer of a component.
         """
         for overlay in self.overlays:
             if overlay.visible:
-                overlay.overlay(self, gc, view_bounds, mode)
+                overlay.overlay(self, gc, view_bounds)
 
-    def _draw_underlay(self, gc, view_bounds=None, mode="normal"):
+    def _draw_underlay(self, gc, view_bounds=None):
         """ Draws the underlay layer of a component.
         """
         for underlay in self.underlays:
             # This method call looks funny but it's correct - underlays are
             # just overlays drawn at a different time in the rendering loop.
             if underlay.visible:
-                underlay.overlay(self, gc, view_bounds, mode)
+                underlay.overlay(self, gc, view_bounds)
 
     def _get_visible_border(self):
         """ Helper function to return the amount of border, if visible """

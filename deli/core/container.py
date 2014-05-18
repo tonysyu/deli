@@ -132,7 +132,7 @@ class Container(Component):
     # Protected methods
     #------------------------------------------------------------------------
 
-    def _dispatch_draw(self, layer, gc, view_bounds, mode):
+    def _dispatch_draw(self, layer, gc, view_bounds):
         """ Renders the named *layer* of this component.
         """
         new_bounds = self._transform_view_bounds(view_bounds)
@@ -145,7 +145,7 @@ class Container(Component):
         # Give the container a chance to draw first for the layers that are
         # considered "under" or "at" the main layer level
         if layer in self.container_under_layers:
-            self._draw_container_layer(layer, gc, view_bounds, mode)
+            self._draw_container_layer(layer, gc, view_bounds)
 
         # Now transform coordinates and draw the children
         visible_components = self._get_visible_components(new_bounds)
@@ -153,31 +153,31 @@ class Container(Component):
             with gc:
                 gc.translate_ctm(*self.position)
                 for component in visible_components:
-                    component._dispatch_draw(layer, gc, new_bounds, mode)
+                    component._dispatch_draw(layer, gc, new_bounds)
 
         if layer in self.container_over_layers:
-            self._draw_container_layer(layer, gc, view_bounds, mode)
+            self._draw_container_layer(layer, gc, view_bounds)
 
-    def _draw_container_layer(self, layer, gc, view_bounds, mode):
+    def _draw_container_layer(self, layer, gc, view_bounds):
             draw = getattr(self, '_draw_container_' + layer, None)
             if draw:
-                draw(gc, view_bounds, mode)
+                draw(gc, view_bounds)
 
-    def _draw_container(self, gc, mode='default'):
+    def _draw_container(self, gc):
         "Draw the container background in a specified graphics context"
         pass
 
-    def _draw_container_background(self, gc, view_bounds=None, mode='normal'):
-        self._draw_background(gc, view_bounds, mode)
+    def _draw_container_background(self, gc, view_bounds=None):
+        self._draw_background(gc, view_bounds)
 
-    def _draw_container_overlay(self, gc, view_bounds=None, mode='normal'):
-        self._draw_overlay(gc, view_bounds, mode)
+    def _draw_container_overlay(self, gc, view_bounds=None):
+        self._draw_overlay(gc, view_bounds)
 
-    def _draw_container_underlay(self, gc, view_bounds=None, mode='normal'):
-        self._draw_underlay(gc, view_bounds, mode)
+    def _draw_container_underlay(self, gc, view_bounds=None):
+        self._draw_underlay(gc, view_bounds)
 
-    def _draw_container_border(self, gc, view_bounds=None, mode='normal'):
-        self._draw_border(gc, view_bounds, mode)
+    def _draw_container_border(self, gc, view_bounds=None):
+        self._draw_border(gc, view_bounds)
 
     def _get_visible_components(self, bounds):
         """ Returns a list of this plot's children that are in the bounds. """

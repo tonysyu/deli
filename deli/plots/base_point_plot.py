@@ -43,7 +43,7 @@ class BasePointPlot(BasePlot):
     # PlotComponent interface
     #------------------------------------------------------------------------
 
-    def _draw_plot(self, gc, view_bounds=None, mode="normal"):
+    def _draw_plot(self, gc, view_bounds=None):
         """ Draws the 'plot' layer.
         """
         pts = self.get_screen_points()

@@ -31,12 +31,12 @@ class PlotLabel(AbstractOverlay):
         super(PlotLabel, self).__init__(*args, **kw)
         self.text = text
 
-    def overlay(self, component, gc, view_bounds=None, mode="normal"):
+    def overlay(self, component, gc, view_bounds=None):
         """ Draws this label overlaid on another component.
 
         Overrides AbstractOverlay.
         """
-        self._draw_overlay(gc, view_bounds, mode)
+        self._draw_overlay(gc, view_bounds)
 
     def do_layout(self):
         """ Tells this component to do layout.
@@ -45,7 +45,7 @@ class PlotLabel(AbstractOverlay):
         """
         self._layout_as_overlay()
 
-    def _draw_overlay(self, gc, view_bounds=None, mode="normal"):
+    def _draw_overlay(self, gc, view_bounds=None):
         """ Draws the overlay layer of a component.
 
         Overrides PlotComponent.
