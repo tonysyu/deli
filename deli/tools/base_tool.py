@@ -21,9 +21,6 @@ of interest:
 - on_key_released
 - on_character
 - on_dropped_on
-- on_drag_over
-- on_drag_enter
-- on_drag_leave
 
 """
 from traits.api import Dict, HasStrictTraits, Instance, Str, WeakRef

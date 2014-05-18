@@ -10,7 +10,7 @@ from .coordinate_box import CoordinateBox
 from .interactor import Interactor
 
 
-DRAWING_ORDER = ["background", "underlay", "mainlayer", "border", "overlay"]
+DRAWING_ORDER = ['background', 'underlay', 'border', 'overlay']
 
 
 class Component(CoordinateBox, Interactor):
@@ -53,20 +53,6 @@ class Component(CoordinateBox, Interactor):
     #------------------------------------------------------------------------
     # Layout traits
     #------------------------------------------------------------------------
-
-    # Dimensions that this component is resizable in.  For resizable
-    # components,  get_preferred_size() is called before their actual
-    # bounds are set.
-    #
-    # * 'v': resizable vertically
-    # * 'h': resizable horizontally
-    # * 'hv': resizable horizontally and vertically
-    # * '': not resizable
-    #
-    # Note that this setting means only that the *parent* can and should resize
-    # this component; it does *not* mean that the component automatically
-    # resizes itself.
-    resizable = Enum("hv", "h", "v", "")
 
     # The ratio of the component's width to its height.  This is used by
     # the component itself to maintain bounds when the bounds are changed
@@ -165,18 +151,11 @@ class Component(CoordinateBox, Interactor):
     # Typically, the definitions of the layers are:
     #
     # #. 'background': Background image, shading, and (possibly) borders
-    # #. 'mainlayer': The main layer that most objects should draw on
     # #. 'border': A special layer for rendering the border on top of the
     #     component instead of under its main layer (see **overlay_border**)
     # #. 'overlay': Legends, selection regions, and other tool-drawn visual
     #     elements
     draw_order = Instance(list, args=(DRAWING_ORDER,))
-
-    # If **unified_draw** is True for this component, then this attribute
-    # determines what layer it will be drawn on.  This is used by containers
-    # and external classes, whose drawing loops call this component.
-    # If **unified_draw** is False, then this attribute is ignored.
-    draw_layer = Str("mainlayer")
 
     # Draw the border as part of the overlay layer? If False, draw the
     # border as part of the background layer.
@@ -374,19 +353,8 @@ class Component(CoordinateBox, Interactor):
 
     def get_preferred_size(self):
         """ Returns the size (width,height) that is preferred for this component
-
-        When called on a component that does not contain other components,
-        this method just returns the component bounds.  If the component is
-        resizable and can draw into any size, the method returns a size that
-        is visually appropriate.  (The component's actual bounds are
-        determined by its container's do_layout() method.)
         """
-        size = [0,0]
-        outer_bounds = self.outer_bounds
-        if "h" not in self.resizable:
-            size[0] = outer_bounds[0]
-        if "v" not in self.resizable:
-            size[1] = outer_bounds[1]
+        size = [0, 0]
         return size
 
     #------------------------------------------------------------------------
@@ -456,8 +424,7 @@ class Component(CoordinateBox, Interactor):
         The *force_draw* parameter forces the method to draw the border; if it
         is false, the border is drawn only when **overlay_border** is True.
         """
-        if not self.border_visible:
-            return
+        pass
 
     #------------------------------------------------------------------------
     # Protected methods for subclasses to implement
@@ -468,20 +435,15 @@ class Component(CoordinateBox, Interactor):
         """
         if self.bgcolor not in ("clear", "transparent", "none"):
             if self.fill_padding:
-                r = tuple(self.outer_position) + \
-                        (self.outer_width-1, self.outer_height-1)
+                size = (self.outer_width-1, self.outer_height-1)
+                rect = tuple(self.outer_position) + size
             else:
-                r = tuple(self.position) + (self.width-1, self.height-1)
+                rect = tuple(self.position) + (self.width-1, self.height-1)
 
             with gc:
                 gc.set_antialias(False)
                 gc.set_fill_color(self.bgcolor_)
-                gc.draw_rect(r, FILL)
-
-        # Call the enable _draw_border routine
-        if not self.overlay_border and self.border_visible:
-            # Tell _draw_border to ignore the self.overlay_border
-            self._draw_border(gc, view_bounds, mode, force_draw=True)
+                gc.draw_rect(rect, FILL)
 
     def _draw_overlay(self, gc, view_bounds=None, mode="normal"):
         """ Draws the overlay layer of a component.
@@ -539,9 +501,6 @@ class Component(CoordinateBox, Interactor):
             e.g. "_left_down" or "_window_enter".
 
         """
-        if self._active_tool is not None:
-            self._active_tool.dispatch(event, suffix)
-
         if event.handled:
             return
 

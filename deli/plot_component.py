@@ -1,6 +1,6 @@
 """ Defines the PlotComponent class.
 """
-from traits.api import Disallow, Instance, Str
+from traits.api import Disallow, Instance
 
 from .core.component import Component
 from .layout.bounding_box import BoundingBox
@@ -44,9 +44,6 @@ class PlotComponent(Component):
     _ = Disallow
 
     draw_order = Instance(list, args=(DEFAULT_DRAWING_ORDER,))
-
-    # The default draw layer for plot components is the "plot" layer
-    draw_layer = Str("plot")
 
     #--------------------------------------------------------------------------
     #  Bounding box

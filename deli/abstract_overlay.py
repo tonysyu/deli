@@ -16,9 +16,6 @@ class AbstractOverlay(PlotComponent):
     # this object is called to draw(), it tries to render onto this component.
     component = Instance(Component)
 
-    # The default layer that this component draws into.
-    draw_layer = "overlay"
-
     # The background color (overrides PlotComponent).
     bgcolor = "transparent"
 

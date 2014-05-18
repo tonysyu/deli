@@ -49,28 +49,8 @@ class Container(Component):
     # gets them afterwards.
     intercept_events = Bool(True)
 
-    # Dimensions in which this container can resize to fit its components.
-    # This trait only applies to dimensions that are also resizable; if the
-    # container is not resizable in a certain dimension, then fit_components
-    # has no effect.
-    #
-    # Also, note that the container does not *automatically* resize itself
-    # based on the value of this trait.  Rather, this trait determines
-    # what value is reported in get_preferred_size(); it is up to the parent
-    # of this container to make sure that it is allocated the size that it
-    # needs by setting its bounds appropriately.
-    #
-    # TODO: Merge resizable and this into a single trait?  Or have a separate
-    # "fit" flag for each dimension in the **resizable** trait?
-    # TODO: This trait is used in layout methods of various Container
-    # subclasses in Chaco.  We need to move those containers into
-    # Enable.
-    fit_components = Enum("", "h", "v", "hv")
-
     # Whether or not the container should auto-size itself to fit all of its
     # components.
-    # Note: This trait is still used, but will be eventually removed in favor
-    # of **fit_components**.
     auto_size = Bool(False)
 
     # The default size of this container if it is empty.
@@ -78,7 +58,7 @@ class Container(Component):
 
     # The layers that the container will draw first, so that they appear
     # under the component layers of the same name.
-    container_under_layers = Tuple("background", "image", "underlay", "mainlayer")
+    container_under_layers = Tuple('background', 'image', 'underlay')
 
     #------------------------------------------------------------------------
     # DOM-related traits
@@ -87,7 +67,6 @@ class Container(Component):
 
     # This object resolves queries for components
     resolver = Instance(AbstractResolver)
-
 
     #------------------------------------------------------------------------
     # Private traits
@@ -99,17 +78,7 @@ class Container(Component):
     # Set of components that last handled a mouse event.  We keep track of
     # this so that we can generate mouse_enter and mouse_leave events of
     # our own.
-    _prev_event_handlers = Instance( set, () )
-
-    # Used by the resolver to cache previous lookups
-    _lookup_cache = Any
-
-    # This container can render itself in a different mode than what it asks of
-    # its contained components.  This attribute stores the rendering mode that
-    # this container requests of its children when it does a _draw(). If the
-    # attribute is set to "default", then whatever mode is handed in to _draw()
-    # is used.
-    _children_draw_mode = Enum("default", "normal", "overlay", "interactive")
+    _prev_event_handlers = Instance(set, ())
 
     #------------------------------------------------------------------------
     # Public methods
@@ -151,10 +120,6 @@ class Container(Component):
                     result.append(component)
         return result
 
-    def lower_component(self, component):
-        """ Puts the indicated component to the very bottom of the Z-order """
-        raise NotImplementedError
-
     def get(self, **kw):
         """
         Allows for querying of this container's components.
@@ -188,9 +153,9 @@ class Container(Component):
         # Give the container a chance to draw first for the layers that are
         # considered "under" or "at" the main layer level
         if layer in self.container_under_layers:
-            my_handler = getattr(self, "_draw_container_" + layer, None)
-            if my_handler:
-                my_handler(gc, view_bounds, mode)
+            draw = getattr(self, "_draw_container_" + layer, None)
+            if draw:
+                draw(gc, view_bounds, mode)
 
         # Now transform coordinates and draw the children
         visible_components = self._get_visible_components(new_bounds)
@@ -206,11 +171,9 @@ class Container(Component):
         # the draw_order list, these are pulled from the subclass list instead
         # of hardcoded here.
         if layer in ("annotation", "overlay", "border"):
-            my_handler = getattr(self, "_draw_container_" + layer, None)
-            if my_handler:
-                my_handler(gc, view_bounds, mode)
-
-        return
+            draw = getattr(self, "_draw_container_" + layer, None)
+            if draw:
+                draw(gc, view_bounds, mode)
 
     def _draw_container(self, gc, mode="default"):
         "Draw the container background in a specified graphics context"
@@ -298,13 +261,6 @@ class Container(Component):
     # Interactor interface
     #------------------------------------------------------------------------
 
-    def normal_mouse_leave(self, event):
-        event.push_transform(self.get_event_transform(event), caller=self)
-        for component in self._prev_event_handlers:
-            component.dispatch(event, "mouse_leave")
-        self._prev_event_handlers = set()
-        event.pop(caller=self)
-
     def _container_handle_mouse_event(self, event, suffix):
         """
         This method allows the container to handle a mouse event before its
@@ -338,8 +294,7 @@ class Container(Component):
                 new_component_set = set(components)
 
                 # For "real" mouse events (i.e., not pre_mouse_* events),
-                # notify the previous listening components of a mouse or
-                # drag leave
+                # notify the previous listening components of a mouse leave
                 if not suffix.startswith("pre_"):
                     components_left = self._prev_event_handlers - new_component_set
                     if components_left:
@@ -356,7 +311,7 @@ class Container(Component):
 
                     # Notify new components of a mouse enter, if the event is
                     # not a mouse_leave or a drag_leave
-                    if suffix not in ("mouse_leave", "drag_leave"):
+                    if suffix != 'mouse_leave':
                         components_entered = \
                             new_component_set - self._prev_event_handlers
                         if components_entered:

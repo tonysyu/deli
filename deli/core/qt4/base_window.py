@@ -169,18 +169,6 @@ class _QtWindow(QtGui.QWidget):
     def wheelEvent(self, event):
         self.handler.wheelEvent(event)
 
-    def dragEnterEvent(self, event):
-        self.handler.dragEnterEvent(event)
-
-    def dragLeaveEvent(self, event):
-        self.handler.dragLeaveEvent(event)
-
-    def dragMoveEvent(self, event):
-        self.handler.dragMoveEvent(event)
-
-    def dropEvent(self, event):
-        self.handler.dropEvent(event)
-
     def sizeHint(self):
         qt_size_hint = super(_QtWindow, self).sizeHint()
         return self.handler.sizeHint(qt_size_hint)
@@ -229,18 +217,6 @@ class _QtGLWindow(QtOpenGL.QGLWidget):
 
     def wheelEvent(self, event):
         self.handler.wheelEvent(event)
-
-    def dragEnterEvent(self, event):
-        self.handler.dragEnterEvent(event)
-
-    def dragLeaveEvent(self, event):
-        self.handler.dragLeaveEvent(event)
-
-    def dragMoveEvent(self, event):
-        self.handler.dragMoveEvent(event)
-
-    def dropEvent(self, event):
-        self.handler.dropEvent(event)
 
 
 class _Window(AbstractWindow):

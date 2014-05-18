@@ -72,14 +72,6 @@ class AbstractWindow(HasTraits):
     #  Abstract methods that must be implemented by concrete subclasses
     #---------------------------------------------------------------------------
 
-    def set_drag_result(self, result):
-        """ Sets the result that should be returned to the system from the
-        handling of the current drag operation.  Valid result values are:
-        "error", "none", "copy", "move", "link", "cancel".  These have the
-        meanings associated with their WX equivalents.
-        """
-        raise NotImplementedError
-
     def _capture_mouse(self):
         "Capture all future mouse events"
         raise NotImplementedError
@@ -176,16 +168,8 @@ class AbstractWindow(HasTraits):
         size = self._get_control_size()
         if (size is not None) and hasattr(self.component, "bounds"):
             new.on_trait_change(self.component_bounds_changed, 'bounds')
-            if getattr(self.component, "fit_window", False):
-                self.component.outer_position = [0,0]
-                self.component.outer_bounds = list(size)
-            elif hasattr(self.component, "resizable"):
-                if "h" in self.component.resizable:
-                    self.component.outer_x = 0
-                    self.component.outer_width = size[0]
-                if "v" in self.component.resizable:
-                    self.component.outer_y = 0
-                    self.component.outer_height = size[1]
+            self.component.outer_position = [0, 0]
+            self.component.outer_bounds = list(size)
         self._update_region = None
         self.redraw()
 
@@ -245,6 +229,7 @@ class AbstractWindow(HasTraits):
     #---------------------------------------------------------------------------
     #  Generic mouse event handler:
     #---------------------------------------------------------------------------
+
     def _handle_mouse_event(self, event_name, event, set_focus=False):
         """ **event** should be a toolkit-specific opaque object that will
         be passed in to the backend's _create_mouse_event() method.  It can
@@ -280,51 +265,6 @@ class AbstractWindow(HasTraits):
                 mouse_event.handled = False
                 self.component.dispatch(mouse_event, event_name)
         return mouse_event.handled
-
-    #---------------------------------------------------------------------------
-    #  Generic drag event handler:
-    #---------------------------------------------------------------------------
-
-    def _handle_drag_event(self, event_name, event, set_focus=False):
-        """ **event** should be a toolkit-specific opaque object that will
-        be passed in to the backend's _create_drag_event() method.  It can
-        be None if the the toolkit lacks a native "drag event" object.
-
-        Returns True if the event has been handled within the Enable object
-        hierarchy, or False otherwise.
-        """
-        # XXX Is this method ever called?
-        if self._size is None:
-            return False
-
-        drag_event = self._create_drag_event(event)
-        # if no mouse event generated for some reason, return
-        if drag_event is None:
-            return False
-
-        if self.component is not None:
-            # Test to see if we need to generate a drag_leave event
-            if self._prev_event_handler:
-                if not self._prev_event_handler.is_in(drag_event.x, drag_event.y):
-                    self._prev_event_handler.dispatch(drag_event, "pre_drag_leave")
-                    drag_event.handled = False
-                    self._prev_event_handler.dispatch(drag_event, "drag_leave")
-                    self._prev_event_handler = None
-
-            if self.component.is_in(drag_event.x, drag_event.y):
-                # Test to see if we need to generate a mouse_enter event
-                if self._prev_event_handler != self.component:
-                    self._prev_event_handler = self.component
-                    self.component.dispatch(drag_event, "pre_drag_enter")
-                    drag_event.handled = False
-                    self.component.dispatch(drag_event, "drag_enter")
-
-                # Fire the actual event
-                self.component.dispatch(drag_event, "pre_" + event_name)
-                drag_event.handled = False
-                self.component.dispatch(drag_event, event_name)
-
-        return drag_event.handled
 
     def redraw(self):
         """ Requests that the window be redrawn. """

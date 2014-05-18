@@ -1,6 +1,6 @@
 import numpy as np
 
-from traits.api import Callable, Instance, Property, Str
+from traits.api import Callable, Instance, Property
 
 from .core.container import Container
 from .layout.bbox_transform import BboxTransform
@@ -17,7 +17,6 @@ class DataCanvas(Container):
     """
 
     draw_order = Instance(list, args=(DEFAULT_DRAWING_ORDER,))
-    draw_layer = Str("plot")
 
     #--------------------------------------------------------------------------
     #  Bounding box

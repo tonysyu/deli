@@ -3,7 +3,7 @@
 from enable.colors import ColorTrait
 from enable.enable_traits import cursor_style_trait, Pointer
 from kiva.affine import affine_identity
-from traits.api import Any, Bool, HasTraits, List, Property, Str, Trait
+from traits.api import Bool, HasTraits, List, Str, Trait
 
 
 class Interactor(HasTraits):
@@ -34,9 +34,6 @@ class Interactor(HasTraits):
     - key_released
     - character
     - dropped_on
-    - drag_over
-    - drag_enter
-    - drag_leave
     """
 
     # Name of the object's event state.  Used as a prefix when looking up
@@ -64,18 +61,10 @@ class Interactor(HasTraits):
     # The tools that are registered as listeners.
     tools = List
 
-    # The tool that is currently active.
-    active_tool = Property
-
     # If True, then marks events as "handled" if there is a handler function
     # defined.  This makes it easy to write simple components that respond
     # to events, but more complex tools will probably want this turned off.
     auto_handle_event = Bool(True)
-
-    # Shadow trait for the **active_tool** property.  Must be an instance of
-    # BaseTool or one of its subclasses.
-    _active_tool = Any
-
 
     def dispatch(self, event, suffix):
         """ Public method for sending mouse/keyboard events to this interactor.

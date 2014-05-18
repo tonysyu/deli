@@ -24,8 +24,6 @@ class PlotLabel(AbstractOverlay):
     #: Visibility of label. Off by default, but turned on when text is set.
     visible = False
 
-    draw_layer = 'overlay'
-
     # The Label instance this plot label is wrapping.
     _label = Instance(LabelArtist, {'x_origin': 'center'})
 
