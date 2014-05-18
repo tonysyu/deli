@@ -246,16 +246,16 @@ class Container(Component):
                 return False
 
     #------------------------------------------------------------------------
-    # Interactor interface
+    # Event handling
     #------------------------------------------------------------------------
 
     def get_event_transform(self, event=None, suffix=""):
         return affine.affine_from_translation(-self.x, -self.y)
 
-    def _dispatch_stateful_event(self, event, suffix):
+    def dispatch(self, event, suffix):
         """
         Dispatches a mouse event based on the current event_state.  Overrides
-        the default Interactor._dispatch_stateful_event by adding some default
+        the default Interactor.dispatch by adding some default
         behavior to send all events to our contained children.
 
         "suffix" is the name of the mouse event as a suffix to the event state
@@ -265,8 +265,8 @@ class Container(Component):
             components = self.components_at(event.x, event.y)
 
             # Translate the event's location to be relative to this container
-            event.push_transform(self.get_event_transform(event, suffix),
-                                 caller=self)
+            transform = self.get_event_transform(event, suffix)
+            event.push_transform(transform, caller=self)
 
             try:
                 component_set = set(components)
@@ -299,7 +299,7 @@ class Container(Component):
                 event.pop(caller=self)
 
             if not event.handled:
-                super(Container, self)._dispatch_stateful_event(event, suffix)
+                super(Container, self).dispatch(event, suffix)
 
     def _notify_if_mouse_event(self, components, event, suffix):
         if len(components) == 0:

@@ -8,13 +8,12 @@ from kiva.constants import FILL
 from traits.api import Any, Bool, Float, Instance, Int, List, Property, Trait
 
 from .coordinate_box import CoordinateBox
-from .interactor import Interactor
 
 
 DRAWING_ORDER = ['background', 'underlay', 'border', 'overlay']
 
 
-class Component(CoordinateBox, Interactor):
+class Component(CoordinateBox):
     """ Component is the base class for most objects.
 
     Since Components can have a border and padding, there is an additional set
@@ -68,6 +67,9 @@ class Component(CoordinateBox, Interactor):
 
     # A list of overlays for the plot.
     overlays = List   #[AbstractOverlay]
+
+    # The tools that are registered as listeners.
+    tools = List
 
     #------------------------------------------------------------------------
     # Padding-related traits
@@ -300,15 +302,12 @@ class Component(CoordinateBox, Interactor):
     def dispatch(self, event, suffix):
         """ Dispatches a mouse event based on the current event state.
 
-        If the component has a **controller**, the method dispatches the event
-        to it, and returns. Otherwise, the following objects get a chance to
-        handle the event:
+        The following objects get a chance to handle the event:
 
-        1. The component's active tool, if any.
-        2. Any overlays, in reverse order that they were added and are drawn.
-        3. The component itself.
-        4. Any underlays, in reverse order that they were added and are drawn.
-        5. Any listener tools.
+        1. Any overlays, in reverse order that they were added and are drawn.
+        2. The component itself.
+        3. Any underlays, in reverse order that they were added and are drawn.
+        4. Any listener tools.
 
         If any object in this sequence handles the event, the method returns
         without proceeding any further through the sequence. If nothing
@@ -333,7 +332,9 @@ class Component(CoordinateBox, Interactor):
                 break
 
         if not event.handled:
-            self._dispatch_stateful_event(event, suffix)
+            parent = super(Component, self)
+            if hasattr(parent, 'dispatch'):
+                parent.dispatch(event, suffix)
 
         if not event.handled:
             # Dispatch to underlays in reverse of draw/added order

@@ -251,14 +251,9 @@ class _Window(AbstractWindow):
         pass
 
     def _create_key_event(self, event_type, event):
-        focus_owner = self.focus_owner
-
-        if focus_owner is None:
-            focus_owner = self.component
-
-            if focus_owner is None:
-                event.ignore()
-                return None
+        if self.component is None:
+            event.ignore()
+            return None
 
         if event_type == 'character':
             key = unicode(event.text())

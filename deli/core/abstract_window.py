@@ -1,12 +1,9 @@
-from numpy import dot
-
 from enable.colors import ColorTrait
 from traits.api import (Any, Bool, Event, HasStrictTraits, Instance, Property,
-                        Trait, Tuple, List)
+                        Trait, Tuple)
 
 from .component import Component
 from .container import Container
-from .interactor import Interactor
 
 
 def Alias(name):
@@ -18,22 +15,6 @@ class AbstractWindow(HasStrictTraits):
 
     # The top-level component that this window houses
     component = Instance(Component)
-
-    # A reference to the nested component that has focus.  This is part of the
-    # manual mechanism for determining keyboard focus.
-    focus_owner = Instance(Interactor)
-
-    # If set, this is the component to which all mouse events are passed,
-    # bypassing the normal event propagation mechanism.
-    mouse_owner = Instance(Interactor)
-
-    # The transform to apply to mouse event positions to put them into the
-    # relative coordinates of the mouse_owner component.
-    mouse_owner_transform = Any()
-
-    # When a component captures the mouse, it can optionally store a
-    # dispatch order for events (until it releases the mouse).
-    mouse_owner_dispatch_history = Trait(None, None, List)
 
     # The background window of the window.  The entire window first gets
     # painted with this color before the component gets to draw.
@@ -192,25 +173,11 @@ class AbstractWindow(HasStrictTraits):
         self.control_pressed = key_event.control_down
         self.shift_pressed = key_event.shift_down
 
-        # Dispatch the event to the correct component
-        mouse_owner = self.mouse_owner
-        if mouse_owner is not None:
-            history = self.mouse_owner_dispatch_history
-            if history is not None and len(history) > 0:
-                # Assemble all the transforms
-                transforms = [c.get_event_transform() for c in history]
-                total_transform = reduce(dot, transforms[::-1])
-                key_event.push_transform(total_transform)
-            elif self.mouse_owner_transform is not None:
-                key_event.push_transform(self.mouse_owner_transform)
-
-            mouse_owner.dispatch(key_event, event_type)
-        else:
-            # Normal event handling loop
-            if (not key_event.handled) and (self.component is not None):
-                if self.component.is_in(key_event.x, key_event.y):
-                    # Fire the actual event
-                    self.component.dispatch(key_event, event_type)
+        # Normal event handling loop
+        if (not key_event.handled) and (self.component is not None):
+            if self.component.is_in(key_event.x, key_event.y):
+                # Fire the actual event
+                self.component.dispatch(key_event, event_type)
 
         return key_event.handled
 

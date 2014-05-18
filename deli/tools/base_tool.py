@@ -91,12 +91,24 @@ class BaseTool(AbstractTool):
     def attach_to(cls, component):
         instance = cls(component=component)
         component.tools.append(instance)
-        if hasattr(instance, 'overlay'):
-            component.overlays.append(instance.overlay)
+
+        overlay = getattr(instance, 'overlay', None)
+        if overlay is not None:
+            component.overlays.append(overlay)
+
         return instance
 
     def dispatch(self, event, suffix):
-        """ Dispatch interactive event to the appropriate handler method. """
+        """ Dispatch interactive event to the appropriate handler method.
+
+        Parameters
+        ----------
+        event : BaseEvent instance
+            The event to dispatch
+        suffix : string
+            The type of event that occurred.  See class docstring for the
+            list of possible suffixes.
+        """
         if self.active_handler is None:
             self.active_handler = self
             self.active_handler.on_enter(event)
