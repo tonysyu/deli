@@ -19,9 +19,6 @@ class DataCanvas(Container):
     draw_order = Instance(list, args=(DEFAULT_DRAWING_ORDER,))
     draw_layer = Str("plot")
 
-    # Do not use an off-screen backbuffer.
-    use_backbuffer = False
-
     #--------------------------------------------------------------------------
     #  Bounding box
     #--------------------------------------------------------------------------

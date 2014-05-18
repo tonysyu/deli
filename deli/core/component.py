@@ -6,12 +6,11 @@ from kiva.constants import FILL
 from traits.api import (Any, Bool, Enum, Float, Instance, Int, List,
                         Property, Str, Trait)
 
-
 from .coordinate_box import CoordinateBox
 from .interactor import Interactor
 
 
-DEFAULT_DRAWING_ORDER = ["background", "underlay", "mainlayer", "border", "overlay"]
+DRAWING_ORDER = ["background", "underlay", "mainlayer", "border", "overlay"]
 
 
 class Component(CoordinateBox, Interactor):
@@ -50,9 +49,6 @@ class Component(CoordinateBox, Interactor):
     # attribute if this component is the direct child of the Window; otherwise,
     # the getter function recurses up the containment hierarchy.
     window = Property   # Instance("Window")
-
-    # The list of viewport that are viewing this component
-    viewports = List(Instance("enable.viewport.Viewport"))
 
     #------------------------------------------------------------------------
     # Layout traits
@@ -174,7 +170,7 @@ class Component(CoordinateBox, Interactor):
     #     component instead of under its main layer (see **overlay_border**)
     # #. 'overlay': Legends, selection regions, and other tool-drawn visual
     #     elements
-    draw_order = Instance(list, args=(DEFAULT_DRAWING_ORDER,))
+    draw_order = Instance(list, args=(DRAWING_ORDER,))
 
     # If **unified_draw** is True for this component, then this attribute
     # determines what layer it will be drawn on.  This is used by containers
@@ -217,23 +213,6 @@ class Component(CoordinateBox, Interactor):
     # Backbuffer traits
     #------------------------------------------------------------------------
 
-    # Should this component do a backbuffered draw, i.e. render itself to an
-    # offscreen buffer that is cached for later use?  If False, then
-    # the component will *never* render itself backbuffered, even if asked
-    # to do so.
-    use_backbuffer = Bool(False)
-
-    # Should the backbuffer extend to the pad area?
-    backbuffer_padding = Bool(True)
-
-    # If a draw were to occur, whether the component would actually change.
-    # This is useful for determining whether a backbuffer is valid, and is
-    # usually set by the component itself or set on the component by calling
-    # _invalidate_draw().  It is exposed as a public trait for the rare cases
-    # when another component wants to know the validity of this component's
-    # backbuffer.
-    draw_valid = Bool(False)
-
     # drawn_outer_position specifies the outer position this component was drawn to
     # on the last draw cycle.  This is used to determine what areas of the screen
     # are damaged.
@@ -242,21 +221,10 @@ class Component(CoordinateBox, Interactor):
     # cycle.  Used in conjunction with outer_position_last_draw
     drawn_outer_bounds = bounds_trait
 
-    # The backbuffer of this component.  In most cases, this is an
-    # instance of GraphicsContext, but this requirement is not enforced.
-    _backbuffer = Any
-
     #------------------------------------------------------------------------
     # New layout/object containment hierarchy traits
     # These are not used yet.
     #------------------------------------------------------------------------
-
-    # A list of strings defining the classes to which this component belongs.
-    # These classes will be used to determine how this component is styled,
-    # is rendered, is laid out, and receives events.  There is no automatic
-    # management of conflicting class names, so if a component is placed
-    # into more than one class and that class
-    classes = List
 
     # The optional element ID of this component.
     id = Str("")
@@ -289,15 +257,6 @@ class Component(CoordinateBox, Interactor):
 
         Subclasses must implement this method to actually render themselves.
         Note: This method is used only by the "old" drawing calls.
-        """
-        pass
-
-    def _draw_selection(self, gc, view_bounds=None, mode="normal"):
-        """ Renders a selected subset of a component's data.
-
-        This method is used by some subclasses. The notion of selection doesn't
-        necessarily apply to all subclasses of PlotComponent, but it applies to
-        enough of them that it is defined as one of the default draw methods.
         """
         pass
 
@@ -354,29 +313,21 @@ class Component(CoordinateBox, Interactor):
         Requests that the component redraw itself.  Usually this means asking
         its parent for a repaint.
         """
-        for view in self.viewports:
-            view.request_redraw()
-
         self._request_redraw()
 
     def invalidate_draw(self, damaged_regions=None, self_relative=False):
         """ Invalidates any backbuffer that may exist, and notifies our parents
-        and viewports of any damaged regions.
+        of any damaged regions.
 
         Call this method whenever a component's internal state
-        changes such that it must be redrawn on the next draw() call."""
-        self.draw_valid = False
-
+        changes such that it must be redrawn on the next draw() call.
+        """
         if damaged_regions is None:
             damaged_regions = self._default_damaged_regions()
 
         if self_relative:
             damaged_regions = [[x + self.x, y + self.y, width, height]
                                for x, y, width, height in damaged_regions]
-        for view in self.viewports:
-            view.invalidate_draw(damaged_regions=damaged_regions,
-                                 self_relative=True,
-                                 view_relative=True)
 
         if self.container is not None:
             self.container.invalidate_draw(damaged_regions=damaged_regions,
@@ -511,61 +462,8 @@ class Component(CoordinateBox, Interactor):
         self.drawn_outer_position = list(self.outer_position[:])
         self.drawn_outer_bounds = list(self.outer_bounds[:])
 
-        # OpenGL-based graphics-contexts have a `gl_init()` method. We
-        # test for this to avoid having to import the OpenGL
-        # GraphicsContext just to do an isinstance() check.
-        is_gl = hasattr(gc, 'gl_init')
-        if self.use_backbuffer and (not is_gl):
-            if self.backbuffer_padding:
-                x, y = self.outer_position
-                width, height = self.outer_bounds
-            else:
-                x, y = self.position
-                width, height = self.bounds
-
-            if not self.draw_valid:
-                # get a reference to the GraphicsContext class from the object
-                GraphicsContext = gc.__class__
-                if hasattr(GraphicsContext, 'create_from_gc'):
-                    # For some backends, such as the mac, a much more efficient
-                    # backbuffer can be created from the window gc.
-                    size = (int(width), int(height))
-                    bb = GraphicsContext.create_from_gc(gc, size)
-                else:
-                    bb = GraphicsContext((int(width), int(height)))
-
-                # if not fill_padding, then we have to fill the backbuffer
-                # with the window color. This is the only way I've found that
-                # it works- perhaps if we had better blend support we could set
-                # the alpha to 0, but for now doing so causes the backbuffer's
-                # background to be white
-                if not self.fill_padding:
-                    with bb:
-                        bb.set_antialias(False)
-                        bb.set_fill_color(self.window.bgcolor_)
-                        bb.draw_rect((x, y, width, height), FILL)
-
-                # Fixme: should there be a +1 here?
-                bb.translate_ctm(-x+0.5, -y+0.5)
-                # There are a couple of strategies we could use here, but we
-                # have to do something about view_bounds.  This is because
-                # if we only partially render the object into the backbuffer,
-                # we will have problems if we then render with different view
-                # bounds.
-
-                for layer in self.draw_order:
-                    if layer != "overlay":
-                        self._dispatch_draw(layer, bb, view_bounds, mode)
-
-                self._backbuffer = bb
-                self.draw_valid = True
-
-            # Blit the backbuffer and then draw the overlay on top
-            gc.draw_image(self._backbuffer, (x, y, width, height))
-            self._dispatch_draw("overlay", gc, view_bounds, mode)
-        else:
-            for layer in self.draw_order:
-                self._dispatch_draw(layer, gc, view_bounds, mode)
+        for layer in self.draw_order:
+            self._dispatch_draw(layer, gc, view_bounds, mode)
 
     def _dispatch_draw(self, layer, gc, view_bounds, mode):
         """ Renders the named *layer* of this component.
@@ -755,13 +653,12 @@ class Component(CoordinateBox, Interactor):
         self.position[1] = val
 
     def _get_hpadding(self):
-        return 2*self._get_visible_border() + self.padding_right + \
-                self.padding_left
+        border_size = 2 * self._get_visible_border()
+        return border_size + self.padding_right + self.padding_left
 
     def _get_vpadding(self):
-        return 2*self._get_visible_border() + self.padding_bottom + \
-                self.padding_top
-
+        border_size = 2 * self._get_visible_border()
+        return border_size + self.padding_bottom + self.padding_top
 
     #------------------------------------------------------------------------
     # Outer position setters and getters
