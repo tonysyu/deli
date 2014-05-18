@@ -1,12 +1,14 @@
 """ Defines the Component class """
 
 from enable.colors import black_color_trait, white_color_trait
-from enable.coordinate_box import CoordinateBox
 from enable.enable_traits import bounds_trait, coordinate_trait, LineStyle
-from enable.interactor import Interactor
 from kiva.constants import FILL
 from traits.api import (Any, Bool, Enum, Float, Instance, Int, List,
                         Property, Str, Trait)
+
+
+from .coordinate_box import CoordinateBox
+from .interactor import Interactor
 
 
 DEFAULT_DRAWING_ORDER = ["background", "underlay", "mainlayer", "border", "overlay"]

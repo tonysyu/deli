@@ -1,18 +1,19 @@
 from numpy import dot
 
 from enable.base import union_bounds
-from enable.interactor import Interactor
 from enable.colors import ColorTrait
 from traits.api import (Any, Bool, Event, HasTraits, Instance, Property,
                         Trait, Tuple, List)
 
 from .component import Component
 from .container import Container
+from .interactor import Interactor
 
 
 def Alias(name):
     return Property(lambda obj: getattr(obj, name),
                     lambda obj, val: setattr(obj, name, val))
+
 
 class AbstractWindow(HasTraits):
 
