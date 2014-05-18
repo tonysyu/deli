@@ -4,8 +4,7 @@ import warnings
 from enable.base import empty_rectangle, intersect_bounds
 from enable.events import MouseEvent
 from kiva import affine
-from traits.api import (Any, Bool, Enum, HasTraits, Instance, List, Property,
-                        Tuple)
+from traits.api import Bool, HasTraits, Instance, List, Property, Tuple
 
 from .component import Component
 
@@ -58,7 +57,7 @@ class Container(Component):
 
     # The layers that the container will draw first, so that they appear
     # under the component layers of the same name.
-    container_under_layers = Tuple('background', 'image', 'underlay')
+    container_under_layers = Tuple('background', 'underlay')
 
     #------------------------------------------------------------------------
     # DOM-related traits
@@ -88,7 +87,7 @@ class Container(Component):
         Component.__init__(self, **traits)
         for component in components:
             self.add(component)
-        if "bounds" in traits.keys() and "auto_size" not in traits.keys():
+        if 'bounds' in traits.keys() and 'auto_size' not in traits.keys():
             self.auto_size = False
 
         if 'intercept_events' in traits:
@@ -153,7 +152,7 @@ class Container(Component):
         # Give the container a chance to draw first for the layers that are
         # considered "under" or "at" the main layer level
         if layer in self.container_under_layers:
-            draw = getattr(self, "_draw_container_" + layer, None)
+            draw = getattr(self, '_draw_container_' + layer, None)
             if draw:
                 draw(gc, view_bounds, mode)
 
@@ -170,25 +169,25 @@ class Container(Component):
         # FIXME: This needs to be abstracted so that when subclasses override
         # the draw_order list, these are pulled from the subclass list instead
         # of hardcoded here.
-        if layer in ("annotation", "overlay", "border"):
-            draw = getattr(self, "_draw_container_" + layer, None)
+        if layer in ('overlay', 'border'):
+            draw = getattr(self, '_draw_container_' + layer, None)
             if draw:
                 draw(gc, view_bounds, mode)
 
-    def _draw_container(self, gc, mode="default"):
+    def _draw_container(self, gc, mode='default'):
         "Draw the container background in a specified graphics context"
         pass
 
-    def _draw_container_background(self, gc, view_bounds=None, mode="normal"):
+    def _draw_container_background(self, gc, view_bounds=None, mode='normal'):
         self._draw_background(gc, view_bounds, mode)
 
-    def _draw_container_overlay(self, gc, view_bounds=None, mode="normal"):
+    def _draw_container_overlay(self, gc, view_bounds=None, mode='normal'):
         self._draw_overlay(gc, view_bounds, mode)
 
-    def _draw_container_underlay(self, gc, view_bounds=None, mode="normal"):
+    def _draw_container_underlay(self, gc, view_bounds=None, mode='normal'):
         self._draw_underlay(gc, view_bounds, mode)
 
-    def _draw_container_border(self, gc, view_bounds=None, mode="normal"):
+    def _draw_container_border(self, gc, view_bounds=None, mode='normal'):
         self._draw_border(gc, view_bounds, mode)
 
     def _get_visible_components(self, bounds):
@@ -261,16 +260,6 @@ class Container(Component):
     # Interactor interface
     #------------------------------------------------------------------------
 
-    def _container_handle_mouse_event(self, event, suffix):
-        """
-        This method allows the container to handle a mouse event before its
-        children get to see it.  Once the event gets handled, its .handled
-        should be set to True, and contained components will not be called
-        with the event.
-        """
-        #super(Container, self)._dispatch_stateful_event(event, suffix)
-        Component._dispatch_stateful_event(self, event, suffix)
-
     def get_event_transform(self, event=None, suffix=""):
         return affine.affine_from_translation(-self.x, -self.y)
 
@@ -291,49 +280,29 @@ class Container(Component):
                                  caller=self)
 
             try:
-                new_component_set = set(components)
+                component_set = set(components)
 
-                # For "real" mouse events (i.e., not pre_mouse_* events),
+                # For 'real' mouse events (i.e., not pre_mouse_* events),
                 # notify the previous listening components of a mouse leave
-                if not suffix.startswith("pre_"):
-                    components_left = self._prev_event_handlers - new_component_set
-                    if components_left:
-                        leave_event = None
-                        if isinstance(event, MouseEvent):
-                            leave_event = event
-                            leave_suffix = "mouse_leave"
+                if not suffix.startswith('pre_'):
+                    components_left = self._prev_event_handlers - component_set
+                    self._notify_if_mouse_event(components_left, event,
+                                                'mouse_leave')
 
-                        if leave_event is not None:
-                            for component in components_left:
-                                component.dispatch(leave_event, "pre_" + leave_suffix)
-                                component.dispatch(leave_event, leave_suffix)
-                                event.handled = False
-
-                    # Notify new components of a mouse enter, if the event is
-                    # not a mouse_leave or a drag_leave
                     if suffix != 'mouse_leave':
-                        components_entered = \
-                            new_component_set - self._prev_event_handlers
-                        if components_entered:
-                            enter_event = None
-                            if isinstance(event, MouseEvent):
-                                enter_event = event
-                                enter_suffix = "mouse_enter"
-                            if enter_event:
-                                for component in components_entered:
-                                    component.dispatch(enter_event, "pre_" + enter_suffix)
-                                    component.dispatch(enter_event, enter_suffix)
-                                    event.handled = False
-
+                        components_entered = (component_set
+                                              - self._prev_event_handlers)
+                        self._notify_if_mouse_event(components_entered, event,
+                                                    'mouse_enter')
                 # Handle the actual event
                 # Only add event handlers to the list of previous event handlers
                 # if they actually receive the event (and the event is not a
                 # pre_* event.
-                if not suffix.startswith("pre_"):
+                if not suffix.startswith('pre_'):
                     self._prev_event_handlers = set()
                 for component in components:
                     component.dispatch(event, suffix)
-                    if not suffix.startswith("pre_"):
+                    if not suffix.startswith('pre_'):
                         self._prev_event_handlers.add(component)
                     if event.handled:
                         break
@@ -341,7 +310,17 @@ class Container(Component):
                 event.pop(caller=self)
 
             if not event.handled:
-                self._container_handle_mouse_event(event, suffix)
+                super(Container, self)._dispatch_stateful_event(event, suffix)
+
+    def _notify_if_mouse_event(self, components, event, suffix):
+        if len(components) == 0:
+            return
+
+        if isinstance(event, MouseEvent):
+            for component in components:
+                component.dispatch(event, 'pre_' + suffix)
+                component.dispatch(event, suffix)
+                event.handled = False
 
     #------------------------------------------------------------------------
     # Event handlers

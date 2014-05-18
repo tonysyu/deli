@@ -44,11 +44,13 @@ class DataCursorOverlay(AbstractOverlay):
     def _label_default(self):
         return FlagLabelArtist()
 
+    def reset(self):
+        self._text = ''
+        self._origin = np.empty((0, 2))
+
     def update_point(self, data_point, screen_point):
         self._text = self.data_point_to_string(data_point)
-
-        data_to_screen = self.component.data_to_screen.transform
-        self._origin = data_to_screen(data_point)
+        self._origin = screen_point
         self.component.request_redraw()
 
     def data_point_to_string(self, point):
@@ -96,5 +98,13 @@ class DataCursorTool(BaseTool):
 
     def _update_overlay(self, data_point):
         data_to_screen = self.component.data_to_screen.transform
-        self.overlay.update_point(data_point, data_to_screen(data_point))
+        screen_point = data_to_screen(data_point)
+        if self.component.is_in(*screen_point):
+            self.overlay.update_point(data_point, screen_point)
+        else:
+            self.overlay.reset()
+        self.component.request_redraw()
+
+    def on_mouse_leave(self, event):
+        self.overlay.reset()
         self.component.request_redraw()

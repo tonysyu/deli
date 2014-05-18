@@ -67,18 +67,12 @@ class PlotCanvas(DataCanvas):
 
     bgcolor = "white"
 
-    # Padding defaults.
-    padding_top = 50
-    padding_bottom = 50
-    padding_left = 50
-    padding_right = 50
-
     #--------------------------------------------------------------------------
     # Object interface
     #--------------------------------------------------------------------------
 
-    def __init__(self, **kwtraits):
-        super(DataCanvas, self).__init__(**kwtraits)
+    def __init__(self, padding=50, **kwtraits):
+        super(DataCanvas, self).__init__(padding=padding, **kwtraits)
         self._init_components()
 
     #------------------------------------------------------------------------

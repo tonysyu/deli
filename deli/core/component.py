@@ -1,9 +1,10 @@
 """ Defines the Component class """
+import numpy as np
 
 from enable.colors import black_color_trait, white_color_trait
 from enable.enable_traits import LineStyle
 from kiva.constants import FILL
-from traits.api import (Any, Bool, Enum, Float, Instance, Int, List,
+from traits.api import (Any, Bool, Float, Instance, Int, List,
                         Property, Str, Trait)
 
 from .coordinate_box import CoordinateBox
@@ -121,23 +122,17 @@ class Component(CoordinateBox, Interactor):
 
     #------------------------------------------------------------------------
     # Position and bounds of outer box (encloses the padding and border area)
-    # All of these are read-only properties.  To set them directly, use
-    # set_outer_coordinates() or set_outer_pos_bounds().
     #------------------------------------------------------------------------
 
     # The x,y point of the lower left corner of the padding outer box around
     # the component.  Setting this position will move the component, but
     # will not change the padding or bounds.
-    # This returns a tuple because modifying the returned value has no effect.
-    # To modify outer_position element-wise, use set_outer_position().
     outer_position = Property
 
     # The number of horizontal and vertical pixels in the padding outer box.
     # Setting these bounds will modify the bounds of the component, but
     # will not change the lower-left position (self.outer_position) or
     # the padding.
-    # This returns a tuple because modifying the returned value has no effect.
-    # To modify outer_bounds element-wise, use set_outer_bounds().
     outer_bounds = Property
 
     #------------------------------------------------------------------------
@@ -160,10 +155,6 @@ class Component(CoordinateBox, Interactor):
     # Draw the border as part of the overlay layer? If False, draw the
     # border as part of the background layer.
     overlay_border = Bool(True)
-
-    # Draw the border inset (on the plot)? If False, draw the border
-    # outside the plot area.
-    inset_border = Bool(True)
 
     #------------------------------------------------------------------------
     # Border and background traits
@@ -231,21 +222,6 @@ class Component(CoordinateBox, Interactor):
     # Public methods
     #------------------------------------------------------------------------
 
-    def __init__(self, **traits):
-        # The 'padding' trait sets 4 individual traits in bulk. Make sure that
-        # it gets set first before other explicit padding traits get set so they
-        # may override the bulk default.
-        padding = traits.pop('padding', None)
-        padding_traits = {}
-        for name in traits.keys():
-            # Use .keys() so we can modify the dict during iteration safely.
-            if name in ['padding_top', 'padding_bottom',
-                        'padding_left', 'padding_right']:
-                padding_traits[name] = traits.pop(name)
-
-        super(Component,self).__init__(**traits)
-        self._set_padding_traits(padding, padding_traits)
-
     def draw(self, gc, view_bounds=None, mode="default"):
         """ Draws the plot component.
 
@@ -304,14 +280,14 @@ class Component(CoordinateBox, Interactor):
         # A basic implementation of is_in(); subclasses should provide their
         # own if they are more accurate/faster/shinier.
         if self.padding_accepts_focus:
-            bounds = self.outer_bounds
-            pos = self.outer_position
+            width, height = self.outer_bounds
+            x_pos, y_pos = self.outer_position
         else:
-            bounds = self.bounds
-            pos = self.position
+            width, height = self.bounds
+            x_pos, y_pos = self.position
 
-        return ((x >= pos[0]) and (x < pos[0] + bounds[0]) and
-                (y >= pos[1]) and (y < pos[1] + bounds[1]))
+        return ((x >= x_pos) and (x < (x_pos + width)) and
+                (y >= y_pos) and (y < (y_pos + height)))
 
     def cleanup(self, window):
         """When a window viewing or containing a component is destroyed,
@@ -361,21 +337,6 @@ class Component(CoordinateBox, Interactor):
     # Protected methods
     #------------------------------------------------------------------------
 
-    def _set_padding_traits(self, padding, padding_traits):
-        """ Set the bulk padding trait and all of the others in the correct
-        order.
-
-        Parameters
-        ----------
-        padding : None, int or list of ints
-            The bulk padding.
-        padding_traits : dict mapping str to int
-            The specific padding traits.
-        """
-        if padding is not None:
-            self.trait_set(padding=padding)
-        self.trait_set(**padding_traits)
-
     def _request_redraw(self):
         if self.container is not None:
             self.container.request_redraw()
@@ -417,13 +378,8 @@ class Component(CoordinateBox, Interactor):
         if handler:
             handler(gc, view_bounds, mode)
 
-    def _draw_border(self, gc, view_bounds=None, mode="default",
-                     force_draw=False):
-        """ Utility method to draw the borders around this component
-
-        The *force_draw* parameter forces the method to draw the border; if it
-        is false, the border is drawn only when **overlay_border** is True.
-        """
+    def _draw_border(self, gc, view_bounds=None, mode="default"):
+        """ Utility method to draw the borders around this component. """
         pass
 
     #------------------------------------------------------------------------
@@ -463,13 +419,7 @@ class Component(CoordinateBox, Interactor):
 
     def _get_visible_border(self):
         """ Helper function to return the amount of border, if visible """
-        if self.border_visible:
-            if self.inset_border:
-                return 0
-            else:
-                return self.border_width
-        else:
-            return 0
+        return self.border_width if self.border_visible else 0
 
     #------------------------------------------------------------------------
     # Tool-related methods and event dispatch
@@ -586,6 +536,12 @@ class Component(CoordinateBox, Interactor):
     def _get_vpadding(self):
         border_size = 2 * self._get_visible_border()
         return border_size + self.padding_bottom + self.padding_top
+
+    def _set_padding(self, value):
+        if np.isscalar(value):
+            value = [value] * 4
+        self.padding_left, self.padding_right = value[:2]
+        self.padding_top, self.padding_bottom = value[2:]
 
     #------------------------------------------------------------------------
     # Outer position setters and getters

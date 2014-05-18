@@ -67,6 +67,10 @@ class BaseToolState(AbstractTool):
     def on_exit(self, event, new_state=None):
         pass
 
+    def on_mouse_leave(self, event):
+        # Typically we want to exit to the normal state when leaving.
+        self.exit_state(event)
+
 
 class BaseTool(AbstractTool):
     """ Base class for tools
