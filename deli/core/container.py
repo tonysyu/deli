@@ -1,5 +1,6 @@
 """ Defines the basic Container class """
 import warnings
+from contextlib import contextmanager
 
 from enable.base import empty_rectangle, intersect_bounds
 from enable.events import MouseEvent
@@ -249,51 +250,55 @@ class Container(Component):
     # Event handling
     #------------------------------------------------------------------------
 
-    def get_event_transform(self, event=None, suffix=""):
+    def get_event_transform(self, event=None):
         return affine.affine_from_translation(-self.x, -self.y)
 
     def dispatch(self, event, suffix):
-        """
-        Dispatches a mouse event based on the current event_state.  Overrides
-        the default Interactor.dispatch by adding some default
-        behavior to send all events to our contained children.
+        """ Dispatches mouse event to child components until it is handled.
 
-        "suffix" is the name of the mouse event as a suffix to the event state
-        name, e.g. "_left_down" or "_window_enter".
+        Parameters
+        ----------
+        event : BaseEvent
+            A mouse or key event.
+        suffix : string
+            The name of the mouse event as a suffix to the event state name,
+            e.g. "left_down" or "window_enter".
         """
-        if not event.handled:
+        if event.handled:
+            return
+
+        with self._local_event_transform(event):
             components = self.components_at(event.x, event.y)
+            component_set = set(components)
 
-            # Translate the event's location to be relative to this container
-            transform = self.get_event_transform(event, suffix)
+            components_left = self._prev_event_handlers - component_set
+            self._notify_if_mouse_event(components_left, event, 'mouse_leave')
+
+            if suffix != 'mouse_leave':
+                components_entered = component_set - self._prev_event_handlers
+                self._notify_if_mouse_event(components_entered,
+                                            event, 'mouse_enter')
+            # Dispatch event and add event handlers to the list of previous
+            # event handlers if they actually receive the event.
+            self._prev_event_handlers = set()
+            for component in components:
+                component.dispatch(event, suffix)
+                self._prev_event_handlers.add(component)
+                if event.handled:
+                    break
+
+        if not event.handled:
+            super(Container, self).dispatch(event, suffix)
+
+    @contextmanager
+    def _local_event_transform(self, event):
+        # Translate the event's location to be relative to this container.
+        try:
+            transform = self.get_event_transform(event)
             event.push_transform(transform, caller=self)
-
-            try:
-                component_set = set(components)
-
-                components_left = self._prev_event_handlers - component_set
-                self._notify_if_mouse_event(components_left, event,
-                                            'mouse_leave')
-
-                if suffix != 'mouse_leave':
-                    components_entered = (component_set
-                                          - self._prev_event_handlers)
-                    self._notify_if_mouse_event(components_entered, event,
-                                                    'mouse_enter')
-                # Handle the actual event
-                # Only add event handlers to the list of previous event handlers
-                # if they actually receive the event
-                self._prev_event_handlers = set()
-                for component in components:
-                    component.dispatch(event, suffix)
-                    self._prev_event_handlers.add(component)
-                    if event.handled:
-                        break
-            finally:
-                event.pop(caller=self)
-
-            if not event.handled:
-                super(Container, self).dispatch(event, suffix)
+            yield
+        finally:
+            event.pop(caller=self)
 
     def _notify_if_mouse_event(self, components, event, suffix):
         if len(components) == 0:
