@@ -1,19 +1,6 @@
-#------------------------------------------------------------------------------
-# Copyright (c) 2007, Riverbank Computing Limited
-# All rights reserved.
-#
-# This software is provided without warranty under the terms of the BSD
-# license included in enthought/LICENSE.txt and may be redistributed only
-# under the conditions described in the aforementioned license.  The license
-# is also available online at http://www.enthought.com/licenses/BSD.txt
-#
-#------------------------------------------------------------------------------
-
-# Standard library imports.
 import sys
 from traceback import format_exception_only
 
-# Enthought library imports.
 from traits.etsconfig.api import ETSConfig
 
 
@@ -36,15 +23,16 @@ def _init_toolkit():
     backend = 'deli.core.%s.%s' % (toolkit, backend)
     try:
         __import__(backend)
-    except ImportError, SystemExit:
+    except (ImportError, SystemExit):
         t, v, _tb = sys.exc_info()
-        raise ImportError, "Unable to import the %s backend for the %s " \
-                "toolkit (reason: %s)." % (backend, toolkit,
-                        format_exception_only(t, v))
+        exception = format_exception_only(t, v)
+        msg = "Unable to import {!r} backend for {!r} toolkit (reason: {})."
+        raise ImportError(msg.format(backend, toolkit, exception))
 
     # Save the imported toolkit module.
     global _toolkit_backend
     _toolkit_backend = backend
+
 
 # Do this once then disappear.
 _init_toolkit()
@@ -55,9 +43,10 @@ def toolkit_object(name):
     """ Return the toolkit specific object with the given name. """
 
     try:
-        be_obj = getattr(sys.modules[_toolkit_backend], name)
+        tk_object = getattr(sys.modules[_toolkit_backend], name)
     except AttributeError:
-        raise NotImplementedError("the %s.%s enable backend doesn't implement %s" %
-                                  (ETSConfig.toolkit, ETSConfig.kiva_backend, name))
+        msg = "The {}.{} enable backend doesn't implement {!r}"
+        args = (ETSConfig.toolkit, ETSConfig.kiva_backend, name)
+        raise NotImplementedError(msg.format(*args))
 
-    return be_obj
+    return tk_object
