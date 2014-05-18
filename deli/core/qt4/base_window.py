@@ -1,10 +1,11 @@
 from pyface.qt import QtCore, QtGui, QtOpenGL
 
-from enable.events import KeyEvent, MouseEvent, DragEvent
+from enable.events import KeyEvent, MouseEvent
 from traits.api import Instance
 
 from ..abstract_window import AbstractWindow
-from .constants import BUTTON_NAME_MAP, KEY_MAP, POINTER_MAP, DRAG_RESULTS_MAP
+from .constants import BUTTON_NAME_MAP, KEY_MAP, POINTER_MAP
+
 
 class _QtWindowHandler(object):
     def __init__(self, qt_window, enable_window):
@@ -37,16 +38,8 @@ class _QtWindowHandler(object):
 
         self._enable_window.resized = (dx, dy)
 
-        if hasattr(component, "fit_window") and component.fit_window:
-            component.outer_position = [0, 0]
-            component.outer_bounds = [dx, dy]
-        elif hasattr(component, "resizable"):
-            if "h" in component.resizable:
-                component.outer_x = 0
-                component.outer_width = dx
-            if "v" in component.resizable:
-                component.outer_y = 0
-                component.outer_height = dy
+        component.outer_position = [0, 0]
+        component.outer_bounds = [dx, dy]
 
     #------------------------------------------------------------------------
     # Qt Keyboard event handlers
@@ -55,7 +48,6 @@ class _QtWindowHandler(object):
     def keyPressEvent(self, event):
         if self._enable_window:
             if not self._enable_window._on_key_pressed(event):
-                # for consistency with wx, we only generate character events if key_pressed not handled
                 self._enable_window._on_character(event)
 
     def keyReleaseEvent(self, event):
@@ -130,36 +122,6 @@ class _QtWindowHandler(object):
             qt_size_hint.setHeight(height)
 
         return qt_size_hint
-
-
-    #------------------------------------------------------------------------
-    # Qt Drag and drop event handlers
-    #------------------------------------------------------------------------
-
-    def dragEnterEvent(self, event):
-        if self._enable_window:
-            self._enable_window._drag_result = QtCore.Qt.IgnoreAction
-            self._enable_window._handle_drag_event('drag_over', event)
-            event.setDropAction(self._enable_window._drag_result)
-            event.accept()
-
-    def dragLeaveEvent(self, event):
-        if self._enable_window:
-            self._enable_window._handle_drag_event('drag_leave', event)
-
-    def dragMoveEvent(self, event):
-        if self._enable_window:
-            self._enable_window._drag_result = QtCore.Qt.IgnoreAction
-            self._enable_window._handle_drag_event('drag_over', event)
-            event.setDropAction(self._enable_window._drag_result)
-            event.accept()
-
-    def dropEvent(self, event):
-        if self._enable_window:
-            self._enable_window._drag_result = event.proposedAction()
-            self._enable_window._handle_drag_event('dropped_on', event)
-            event.setDropAction(self._enable_window._drag_result)
-            event.accept()
 
 
 class _QtWindow(QtGui.QWidget):
@@ -280,11 +242,6 @@ class _QtGLWindow(QtOpenGL.QGLWidget):
     def dropEvent(self, event):
         self.handler.dropEvent(event)
 
-    # TODO: by symmetry this belongs here, but we need to test it
-    #def sizeHint(self):
-    #    qt_size_hint = super(_QtGLWindow, self).sizeHint()
-    #    return self.handler.sizeHint(qt_size_hint)
-
 
 class _Window(AbstractWindow):
 
@@ -309,12 +266,6 @@ class _Window(AbstractWindow):
     # Implementations of abstract methods in AbstractWindow
     #------------------------------------------------------------------------
 
-    def set_drag_result(self, result):
-        if result not in DRAG_RESULTS_MAP:
-            raise RuntimeError("Unknown drag result '%s'" % result)
-        self._drag_result = DRAG_RESULTS_MAP[result]
-        return
-
     def _capture_mouse ( self ):
         "Capture all future mouse events"
         # Nothing needed with Qt.
@@ -324,7 +275,7 @@ class _Window(AbstractWindow):
         "Release the mouse capture"
         # Nothing needed with Qt.
         pass
-    
+
     def _create_key_event(self, event_type, event):
         focus_owner = self.focus_owner
 
@@ -398,54 +349,6 @@ class _Window(AbstractWindow):
                 middle_down=bool(buttons & QtCore.Qt.MidButton),
                 right_down=bool(buttons & QtCore.Qt.RightButton),
                 window=self)
-
-    def _create_drag_event(self, event):
-        
-        # If the control no longer exists, don't send mouse event
-        if self.control is None:
-            return None
-        # If the event (if there is one) doesn't contain the mouse position,
-        # modifiers and buttons then get sensible defaults.
-        try:
-            x = event.x()
-            y = event.y()
-        except AttributeError:
-            pos = self.control.mapFromGlobal(QtGui.QCursor.pos())
-            x = pos.x()
-            y = pos.y()
-
-        self.control.handler.last_mouse_pos = (x, y)
-        
-        # extract an object from the event, if we can
-        try:
-            mimedata = event.mimeData()
-            copy = event.proposedAction() == QtCore.Qt.CopyAction
-        except AttributeError:
-            # this is a DragLeave event
-            return DragEvent(x=x, y=self._flip_y(y), obj=None, copy=False,
-                        window=self, mimedata=None)
-            
-        try:
-            from traitsui.qt4.clipboard import PyMimeData
-        except ImportError:
-            # traitsui isn't available, just make mimedata available on event
-            obj = None
-        else:
-            mimedata = PyMimeData.coerce(mimedata)
-            obj = mimedata.instance()
-            if obj is None:
-                files = mimedata.localPaths()
-                if files:
-                    try:
-                        # try to extract file info from mimedata
-                        # XXX this is for compatibility with what wx does
-                        from apptools.io.api import File
-                        obj = [File(path=path) for path in files]
-                    except ImportError:
-                        pass
-        
-        return DragEvent(x=x, y=self._flip_y(y), obj=obj, copy=copy,
-                        window=self, mimedata=mimedata)
 
     def _redraw(self, coordinates=None):
         if self.control:
