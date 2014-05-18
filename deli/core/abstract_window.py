@@ -1,8 +1,7 @@
 from numpy import dot
 
-from enable.base import union_bounds
 from enable.colors import ColorTrait
-from traits.api import (Any, Bool, Event, HasTraits, Instance, Property,
+from traits.api import (Any, Bool, Event, HasStrictTraits, Instance, Property,
                         Trait, Tuple, List)
 
 from .component import Component
@@ -15,7 +14,7 @@ def Alias(name):
                     lambda obj, val: setattr(obj, name, val))
 
 
-class AbstractWindow(HasTraits):
+class AbstractWindow(HasStrictTraits):
 
     # The top-level component that this window houses
     component = Instance(Component)
@@ -56,6 +55,9 @@ class AbstractWindow(HasTraits):
     # When the underlying toolkit control gets resized, this event gets set
     # to the new size of the window, expressed as a tuple (dx, dy).
     resized = Event
+
+    # Kiva GraphicsContext (XXX: is there a base class?)
+    _gc = Any
 
     # The previous component that handled an event.  Used to generate
     # mouse_enter and mouse_leave events.  Right now this can only be
@@ -142,11 +144,9 @@ class AbstractWindow(HasTraits):
     #------------------------------------------------------------------------
 
     def __init__(self, **traits):
-        self._scroll_origin = (0.0, 0.0)
         self._update_region = None
         self._gc = None
-        self._pointer_owner = None
-        HasTraits.__init__(self, **traits)
+        super(HasStrictTraits, self).__init__(**traits)
 
         # Create a default component (if necessary):
         if self.component is None:
@@ -257,7 +257,6 @@ class AbstractWindow(HasTraits):
     def redraw(self):
         """ Requests that the window be redrawn. """
         self._redraw()
-        return
 
     def cleanup(self):
         """ Clean up after ourselves.

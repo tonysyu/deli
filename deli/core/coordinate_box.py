@@ -1,8 +1,8 @@
 from enable.enable_traits import bounds_trait, coordinate_trait
-from traits.api import HasTraits, Property
+from traits.api import HasStrictTraits, Property
 
 
-class CoordinateBox(HasTraits):
+class CoordinateBox(HasStrictTraits):
     """
     Represents a box in screen space, and provides convenience properties to
     access bounds and coordinates in a variety of ways.

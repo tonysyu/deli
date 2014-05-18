@@ -3,10 +3,10 @@
 from enable.colors import ColorTrait
 from enable.enable_traits import cursor_style_trait, Pointer
 from kiva.affine import affine_identity
-from traits.api import Bool, HasTraits, List, Str, Trait
+from traits.api import Bool, HasStrictTraits, List, Str, Trait
 
 
-class Interactor(HasTraits):
+class Interactor(HasStrictTraits):
     """
     The base class of any Enable object that receives keyboard and mouse
     events.  Adds the notion of "state" which determines which set of

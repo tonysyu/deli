@@ -4,12 +4,12 @@ import warnings
 from enable.base import empty_rectangle, intersect_bounds
 from enable.events import MouseEvent
 from kiva import affine
-from traits.api import Bool, HasTraits, Instance, List, Property, Tuple
+from traits.api import Bool, HasStrictTraits, Instance, List, Property, Tuple
 
 from .component import Component
 
 
-class AbstractResolver(HasTraits):
+class AbstractResolver(HasStrictTraits):
     """
     A Resolver traverses a component DB and matches a specifier.
     """

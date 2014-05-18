@@ -226,8 +226,6 @@ class _Window(AbstractWindow):
     def __init__(self, parent, wid=-1, pos=None, size=None, **traits):
         AbstractWindow.__init__(self, **traits)
 
-        self._mouse_captured = False
-
         if isinstance(parent, QtGui.QLayout):
             parent = parent.parentWidget()
         self.control = self._create_control(parent, self)

@@ -48,7 +48,7 @@ class Component(CoordinateBox, Interactor):
     # Our container object
     container = Any    # Instance("Container")
 
-    # A reference to our top-level Enable Window.  This is stored as a shadow
+    # The top-level Window.  This is stored as a shadow
     # attribute if this component is the direct child of the Window; otherwise,
     # the getter function recurses up the containment hierarchy.
     window = Property   # Instance("Window")
@@ -262,7 +262,10 @@ class Component(CoordinateBox, Interactor):
         Requests that the component redraw itself.  Usually this means asking
         its parent for a repaint.
         """
-        self._request_redraw()
+        if self.container is not None:
+            self.container.request_redraw()
+        elif self._window:
+            self._window.redraw()
 
     def is_in(self, x, y):
         # A basic implementation of is_in(); subclasses should provide their
@@ -298,7 +301,7 @@ class Component(CoordinateBox, Interactor):
             **bounds**.
         force : Boolean
             Whether to force a layout operation. If False, the component does
-            a layout on itself only if **_layout_needed** is True.
+            a layout on itself only if **layout_needed** is True.
             The method always does layout on any underlays or overlays it has,
             even if *force* is False.
 
@@ -320,12 +323,6 @@ class Component(CoordinateBox, Interactor):
     #------------------------------------------------------------------------
     # Protected methods
     #------------------------------------------------------------------------
-
-    def _request_redraw(self):
-        if self.container is not None:
-            self.container.request_redraw()
-        elif self._window:
-            self._window.redraw()
 
     def _dispatch_draw(self, layer, gc, view_bounds, mode):
         """ Renders the named *layer* of this component.
