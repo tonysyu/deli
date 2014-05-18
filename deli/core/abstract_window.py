@@ -1,17 +1,10 @@
-
-# Major library imports
 from numpy import dot
 
-# Enthought library imports
-from traits.api import (Any, Bool, Event, HasTraits, Instance, Property,
-                        Trait, Tuple, List)
-
-
-# Local relative imports
-from enable.base import (bounds_to_coordinates,
-                         does_disjoint_intersect_coordinates, union_bounds)
+from enable.base import union_bounds
 from enable.interactor import Interactor
 from enable.colors import ColorTrait
+from traits.api import (Any, Bool, Event, HasTraits, Instance, Property,
+                        Trait, Tuple, List)
 
 from .component import Component
 from .container import Container
@@ -77,8 +70,6 @@ class AbstractWindow(HasTraits):
     # The regions to update upon redraw
     _update_region = Any
 
-
-
     #---------------------------------------------------------------------------
     #  Abstract methods that must be implemented by concrete subclasses
     #---------------------------------------------------------------------------
@@ -102,7 +93,7 @@ class AbstractWindow(HasTraits):
     def _create_key_event(self, event):
         "Convert a GUI toolkit key event into a KeyEvent"
         raise NotImplementedError
-    
+
     def _create_mouse_event(self, event):
         "Convert a GUI toolkit mouse event into a MouseEvent"
         raise NotImplementedError
@@ -163,7 +154,7 @@ class AbstractWindow(HasTraits):
     def get_pointer_position(self):
         "Returns the current pointer position in local window coordinates"
         raise NotImplementedError
-        
+
     #------------------------------------------------------------------------
     # Public methods
     #------------------------------------------------------------------------
@@ -178,7 +169,6 @@ class AbstractWindow(HasTraits):
         # Create a default component (if necessary):
         if self.component is None:
             self.component = Container()
-        return
 
     def _component_changed(self, old, new):
         if old is not None:
@@ -208,7 +198,6 @@ class AbstractWindow(HasTraits):
                     self.component.outer_height = size[1]
         self._update_region = None
         self.redraw()
-        return
 
     def component_bounds_changed(self, bounds):
         """
@@ -218,35 +207,21 @@ class AbstractWindow(HasTraits):
         self.invalidate_draw()
         pass
 
-    def set_mouse_owner(self, mouse_owner, transform=None, history=None):
-        "Handle the 'mouse_owner' being changed"
-        if mouse_owner is None:
-            self._release_mouse()
-            self.mouse_owner = None
-            self.mouse_owner_transform = None
-            self.mouse_owner_dispatch_history = None
-        else:
-            self._capture_mouse()
-            self.mouse_owner = mouse_owner
-            self.mouse_owner_transform = transform
-            self.mouse_owner_dispatch_history = history
-        return
-
     def invalidate_draw(self, damaged_regions=None, self_relative=False):
         if damaged_regions is not None and self._update_region is not None:
             self._update_region += damaged_regions
         else:
             self._update_region = None
-#        print damaged_regions
 
     #---------------------------------------------------------------------------
     #  Generic keyboard event handler:
     #---------------------------------------------------------------------------
+
     def _handle_key_event(self, event_type, event):
         """ **event** should be a toolkit-specific opaque object that will
         be passed in to the backend's _create_key_event() method. It can
         be None if the the toolkit lacks a native "key event" object.
-        
+
         Returns True if the event has been handled within the Enable object
         hierarchy, or False otherwise.
         """
@@ -254,11 +229,11 @@ class AbstractWindow(HasTraits):
         key_event = self._create_key_event(event_type, event)
         if key_event is None:
             return False
-        
+
         self.shift_pressed = key_event.shift_down
         self.alt_pressed = key_event.alt_down
         self.control_pressed = key_event.control_down
-        
+
         # Dispatch the event to the correct component
         mouse_owner = self.mouse_owner
         if mouse_owner is not None:
@@ -278,7 +253,7 @@ class AbstractWindow(HasTraits):
                 if self.component.is_in(key_event.x, key_event.y):
                     # Fire the actual event
                     self.component.dispatch(key_event, event_type)
-        
+
         return key_event.handled
 
     #---------------------------------------------------------------------------
@@ -293,84 +268,37 @@ class AbstractWindow(HasTraits):
         hierarchy, or False otherwise.
         """
         if self._size is None:
-            # PZW: Hack!
-            # We need to handle the cases when the window hasn't been painted yet, but
-            # it's gotten a mouse event.  In such a case, we just ignore the mouse event.
-            # If the window has been painted, then _size will have some sensible value.
             return False
 
         mouse_event = self._create_mouse_event(event)
-        # if no mouse event generated for some reason, return
-        if mouse_event is None:
-            return False
-        
-        mouse_owner = self.mouse_owner
 
-        if mouse_owner is not None:
-            # A mouse_owner has grabbed the mouse.  Check to see if we need to
-            # compose a net transform by querying each of the objects in the
-            # dispatch history in turn, or if we can just apply a saved top-level
-            # transform.
-            history = self.mouse_owner_dispatch_history
-            if history is not None and len(history) > 0:
-                # Assemble all the transforms
-                transforms = [c.get_event_transform() for c in history]
-                total_transform = reduce(dot, transforms[::-1])
-                mouse_event.push_transform(total_transform)
-            elif self.mouse_owner_transform is not None:
-                mouse_event.push_transform(self.mouse_owner_transform)
-
-            mouse_owner.dispatch(mouse_event, event_name)
-            self._pointer_owner = mouse_owner
-        else:
-            # Normal event handling loop
-            if self.overlay is not None:
-                # TODO: implement this...
-                pass
-            if (not mouse_event.handled) and (self.component is not None):
-                # Test to see if we need to generate a mouse_leave event
-                if self._prev_event_handler:
-                    if not self._prev_event_handler.is_in(mouse_event.x, mouse_event.y):
-                        self._prev_event_handler.dispatch(mouse_event, "pre_mouse_leave")
-                        mouse_event.handled = False
-                        self._prev_event_handler.dispatch(mouse_event, "mouse_leave")
-                        self._prev_event_handler = None
-
-                if self.component.is_in(mouse_event.x, mouse_event.y):
-                    # Test to see if we need to generate a mouse_enter event
-                    if self._prev_event_handler != self.component:
-                        self._prev_event_handler = self.component
-                        self.component.dispatch(mouse_event, "pre_mouse_enter")
-                        mouse_event.handled = False
-                        self.component.dispatch(mouse_event, "mouse_enter")
-
-                    # Fire the actual event
-                    self.component.dispatch(mouse_event, "pre_" + event_name)
+        if (not mouse_event.handled) and (self.component is not None):
+            # Test to see if we need to generate a mouse_leave event
+            if self._prev_event_handler:
+                if not self._prev_event_handler.is_in(mouse_event.x, mouse_event.y):
+                    self._prev_event_handler.dispatch(mouse_event, "pre_mouse_leave")
                     mouse_event.handled = False
-                    self.component.dispatch(mouse_event, event_name)
+                    self._prev_event_handler.dispatch(mouse_event, "mouse_leave")
+                    self._prev_event_handler = None
 
+            if self.component.is_in(mouse_event.x, mouse_event.y):
+                # Test to see if we need to generate a mouse_enter event
+                if self._prev_event_handler != self.component:
+                    self._prev_event_handler = self.component
+                    self.component.dispatch(mouse_event, "pre_mouse_enter")
+                    mouse_event.handled = False
+                    self.component.dispatch(mouse_event, "mouse_enter")
 
-        # If this event requires setting the keyboard focus, set the first
-        # component under the mouse pointer that accepts focus as the new focus
-        # owner (otherwise, nobody owns the focus):
-        if set_focus:
-            # If the mouse event was a click, then we set the toolkit's
-            # focus to ourselves
-            if mouse_event.left_down or mouse_event.middle_down or \
-                    mouse_event.right_down or mouse_event.mouse_wheel != 0:
-                self._set_focus()
-
-            if (self.component is not None) and (self.component.accepts_focus):
-                if self.focus_owner is None:
-                    self.focus_owner = self.component
-                else:
-                    pass
-
+                # Fire the actual event
+                self.component.dispatch(mouse_event, "pre_" + event_name)
+                mouse_event.handled = False
+                self.component.dispatch(mouse_event, event_name)
         return mouse_event.handled
 
     #---------------------------------------------------------------------------
     #  Generic drag event handler:
     #---------------------------------------------------------------------------
+
     def _handle_drag_event(self, event_name, event, set_focus=False):
         """ **event** should be a toolkit-specific opaque object that will
         be passed in to the backend's _create_drag_event() method.  It can
@@ -379,18 +307,15 @@ class AbstractWindow(HasTraits):
         Returns True if the event has been handled within the Enable object
         hierarchy, or False otherwise.
         """
+        # XXX Is this method ever called?
         if self._size is None:
-            # PZW: Hack!
-            # We need to handle the cases when the window hasn't been painted yet, but
-            # it's gotten a mouse event.  In such a case, we just ignore the mouse event.
-            # If the window has been painted, then _size will have some sensible value.
             return False
 
         drag_event = self._create_drag_event(event)
         # if no mouse event generated for some reason, return
         if drag_event is None:
             return False
-            
+
         if self.component is not None:
             # Test to see if we need to generate a drag_leave event
             if self._prev_event_handler:
@@ -415,10 +340,6 @@ class AbstractWindow(HasTraits):
 
         return drag_event.handled
 
-    def set_tooltip(self, components):
-        "Set the window's tooltip (if necessary)"
-        raise NotImplementedError
-
     def redraw(self):
         """ Requests that the window be redrawn. """
         self._redraw()
@@ -438,21 +359,10 @@ class AbstractWindow(HasTraits):
             self._gc.window = None
             self._gc = None
 
-    def _needs_redraw(self, bounds):
-        "Determine if a specified region intersects the update region"
-        return does_disjoint_intersect_coordinates( self._update_region,
-                                                    bounds_to_coordinates( bounds ) )
-
     def _paint(self, event=None):
         """ This method is called directly by the UI toolkit's callback
         mechanism on the paint event.
         """
-        if self.control is None:
-            # the window has gone away, but let the window implementation
-            # handle the event as needed
-            self._window_paint(event)
-            return
-
         # Create a new GC if necessary
         size = self._get_control_size()
         if (self._size != tuple(size)) or (self._gc is None):
@@ -468,7 +378,6 @@ class AbstractWindow(HasTraits):
         gc = self._gc
         self.component.draw(gc, view_bounds=(0, 0, size[0], size[1]))
 
-#        damaged_regions = draw_result['damaged_regions']
         # FIXME: consolidate damaged regions if necessary
         if not self.use_damaged_region:
             self._update_region = None
@@ -478,14 +387,6 @@ class AbstractWindow(HasTraits):
         self._window_paint(event)
 
         self._update_region = []
-        return
-
-    def __getstate__(self):
-        attribs = ("component", "bgcolor", "overlay", "_scroll_origin")
-        state = {}
-        for attrib in attribs:
-            state[attrib] = getattr(self, attrib)
-        return state
 
     #---------------------------------------------------------------------------
     # Wire up the mouse event handlers
@@ -530,24 +431,8 @@ class AbstractWindow(HasTraits):
     def _on_mouse_leave ( self, event ):
         self._handle_mouse_event( 'mouse_leave', event, -1 )
 
-    # Additional event handlers that are not part of normal Interactors
     def _on_window_enter(self, event):
-        # TODO: implement this to generate a mouse_leave on self.component
         pass
-
-    def _on_window_leave(self, event):
-        if self._size is None:
-            # PZW: Hack!
-            # We need to handle the cases when the window hasn't been painted yet, but
-            # it's gotten a mouse event.  In such a case, we just ignore the mouse event.
-            # If the window has been painted, then _size will have some sensible value.
-            self._prev_event_handler = None
-        if self._prev_event_handler:
-            mouse_event = self._create_mouse_event(event)
-            self._prev_event_handler.dispatch(mouse_event, "mouse_leave")
-            self._prev_event_handler = None
-        return
-
 
     #---------------------------------------------------------------------------
     # Wire up the keyboard event handlers
