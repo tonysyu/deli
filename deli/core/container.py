@@ -99,7 +99,6 @@ class Container(Component):
             with gc:
                 gc.translate_ctm(*self.position)
                 for component in visible_components:
-                    print component
                     component.draw_layer(layer, gc, view_bounds)
 
     def _get_visible_components(self, bounds):

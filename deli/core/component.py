@@ -5,7 +5,8 @@ import numpy as np
 
 from enable.colors import white_color_trait
 from kiva.constants import FILL
-from traits.api import Any, Bool, Float, Instance, Int, List, Property, Trait
+from traits.api import (Any, Bool, Float, Instance, Int, List, Property, Trait,
+                        WeakRef)
 
 from .coordinate_box import CoordinateBox
 
@@ -39,7 +40,7 @@ class Component(CoordinateBox):
     #------------------------------------------------------------------------
 
     # The parent container for this component.
-    container = Any    # Instance("Container")
+    container = WeakRef(CoordinateBox)
 
     # The top-level Window.
     window = Property   # Instance("Window")
