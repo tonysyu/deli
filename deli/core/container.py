@@ -4,26 +4,22 @@ from contextlib import contextmanager
 from enable.base import empty_rectangle, intersect_bounds
 from enable.events import MouseEvent
 from kiva import affine
-from traits.api import Bool, Instance, List, Property, Tuple
+from traits.api import Instance, List, Property, Tuple
 
 from .component import Component
 
 
 class Container(Component):
-    """ A Container that holds other Components (or containers).
+    """ A Container that holds components and other containers.
 
-    If auto_size is True, the container will automatically update its bounds to
-    enclose all of the components handed to it, so that a container's bounds
-    serve as a bounding box (although not necessarily a minimal bounding box)
-    of its contained components.
+    This represents a general container class of a composite structure [GoF]_.
+
+    .. [GoF] Design Patterns: Elements of Reusable Object Oriented Software,
+             Gamma et al., Addison-Wesley, 1996.
     """
 
     # The list of components within this frame
     components = Property    # List(Component)
-
-    # Whether or not the container should auto-size itself to fit all of its
-    # components.
-    auto_size = Bool(False)
 
     # The layers that the container will draw first, so that they appear
     # under the component layers of the same name.
@@ -155,8 +151,7 @@ class Container(Component):
         tmp = intersect_bounds(self.position + self.bounds, view_bounds)
         if tmp == empty_rectangle:
             return empty_rectangle
-        # Compute new_bounds, which is the view_bounds transformed into
-        # our coordinate space
+        # Transform view_bounds transformed into our coordinate space.
         x, y, width, height = view_bounds
         new_bounds = (x-self.x, y-self.y, width, height)
         return new_bounds
@@ -217,11 +212,11 @@ class Container(Component):
                 components_entered = component_set - self._prev_event_handlers
                 self._notify_if_mouse_event(components_entered,
                                             event, 'mouse_enter')
-            # Dispatch event and add event handlers to the list of previous
-            # event handlers if they actually receive the event.
+
             self._prev_event_handlers = set()
             for component in components:
                 component.dispatch(event, suffix)
+                # Only add handler if it actually received the event.
                 self._prev_event_handlers.add(component)
                 if event.handled:
                     break
@@ -231,7 +226,7 @@ class Container(Component):
 
     @contextmanager
     def _local_event_transform(self, event):
-        # Translate the event's location to be relative to this container.
+        """ Translate event location to be relative to this container. """
         try:
             transform = self.get_event_transform(event)
             event.push_transform(transform, caller=self)
@@ -253,8 +248,6 @@ class Container(Component):
     #------------------------------------------------------------------------
 
     def _bounds_changed(self, old, new):
-        # crappy... calling our parent's handler seems like a common traits
-        # event handling problem
         super(Container, self)._bounds_changed(old, new)
         self._layout_needed = True
 

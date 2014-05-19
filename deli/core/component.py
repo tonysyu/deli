@@ -25,6 +25,13 @@ class Component(CoordinateBox):
 
     Since Components can have a border and padding, there is an additional set
     of bounds and position attributes to define the "outer box" of components.
+
+    This represents a general component of a composite structure [GoF]_, but,
+    by itself, is only a leaf-component. `Containers`, which subclass
+    `Component`, compose components and other containers.
+
+    .. [GoF] Design Patterns: Elements of Reusable Object Oriented Software,
+             Gamma et al., Addison-Wesley, 1996.
     """
 
     #------------------------------------------------------------------------
