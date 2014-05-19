@@ -28,17 +28,7 @@ class Component(CoordinateBox):
     """
 
     #------------------------------------------------------------------------
-    # Basic appearance traits
-    #------------------------------------------------------------------------
-
-    # Is the component visible?
-    visible = Bool(True)
-
-    # Does the component use space in the layout even if it is not visible?
-    invisible_layout = Bool(False)
-
-    #------------------------------------------------------------------------
-    # Object/containment hierarchy traits
+    # Components and containers
     #------------------------------------------------------------------------
 
     # The parent container for this component.
@@ -49,6 +39,37 @@ class Component(CoordinateBox):
 
     # Only gets set if this is the top-level enable component in a Window.
     _window = Any    # Instance("Window")
+
+    # A list of underlays for this plot.
+    underlays = List  #[AbstractOverlay]
+
+    # A list of overlays for the plot.
+    overlays = List   #[AbstractOverlay]
+
+    # The tools that are registered as listeners.
+    tools = List
+
+    # The order in which various rendering classes on this component are drawn.
+    draw_order = Instance(list, args=(DRAWING_ORDER,))
+
+    #------------------------------------------------------------------------
+    # Basic appearance traits
+    #------------------------------------------------------------------------
+
+    # The background color of this component.
+    bgcolor = white_color_trait
+
+    # Is the component visible?
+    visible = Bool(True)
+
+    # Does the component use space in the layout even if it is not visible?
+    invisible_layout = Bool(False)
+
+    # The width of the border around this component.
+    border_width = Int(1)
+
+    # Visibility of border.
+    border_visible = Bool(False)
 
     #------------------------------------------------------------------------
     # Layout traits
@@ -61,23 +82,6 @@ class Component(CoordinateBox):
     layout_needed = Property
 
     _layout_needed = Bool(True)
-
-    #------------------------------------------------------------------------
-    # Overlays and underlays
-    #------------------------------------------------------------------------
-
-    # A list of underlays for this plot.
-    underlays = List  #[AbstractOverlay]
-
-    # A list of overlays for the plot.
-    overlays = List   #[AbstractOverlay]
-
-    # The tools that are registered as listeners.
-    tools = List
-
-    #------------------------------------------------------------------------
-    # Padding-related traits
-    #------------------------------------------------------------------------
 
     # The amount of space to put on the left side of the component
     padding_left = Int(0)
@@ -102,35 +106,11 @@ class Component(CoordinateBox):
     # Readonly property expressing the total amount of vertical padding
     vpadding = Property
 
-    #------------------------------------------------------------------------
-    # Position and bounds of outer box (encloses the padding and border area)
-    #------------------------------------------------------------------------
-
     # The lower left corner of the padding outer box around the component.
     outer_position = Property
 
     # The number of horizontal and vertical pixels in the padding outer box.
     outer_bounds = Property
-
-    #------------------------------------------------------------------------
-    # Rendering control traits
-    #------------------------------------------------------------------------
-
-    # The order in which various rendering classes on this component are drawn.
-    draw_order = Instance(list, args=(DRAWING_ORDER,))
-
-    #------------------------------------------------------------------------
-    # Border and background traits
-    #------------------------------------------------------------------------
-
-    # The width of the border around this component.
-    border_width = Int(1)
-
-    # Visibility of border.
-    border_visible = Bool(False)
-
-    # The background color of this component.
-    bgcolor = white_color_trait
 
     #------------------------------------------------------------------------
     # Abstract methods
@@ -209,18 +189,15 @@ class Component(CoordinateBox):
     def do_layout(self, size=None, force=False):
         """ Tells this component to do layout at a given size.
 
+        Always do layout on underlays or overlays, even if `force` is False.
+
         Parameters
         ----------
         size : (width, height)
             Size at which to lay out the component; either or both values can
-            be 0. If it is None, then the component lays itself out using
-            **bounds**.
+            be 0. If it is None, then use `bounds` for layout
         force : Boolean
-            Whether to force a layout operation. If False, the component does
-            a layout on itself only if **layout_needed** is True.
-            The method always does layout on any underlays or overlays it has,
-            even if *force* is False.
-
+            If False, do layout only if `layout_needed` is True.
         """
         if self.layout_needed or force:
             if size is not None:
