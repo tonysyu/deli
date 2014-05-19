@@ -265,7 +265,7 @@ class Component(CoordinateBox):
         """
         for overlay in self.overlays:
             if overlay.visible:
-                overlay.overlay(self, gc, view_bounds)
+                overlay.draw(self, gc, view_bounds)
 
     def _draw_underlay(self, gc, view_bounds=None):
         """ Draws the underlay layer of a component.
@@ -274,7 +274,7 @@ class Component(CoordinateBox):
             # This method call looks funny but it's correct - underlays are
             # just overlays drawn at a different time in the rendering loop.
             if underlay.visible:
-                underlay.overlay(self, gc, view_bounds)
+                underlay.draw(self, gc, view_bounds)
 
     def _get_visible_border(self):
         """ Helper function to return the amount of border, if visible """
