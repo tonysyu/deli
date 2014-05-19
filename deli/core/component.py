@@ -163,7 +163,7 @@ class Component(CoordinateBox):
         elif self._window:
             self._window.redraw()
 
-    def is_in(self, x, y, include_padding=True):
+    def is_in(self, x, y, include_padding=False):
         # A basic implementation of is_in(); subclasses should provide their
         # own if they are more accurate/faster/shinier.
         if include_padding:

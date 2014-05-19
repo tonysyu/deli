@@ -1,5 +1,4 @@
 """ Defines the basic Container class """
-import warnings
 from contextlib import contextmanager
 
 from enable.base import empty_rectangle, intersect_bounds
@@ -26,9 +25,6 @@ class Container(Component):
     # components.
     auto_size = Bool(False)
 
-    # The default size of this container if it is empty.
-    default_size = Tuple(0, 0)
-
     # The layers that the container will draw first, so that they appear
     # under the component layers of the same name.
     container_under_layers = Tuple('background', 'underlay')
@@ -44,9 +40,8 @@ class Container(Component):
     # Shadow trait for self.components
     _components = List    # List(Component)
 
-    # Set of components that last handled a mouse event.  We keep track of
-    # this so that we can generate mouse_enter and mouse_leave events of
-    # our own.
+    # Set of components that last handled a mouse event. This allows us to
+    # generate mouse_enter and mouse_leave events of our own.
     _prev_event_handlers = Instance(set, ())
 
     #------------------------------------------------------------------------
@@ -62,23 +57,19 @@ class Container(Component):
         self._components.extend(components)
 
     def components_at(self, x, y):
-        """
-        Returns a list of the components underneath the given point (given in
-        the parent coordinate frame of this container).
+        """ Returns components underneath the given point.
+
+        Input point is specified in parent container's coordinate space.
         """
         result = []
         if self.is_in(x,y):
-            xprime = x - self.position[0]
-            yprime = y - self.position[1]
             for component in self._components[::-1]:
-                if component.is_in(xprime, yprime):
+                if component.is_in(x - self.x, y - self.y):
                     result.append(component)
         return result
 
     def cleanup(self, window):
-        """When a window viewing or containing a component is destroyed,
-        cleanup is called on the component to give it the opportunity to
-        delete any transient state it may have (such as backbuffers)."""
+        """ Perform any necessary cleanup. """
         if self._components:
             for component in self._components:
                 component.cleanup(window)
@@ -90,7 +81,7 @@ class Container(Component):
     def draw_layer(self, layer, gc, view_bounds):
         """ Renders the named *layer* of this component.
         """
-        new_bounds = self._transform_view_bounds(view_bounds)
+        new_bounds = self._local_bounds(view_bounds)
         if new_bounds == empty_rectangle:
             return
 
@@ -158,22 +149,16 @@ class Container(Component):
         else:
             return True
 
-    def _transform_view_bounds(self, view_bounds):
-        """
-        Transforms the given view bounds into our local space and computes a new
-        region that can be handed off to our children.  Returns a 4-tuple of
-        the new position+bounds, or None (if None was passed in), or the value
-        of empty_rectangle (from enable.base) if the intersection resulted
-        in a null region.
-        """
+    def _local_bounds(self, view_bounds):
+        """ Return bounds transformed to local space. """
         # Check if we are visible
         tmp = intersect_bounds(self.position + self.bounds, view_bounds)
         if tmp == empty_rectangle:
             return empty_rectangle
         # Compute new_bounds, which is the view_bounds transformed into
         # our coordinate space
-        v = view_bounds
-        new_bounds = (v[0]-self.x, v[1]-self.y, v[2], v[3])
+        x, y, width, height = view_bounds
+        new_bounds = (x-self.x, y-self.y, width, height)
         return new_bounds
 
     def _component_bounds_changed(self, component):
