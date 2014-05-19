@@ -87,7 +87,7 @@ class Container(Component):
     # Protected methods
     #------------------------------------------------------------------------
 
-    def _dispatch_draw(self, layer, gc, view_bounds):
+    def draw_layer(self, layer, gc, view_bounds):
         """ Renders the named *layer* of this component.
         """
         new_bounds = self._transform_view_bounds(view_bounds)
@@ -102,16 +102,19 @@ class Container(Component):
         if layer in self.container_under_layers:
             self._draw_container_layer(layer, gc, view_bounds)
 
-        # Now transform coordinates and draw the children
-        visible_components = self._get_visible_components(new_bounds)
+        self._draw_children(layer, gc, view_bounds)
+
+        if layer in self.container_over_layers:
+            self._draw_container_layer(layer, gc, view_bounds)
+
+    def _draw_children(self, layer, gc, view_bounds):
+        # Draw children with coordinates relative to container.
+        visible_components = self._get_visible_components(view_bounds)
         if visible_components:
             with gc:
                 gc.translate_ctm(*self.position)
                 for component in visible_components:
-                    component._dispatch_draw(layer, gc, new_bounds)
-
-        if layer in self.container_over_layers:
-            self._draw_container_layer(layer, gc, view_bounds)
+                    component.draw_layer(layer, gc, view_bounds)
 
     def _draw_container_layer(self, layer, gc, view_bounds):
             draw = getattr(self, '_draw_container_' + layer, None)

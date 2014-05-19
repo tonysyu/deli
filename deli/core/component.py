@@ -151,7 +151,7 @@ class Component(CoordinateBox):
             self.do_layout()
 
         for layer in self.draw_order:
-            self._dispatch_draw(layer, gc, view_bounds)
+            self.draw_layer(layer, gc, view_bounds)
 
     def request_redraw(self):
         """
@@ -217,7 +217,7 @@ class Component(CoordinateBox):
     # Protected methods
     #------------------------------------------------------------------------
 
-    def _dispatch_draw(self, layer, gc, view_bounds):
+    def draw_layer(self, layer, gc, view_bounds):
         """ Renders the named *layer* of this component.
 
         This method can be used by container classes that group many components
