@@ -205,8 +205,9 @@ class Container(Component):
         if event.handled:
             return
 
+        # Get components under event and then transform to local coordinates.
+        components = self.components_at(event.x, event.y)
         with self._local_event_transform(event):
-            components = self.components_at(event.x, event.y)
             component_set = set(components)
 
             components_left = self._prev_event_handlers - component_set
