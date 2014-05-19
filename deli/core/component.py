@@ -355,18 +355,6 @@ class Component(CoordinateBox):
     # Position and padding setters and getters
     #------------------------------------------------------------------------
 
-    def _get_x(self):
-        return self.position[0]
-
-    def _set_x(self, val):
-        self.position[0] = val
-
-    def _get_y(self):
-        return self.position[1]
-
-    def _set_y(self, val):
-        self.position[1] = val
-
     def _get_hpadding(self):
         border_size = 2 * self._get_visible_border()
         return border_size + self.padding_right + self.padding_left
@@ -382,7 +370,7 @@ class Component(CoordinateBox):
         self.padding_top, self.padding_bottom = value[2:]
 
     #------------------------------------------------------------------------
-    # Outer position setters and getters
+    # Outer position and bounds
     #------------------------------------------------------------------------
 
     def _get_outer_position(self):
@@ -395,10 +383,6 @@ class Component(CoordinateBox):
         border = self._get_visible_border()
         self.position = [new_pos[0] + self.padding_left + border,
                          new_pos[1] + self.padding_bottom + border]
-
-    #------------------------------------------------------------------------
-    # Outer bounds setters and getters
-    #------------------------------------------------------------------------
 
     def _get_outer_bounds(self):
         bounds = self.bounds
