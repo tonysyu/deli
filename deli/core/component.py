@@ -11,7 +11,8 @@ from traits.api import (Any, Bool, Float, Instance, Int, List, Property, Str,
 from .coordinate_box import CoordinateBox
 
 
-DRAWING_ORDER = ['background', 'underlay', 'border', 'overlay']
+DEFAULT_DRAWING_ORDER = ["background", "image", "underlay", "plot",
+                         "border", "overlay"]
 
 
 class NullDispatch(object):
@@ -61,7 +62,13 @@ class Component(CoordinateBox):
     tools = List
 
     # The order in which various rendering classes on this component are drawn.
-    draw_order = Instance(list, args=(DRAWING_ORDER,))
+    # 1. 'background': Background image, shading.
+    # 2. 'image': A special layer for plots that render as images.
+    # 3. 'underlay': Axes and grids.
+    # 4. 'plot': The main plot area itself.
+    # 5. 'border': Plot borders.
+    # 6. 'overlay': Legends, selections, and other tool-drawn visual elements.
+    draw_order = Instance(list, args=(DEFAULT_DRAWING_ORDER,))
 
     #------------------------------------------------------------------------
     # Basic appearance traits

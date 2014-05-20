@@ -6,7 +6,6 @@ from .core.container import Container
 from .layout.bbox_transform import BboxTransform
 from .layout.bounding_box import BoundingBox
 from .layout.box_layout import enforce_screen_aspect_ratio
-from .plot_component import DEFAULT_DRAWING_ORDER
 
 
 class DataCanvas(Container):
@@ -15,8 +14,6 @@ class DataCanvas(Container):
     It can house plots and other plot components, and otherwise behaves
     just like a normal Container.
     """
-
-    draw_order = Instance(list, args=(DEFAULT_DRAWING_ORDER,))
 
     #--------------------------------------------------------------------------
     #  Bounding box
