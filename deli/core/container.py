@@ -141,6 +141,10 @@ class Container(Component):
         "Called by contained objects when their bounds change"
         pass
 
+    def _component_position_changed(self, component):
+        "Called by contained objects when their position changes"
+        pass
+
     #------------------------------------------------------------------------
     # Property setters & getters
     #------------------------------------------------------------------------

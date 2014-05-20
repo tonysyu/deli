@@ -5,8 +5,8 @@ import numpy as np
 
 from enable.colors import white_color_trait
 from kiva.constants import FILL
-from traits.api import (Any, Bool, Float, Instance, Int, List, Property, Trait,
-                        WeakRef)
+from traits.api import (Any, Bool, Float, Instance, Int, List, Property, Str,
+                        Trait, WeakRef)
 
 from .coordinate_box import CoordinateBox
 
@@ -34,6 +34,9 @@ class Component(CoordinateBox):
     .. [GoF] Design Patterns: Elements of Reusable Object Oriented Software,
              Gamma et al., Addison-Wesley, 1996.
     """
+
+    # The element ID of this component.
+    id = Str
 
     #------------------------------------------------------------------------
     # Components and containers
