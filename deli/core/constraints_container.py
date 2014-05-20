@@ -11,6 +11,7 @@ from traits.api import (Any, Bool, Callable, Dict, Either, Instance, List,
 from ..layout.layout_helpers import expand_constraints
 from ..layout.layout_manager import LayoutManager
 from ..layout.utils import add_symbolic_contents_constraints
+from ..utils.misc import new_item_name
 from .container import Container
 from .coordinate_box import CoordinateBox, get_from_constraints_namespace
 
@@ -89,6 +90,21 @@ class ConstraintsContainer(Container):
     #------------------------------------------------------------------------
     # Public methods
     #------------------------------------------------------------------------
+
+    def add(self, *components):
+        """ Adds components to this container.
+
+        Extend `Container` implementation to ensure components have unique ids.
+        """
+        ids = self._component_map.keys()
+        for component in components:
+            if not component.id:
+                component.id = new_item_name(ids, name_template='component_{}')
+                ids.append(component.id)
+            elif component.id in self._component_map:
+                msg = "Component ids must be unique, but {!r} already exists."
+                raise ValueError(msg.format(component.id))
+        super(ConstraintsContainer, self).add(*components)
 
     def do_layout(self, size=None, force=False):
         """ Make sure child components get a chance to refresh their layout.
@@ -327,22 +343,13 @@ class ConstraintsContainer(Container):
         """
         for item in components:
             key = item.id
-            if len(key) == 0:
-                msg = "Components added to a {0} must have a valid 'id' trait."
-                name = type(self).__name__
-                raise ValueError(msg.format(name))
-            elif key in self._component_map:
-                msg = "A Component with id '{0}' has already been added."
-                raise ValueError(msg.format(key))
-            elif key == self.id:
+            if key == self.id:
                 msg = "Can't add a Component with the same id as its parent."
                 raise ValueError(msg)
 
             self._component_map[key] = item
             item.on_trait_change(self._component_size_hint_changed,
                                  'layout_size_hint')
-
-        # Update the layout
         self.relayout()
 
     def _generate_constraints(self, layout_table):

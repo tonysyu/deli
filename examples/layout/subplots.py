@@ -14,8 +14,8 @@ from deli.plots.scatter_plot import ScatterPlot
 class Demo(HasStrictTraits):
 
     figure = Instance(ConstraintsContainer)
-    line_plot = Instance(PlotCanvas)
-    scatter_plot = Instance(PlotCanvas)
+    line_canvas = Instance(PlotCanvas)
+    scatter_canvas = Instance(PlotCanvas)
 
     traits_view = View(
         Item('figure',
@@ -30,15 +30,15 @@ class Demo(HasStrictTraits):
     def _figure_default(self):
         figure = ConstraintsContainer(bounds=(500,500), padding=50)
 
-        figure.add(self.line_plot, self.scatter_plot)
+        figure.add(self.line_canvas, self.scatter_canvas)
         figure.layout_constraints = [
-            vbox(self.line_plot, self.scatter_plot),
-            align('layout_height', self.line_plot, self.scatter_plot),
+            vbox(self.line_canvas, self.scatter_canvas),
+            align('layout_height', self.line_canvas, self.scatter_canvas),
         ]
         return figure
 
-    def _line_plot_default(self):
-        canvas = PlotCanvas(id='line_plot')
+    def _line_canvas_default(self):
+        canvas = PlotCanvas()
         canvas.title.text = "Line Plot"
 
         x = np.linspace(0, 10.0, 100)
@@ -46,8 +46,8 @@ class Demo(HasStrictTraits):
         canvas.add(plot)
         return canvas
 
-    def _scatter_plot_default(self):
-        canvas = PlotCanvas(id='scatter_plot')
+    def _scatter_canvas_default(self):
+        canvas = PlotCanvas()
         canvas.title.text = "Scatter Plot"
 
         x = np.linspace(0, 10.0, 100)
