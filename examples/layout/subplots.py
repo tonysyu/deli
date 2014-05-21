@@ -28,11 +28,13 @@ class Demo(HasStrictTraits):
     )
 
     def _figure_default(self):
-        figure = ConstraintsContainer(bounds=(500,500), padding=50)
+        figure = ConstraintsContainer(bounds=(500, 500), padding=50)
 
         figure.add(self.line_canvas, self.scatter_canvas)
+        spacing = (self.line_canvas.padding_bottom +
+                   self.scatter_canvas.padding_top)
         figure.layout_constraints = [
-            vbox(self.line_canvas, self.scatter_canvas),
+            vbox(self.line_canvas, self.scatter_canvas, spacing=spacing),
             align('layout_height', self.line_canvas, self.scatter_canvas),
         ]
         return figure

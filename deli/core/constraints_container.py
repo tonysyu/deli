@@ -21,6 +21,9 @@ class ConstraintsContainer(Container):
     constraints-based layout solver.
 
     """
+
+    bgcolor = 'none'
+
     # A read-only symbolic object that represents the left boundary of
     # the component
     contents_left = Property(fget=get_from_constraints_namespace)
@@ -222,8 +225,7 @@ class ConstraintsContainer(Container):
         return [self.contents_left == self.left,
                 self.contents_bottom == self.bottom,
                 self.contents_right == self.left + self.layout_width,
-                self.contents_top == self.bottom + self.layout_height,
-            ]
+                self.contents_top == self.bottom + self.layout_height]
 
     def _get__layout_constraints(self):
         """ React to changes of the user controlled constraints.
