@@ -389,12 +389,11 @@ class ConstraintsContainer(Container):
         # which is not relevant to constraints generation.
         for _, child in layout_table:
             raw_cns_extend(child._hard_constraints)
-            if isinst(child, Container_):
-                if child.transfer_layout_ownership(self):
-                    user_cns_extend(child._layout_constraints)
-                    raw_cns_extend(child._contents_constraints)
-                else:
-                    raw_cns_extend(child._size_constraints)
+
+            child_is_container = isinst(child, Container_)
+            if child_is_container and child.transfer_layout_ownership(self):
+                user_cns_extend(child._layout_constraints)
+                raw_cns_extend(child._contents_constraints)
             else:
                 raw_cns_extend(child._size_constraints)
 
