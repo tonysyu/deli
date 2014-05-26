@@ -20,7 +20,7 @@ def test_layout_size():
     assert_matches_size(container, (WIDTH, HEIGHT))
 
 
-def stretch_out(component):
+def fill_container(component):
     """ Stretch a child component to fill its parent container.
 
     Note that the layout is solved bottom up so, if the component's
@@ -38,7 +38,7 @@ def test_child_container_fills_parent_container():
     # Note that the `share_layout` flag allows the parent to dictate the size
     # of the child. Otherwise, the child constraints are solved first.
     child = ConstraintsContainer(share_layout=True)
-    child.layout_constraints = stretch_out
+    child.layout_constraints = fill_container
 
     parent = container_with_default_size()
     parent.add(child)
