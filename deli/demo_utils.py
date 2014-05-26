@@ -9,11 +9,15 @@ from deli.tools.pan_tool import PanTool
 from deli.tools.zoom_tool import ZoomTool
 
 
+WIDTH = 700
+HEIGHT = 500
+
+
 class Window(ABCHasStrictTraits):
     """ A simple TraitsUI window for displaying a PlotCanvas """
 
     title = Str
-    size = Tuple((700, 500))
+    size = Tuple((WIDTH, HEIGHT))
     canvas = Instance(PlotCanvas)
 
     zoom_and_pan = Bool(True)

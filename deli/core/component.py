@@ -241,10 +241,6 @@ class Component(CoordinateBox):
         if handler:
             handler(gc, view_bounds)
 
-    def _draw_border(self, gc, view_bounds=None):
-        """ Utility method to draw the borders around this component. """
-        pass
-
     #------------------------------------------------------------------------
     # Protected methods for subclasses to implement
     #------------------------------------------------------------------------
