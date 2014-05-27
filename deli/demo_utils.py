@@ -4,7 +4,7 @@ from traits.api import ABCHasStrictTraits, Bool, Instance, Str, Tuple
 from traitsui.api import UItem, View
 
 from deli.core.component_editor import ComponentEditor
-from deli.plot_canvas import PlotCanvas
+from deli.graph import Graph
 from deli.tools.pan_tool import PanTool
 from deli.tools.zoom_tool import ZoomTool
 
@@ -14,29 +14,29 @@ HEIGHT = 500
 
 
 class Window(ABCHasStrictTraits):
-    """ A simple TraitsUI window for displaying a PlotCanvas """
+    """ A simple TraitsUI window for displaying a Graph """
 
     title = Str
     size = Tuple((WIDTH, HEIGHT))
-    canvas = Instance(PlotCanvas)
+    graph = Instance(Graph)
 
     zoom_and_pan = Bool(True)
 
     def default_traits_view(self):
         view = View(
-            UItem('canvas', editor=ComponentEditor(size=self.size)),
+            UItem('graph', editor=ComponentEditor(size=self.size)),
             resizable=True, title=self.title
         )
         return view
 
     @abstractmethod
-    def setup_canvas(self):
-        """ Create `PlotCanvas` to display in the window. """
+    def setup_graph(self):
+        """ Create `Graph` to display in the window. """
 
-    def _canvas_default(self):
-        canvas = self.setup_canvas()
+    def _graph_default(self):
+        graph = self.setup_graph()
 
         if self.zoom_and_pan:
-            ZoomTool.attach_to(canvas)
-            PanTool.attach_to(canvas)
-        return canvas
+            ZoomTool.attach_to(graph)
+            PanTool.attach_to(graph)
+        return graph

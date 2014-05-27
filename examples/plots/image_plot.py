@@ -1,17 +1,17 @@
 from skimage import data
 
 from deli.demo_utils import Window
-from deli.plot_canvas import PlotCanvas
+from deli.graph import Graph
 from deli.plots.image_plot import ImagePlot
 
 
 class Demo(Window):
 
-    def setup_canvas(self):
-        canvas = PlotCanvas()
+    def setup_graph(self):
+        graph = Graph()
         plot = ImagePlot(data=data.lena())
-        canvas.add(plot)
-        return canvas
+        graph.add(plot)
+        return graph
 
 
 if __name__ == '__main__':

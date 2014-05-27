@@ -9,7 +9,7 @@ from .layout.box_layout import enforce_screen_aspect_ratio
 from .plot_component import DEFAULT_DRAWING_ORDER
 
 
-class DataCanvas(Container):
+class BaseGraph(Container):
     """ Represents a mapping from 2-D data space into 2-D screen space.
 
     It can house plots and other plot components, and otherwise behaves
@@ -35,11 +35,11 @@ class DataCanvas(Container):
         return BoundingBox.from_extents(np.inf, np.inf, -np.inf, -np.inf)
 
     def _bounds_changed(self, old, new):
-        super(DataCanvas, self)._bounds_changed(old, new)
+        super(BaseGraph, self)._bounds_changed(old, new)
         self._update_bbox()
 
     def _position_changed(self, old, new):
-        super(DataCanvas, self)._position_changed(old, new)
+        super(BaseGraph, self)._position_changed(old, new)
         self._update_bbox()
 
     def _update_bbox(self):

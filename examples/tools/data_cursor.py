@@ -1,27 +1,27 @@
 import numpy as np
 
 from deli.demo_utils import Window
-from deli.plot_canvas import PlotCanvas
+from deli.graph import Graph
 from deli.plots.line_plot import LinePlot
 from deli.tools.data_cursor_tool import DataCursorTool
 
 
 class Demo(Window):
 
-    def setup_canvas(self):
+    def setup_graph(self):
         x = np.linspace(0, 2 * np.pi)
         y1 = np.sin(x)
         y2 = np.cos(x)
 
-        canvas = PlotCanvas()
-        canvas.title.text = "Data cursor"
+        graph = Graph()
+        graph.title.text = "Data cursor"
 
         for y, color in zip((y1, y2), ('black', 'red')):
             plot = LinePlot(x_data=x, y_data=y, color=color)
-            canvas.add(plot)
+            graph.add(plot)
             DataCursorTool.attach_to(plot)
 
-        return canvas
+        return graph
 
 
 if __name__ == '__main__':

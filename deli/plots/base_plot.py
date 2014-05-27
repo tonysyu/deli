@@ -25,7 +25,7 @@ class BasePlot(PlotComponent):
     #: The extents of the data (x_min, y_min, x_max, y_max)
     data_extents = Property(Tuple)
 
-    #: Bounding box for data in the plot canvas. Note that this bounding box
+    #: Bounding box for data in the plot graph. Note that this bounding box
     #: does not just describe the data in this plot; it's the currently
     #: displayed limits of the plot in data space.
     data_bbox = Instance(BoundingBox)

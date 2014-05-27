@@ -3,7 +3,7 @@
 from traits.api import Bool, Dict, Instance, Str
 
 from .axis import BaseAxis, XAxis, YAxis
-from .data_canvas import DataCanvas
+from .base_graph import BaseGraph
 from .grid import BaseGrid, XGrid, YGrid
 from .plot_label import PlotLabel
 from .plots.base_plot import BasePlot
@@ -18,7 +18,7 @@ def replace_in_list(a_list, old, new):
         a_list.append(new)
 
 
-class PlotCanvas(DataCanvas):
+class Graph(BaseGraph):
     """ Represents a correlated set of data, plots, and axes in a single
     screen region.
     """
@@ -72,7 +72,7 @@ class PlotCanvas(DataCanvas):
     #--------------------------------------------------------------------------
 
     def __init__(self, padding=50, **kwtraits):
-        super(DataCanvas, self).__init__(padding=padding, **kwtraits)
+        super(BaseGraph, self).__init__(padding=padding, **kwtraits)
         self._init_components()
 
     #------------------------------------------------------------------------
@@ -82,7 +82,7 @@ class PlotCanvas(DataCanvas):
     def add(self, plot, name=None):
         if name is None:
             name = new_item_name(self.plots, name_template='plot_{}')
-        super(PlotCanvas, self).add(plot)
+        super(Graph, self).add(plot)
         self.plots[name] = plot
         self.data_bbox.update_from_extents(*plot.data_extents)
         plot.data_bbox = self.data_bbox

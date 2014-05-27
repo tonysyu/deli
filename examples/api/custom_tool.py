@@ -3,7 +3,7 @@ from numpy import linspace
 from traits.api import Instance
 
 from deli.demo_utils import Window
-from deli.plot_canvas import PlotCanvas
+from deli.graph import Graph
 from deli.plots.line_plot import LinePlot
 from deli.tools.base_tool import BaseTool, BaseToolState
 from deli.tools.key_spec import KeySpec, shift_key
@@ -44,16 +44,16 @@ class PrintOnMove(BaseToolState):
 
 class Demo(Window):
 
-    def setup_canvas(self):
-        canvas = PlotCanvas()
-        canvas.title.text = "Line Plot"
+    def setup_graph(self):
+        graph = Graph()
+        graph.title.text = "Line Plot"
 
         x = y = linspace(0, 1)
         plot = LinePlot(x_data=x, y_data=y)
-        canvas.add(plot)
+        graph.add(plot)
 
-        PrintTool.attach_to(canvas)
-        return canvas
+        PrintTool.attach_to(graph)
+        return graph
 
 
 if __name__ == '__main__':
