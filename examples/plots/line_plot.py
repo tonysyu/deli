@@ -16,7 +16,7 @@ class Demo(Window):
         for i, color in enumerate(('red', 'green', 'blue')):
             y = jn(i, x)
             plot = LinePlot(x_data=x, y_data=y, color=color)
-            graph.add(plot)
+            graph.add_plot(plot)
         return graph
 
 

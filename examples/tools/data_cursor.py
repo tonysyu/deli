@@ -18,7 +18,7 @@ class Demo(Window):
 
         for y, color in zip((y1, y2), ('black', 'red')):
             plot = LinePlot(x_data=x, y_data=y, color=color)
-            graph.add(plot)
+            graph.add_plot(plot)
             DataCursorTool.attach_to(plot)
 
         return graph

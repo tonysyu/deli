@@ -10,7 +10,7 @@ class Demo(Window):
     def setup_graph(self):
         graph = Graph()
         plot = ImagePlot(data=data.lena())
-        graph.add(plot)
+        graph.add_plot(plot)
         return graph
 
 

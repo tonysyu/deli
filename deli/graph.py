@@ -79,10 +79,10 @@ class Graph(BaseGraph):
     # Public methods
     #------------------------------------------------------------------------
 
-    def add(self, plot, name=None):
+    def add_plot(self, plot, name=None):
         if name is None:
             name = new_item_name(self.plots, name_template='plot_{}')
-        super(Graph, self).add(plot)
+        self.add(plot)
         self.plots[name] = plot
         self.data_bbox.update_from_extents(*plot.data_extents)
         plot.data_bbox = self.data_bbox

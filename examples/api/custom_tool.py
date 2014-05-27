@@ -50,7 +50,7 @@ class Demo(Window):
 
         x = y = linspace(0, 1)
         plot = LinePlot(x_data=x, y_data=y)
-        graph.add(plot)
+        graph.add_plot(plot)
 
         PrintTool.attach_to(graph)
         return graph

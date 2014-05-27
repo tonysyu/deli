@@ -14,7 +14,7 @@ class Demo(Window):
 
         x = np.linspace(-2.0, 10.0, 100)
         plot = LinePlot(x_data=x, y_data=np.sin(x))
-        graph.add(plot)
+        graph.add_plot(plot)
         return graph
 
 
