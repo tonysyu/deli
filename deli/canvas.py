@@ -5,7 +5,7 @@ from traits.api import Callable, Instance, Property
 from .core.container import Container
 from .layout.bbox_transform import BboxTransform
 from .layout.bounding_box import BoundingBox
-from .layout.box_layout import enforce_screen_aspect_ratio
+from .layout.box_layout import simple_container_do_layout
 
 
 def replace_in_list(a_list, old, new):
@@ -64,7 +64,7 @@ class Canvas(Container):
     calculate_layout = Callable
 
     def _calculate_layout_default(self):
-        return enforce_screen_aspect_ratio
+        return simple_container_do_layout
 
     def _do_layout(self):
         """ Adjust component layout (called by do_layout()). """

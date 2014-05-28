@@ -5,8 +5,7 @@ import numpy as np
 
 from enable.colors import white_color_trait
 from kiva.constants import FILL
-from traits.api import (Any, Bool, Float, Instance, Int, List, Property, Trait,
-                        WeakRef)
+from traits.api import Any, Bool, Instance, Int, List, Property, WeakRef
 
 from ..layout.bounding_box import BoundingBox
 from .coordinate_box import CoordinateBox
@@ -114,9 +113,6 @@ class Component(CoordinateBox):
     #------------------------------------------------------------------------
     # Layout traits
     #------------------------------------------------------------------------
-
-    # The ratio of the component's width to its height.
-    aspect_ratio = Trait(None, None, Float)
 
     # A read-only property that returns True if this component needs layout.
     layout_needed = Property
