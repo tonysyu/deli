@@ -46,12 +46,12 @@ class Canvas(Container):
     def _data_bbox_default(self):
         return BoundingBox.from_extents(np.inf, np.inf, -np.inf, -np.inf)
 
-    def _bounds_changed(self, old, new):
-        super(Canvas, self)._bounds_changed(old, new)
+    def _bounds_changed(self):
+        super(Canvas, self)._bounds_changed()
         self._update_bbox()
 
-    def _position_changed(self, old, new):
-        super(Canvas, self)._position_changed(old, new)
+    def _position_changed(self):
+        super(Canvas, self)._position_changed()
         self._update_bbox()
 
     def _update_bbox(self):

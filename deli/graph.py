@@ -33,11 +33,11 @@ class Graph(Container):
     def _screen_bbox_default(self):
         return BoundingBox.from_extents(self.x, self.y, self.x2, self.y2)
 
-    def _bounds_changed(self, old, new):
-        super(Graph, self)._bounds_changed(old, new)
+    def _bounds_changed(self):
+        super(Graph, self)._bounds_changed()
         self._update_bbox()
 
-    def _position_changed(self, old, new):
+    def _position_changed(self):
         self._update_bbox()
 
     def _update_bbox(self):

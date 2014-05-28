@@ -79,11 +79,13 @@ class Component(CoordinateBox):
     def _screen_bbox_default(self):
         return BoundingBox.from_extents(self.x, self.y, self.x2, self.y2)
 
-    def _bounds_changed(self, old, new):
-        pass
+    def _bounds_changed(self):
+        if self.container is not None:
+            self.container._component_bounds_changed()
 
-    def _position_changed(self, old, new):
-        pass
+    def _position_changed(self):
+        if self.container is not None:
+            self.container._component_position_changed()
 
     def _update_bbox(self):
         self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
@@ -348,7 +350,7 @@ class Component(CoordinateBox):
 
     def _bounds_items_changed(self, event):
         if self.container is not None:
-            self.container._component_bounds_changed(self)
+            self.container._component_bounds_changed()
 
     def _container_changed(self, old, new):
         if new is None:
@@ -356,7 +358,7 @@ class Component(CoordinateBox):
 
     def _position_items_changed(self, *args):
         if self.container is not None:
-            self.container._component_position_changed(self)
+            self.container._component_position_changed()
 
     def _visible_changed(self, old, new):
         if new:

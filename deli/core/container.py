@@ -140,13 +140,13 @@ class Container(Component):
         new_bounds = (x-self.x, y-self.y, width, height)
         return new_bounds
 
-    def _component_position_changed(self, component):
+    def _component_position_changed(self):
         """Called by contained objects when their positions change"""
-        pass
+        self._position_changed()
 
-    def _component_bounds_changed(self, component):
+    def _component_bounds_changed(self):
         """Called by contained objects when their bounds change"""
-        pass
+        self._bounds_changed()
 
     #------------------------------------------------------------------------
     # Property setters & getters
@@ -170,6 +170,10 @@ class Container(Component):
     #------------------------------------------------------------------------
     # Event handling
     #------------------------------------------------------------------------
+
+    def _bounds_changed(self):
+        super(Container, self)._bounds_changed()
+        self._layout_needed = True
 
     def get_event_transform(self, event=None):
         return affine.affine_from_translation(-self.x, -self.y)
