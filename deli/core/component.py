@@ -8,6 +8,7 @@ from kiva.constants import FILL
 from traits.api import (Any, Bool, Float, Instance, Int, List, Property, Trait,
                         WeakRef)
 
+from ..layout.bounding_box import BoundingBox
 from .coordinate_box import CoordinateBox
 
 
@@ -30,6 +31,14 @@ class Component(CoordinateBox):
     This represents a general component of a composite structure [GoF]_, but,
     by itself, is only a leaf-component. `Containers`, which subclass
     `Component`, compose components and other containers.
+
+    Drawing order is controlled by `_draw_<layer>` methods, where <layers> are:
+
+    1. 'background': Background image, shading
+    2. 'underlay': Axes and grids
+    3. 'plot': The main plot area itself
+    4. 'border': Plot borders
+    5. 'overlay': Legends, selection regions, and other tool-drawn elements
 
     .. [GoF] Design Patterns: Elements of Reusable Object Oriented Software,
              Gamma et al., Addison-Wesley, 1996.
@@ -232,8 +241,6 @@ class Component(CoordinateBox):
         together and want them to draw cooperatively. The container iterates
         through its components and asks them to draw only certain layers.
         """
-        # Don't render the selection layer if use_selection is false.  This
-        # is mostly for backwards compatibility.
         if self.layout_needed:
             self.do_layout()
 
