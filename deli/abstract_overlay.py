@@ -6,17 +6,16 @@ data-related plot items and the decorators on them.
 from traits.api import Instance
 
 from .core.component import Component
-from .plot_component import PlotComponent
 
 
-class AbstractOverlay(PlotComponent):
+class AbstractOverlay(Component):
     """ The base class for overlays and underlays of the plot area. """
 
     # The component that this object overlays. This can be None. By default, if
     # this object is called to draw(), it tries to render onto this component.
     component = Instance(Component)
 
-    # The background color (overrides PlotComponent).
+    # The background color (overrides Component).
     bgcolor = "transparent"
 
     def __init__(self, component=None, *args, **kw):

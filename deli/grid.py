@@ -80,7 +80,7 @@ class BaseGrid(AbstractOverlay):
         """ Draws the component.
 
         This method is preserved for backwards compatibility. Overrides
-        PlotComponent.
+        Component.
         """
         with gc:
             self.line_artist.update_style(gc)

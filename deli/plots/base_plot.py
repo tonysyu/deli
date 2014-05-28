@@ -2,12 +2,12 @@
 """
 from traits.api import Instance, Property, Tuple
 
-from ..plot_component import PlotComponent
+from ..core.component import Component
 from ..layout.bounding_box import BoundingBox
 from ..layout.bbox_transform import BboxTransform
 
 
-class BasePlot(PlotComponent):
+class BasePlot(Component):
     """ Base class for all plots.
 
     Unlike artists, plots may contain the data that they render. Plots are

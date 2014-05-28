@@ -73,7 +73,7 @@ class BaseAxis(AbstractOverlay):
             self.component = component
 
     #------------------------------------------------------------------------
-    # PlotComponent and AbstractOverlay interface
+    # Component and AbstractOverlay interface
     #------------------------------------------------------------------------
 
     def draw(self, component, gc, view_bounds=None):
@@ -87,7 +87,7 @@ class BaseAxis(AbstractOverlay):
         """ Draws the component.
 
         This method is preserved for backwards compatibility. Overrides
-        PlotComponent.
+        Component.
         """
         with gc:
             self._draw_axis_line(gc)

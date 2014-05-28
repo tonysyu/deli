@@ -69,6 +69,25 @@ class Component(CoordinateBox):
     # The order in which various rendering classes on this component are drawn.
     draw_order = Instance(list, args=(DRAWING_ORDER,))
 
+    #--------------------------------------------------------------------------
+    #  Bounding box
+    #--------------------------------------------------------------------------
+
+    #: Bounding box in screen coordinates
+    screen_bbox = Instance(BoundingBox)
+
+    def _screen_bbox_default(self):
+        return BoundingBox.from_extents(self.x, self.y, self.x2, self.y2)
+
+    def _bounds_changed(self, old, new):
+        pass
+
+    def _position_changed(self, old, new):
+        pass
+
+    def _update_bbox(self):
+        self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
+
     #------------------------------------------------------------------------
     # Basic appearance traits
     #------------------------------------------------------------------------
@@ -327,21 +346,13 @@ class Component(CoordinateBox):
     # Event handlers
     #------------------------------------------------------------------------
 
-    def _bounds_changed(self, old, new):
-        if self.container is not None:
-            self.container._component_bounds_changed(self)
-
     def _bounds_items_changed(self, event):
         if self.container is not None:
             self.container._component_bounds_changed(self)
 
     def _container_changed(self, old, new):
         if new is None:
-            self.position = [0,0]
-
-    def _position_changed(self, *args):
-        if self.container is not None:
-            self.container._component_position_changed(self)
+            self.position = [0, 0]
 
     def _position_items_changed(self, *args):
         if self.container is not None:

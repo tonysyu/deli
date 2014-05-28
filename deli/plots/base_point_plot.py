@@ -40,7 +40,7 @@ class BasePointPlot(BasePlot):
     alpha = Range(0.0, 1.0, 1.0)
 
     #------------------------------------------------------------------------
-    # PlotComponent interface
+    # Component interface
     #------------------------------------------------------------------------
 
     def _draw_plot(self, gc, view_bounds=None):

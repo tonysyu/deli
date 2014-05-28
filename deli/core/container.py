@@ -235,9 +235,5 @@ class Container(Component):
     # Event handlers
     #------------------------------------------------------------------------
 
-    def _bounds_changed(self, old, new):
-        super(Container, self)._bounds_changed(old, new)
-        self._layout_needed = True
-
     def __components_items_changed(self, event):
         self._layout_needed = True

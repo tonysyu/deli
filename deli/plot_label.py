@@ -41,14 +41,14 @@ class PlotLabel(AbstractOverlay):
     def do_layout(self):
         """ Tells this component to do layout.
 
-        Overrides PlotComponent.
+        Overrides Component.
         """
         self._layout_as_overlay()
 
     def _draw_overlay(self, gc, view_bounds=None):
         """ Draws the overlay layer of a component.
 
-        Overrides PlotComponent.
+        Overrides Component.
         """
         x_center = self.x + (self.width / 2.0)
         y_center = self.y + (self.height / 2.0)
