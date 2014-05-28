@@ -25,7 +25,9 @@ class PlotLabel(AbstractOverlay):
     visible = False
 
     # The Label instance this plot label is wrapping.
-    _label = Instance(LabelArtist, {'x_origin': 'center'})
+    _label = Instance(LabelArtist, {'x_origin': 'center',
+                                    'y_origin': 'bottom',
+                                    'y_offset': 20})
 
     def __init__(self, text="", *args, **kw):
         super(PlotLabel, self).__init__(*args, **kw)
@@ -50,21 +52,16 @@ class PlotLabel(AbstractOverlay):
 
         Overrides Component.
         """
-        x_center = self.x + (self.width / 2.0)
-        y_center = self.y + (self.height / 2.0)
-
         with gc:
-            gc.translate_ctm(x_center, y_center)
+            gc.translate_ctm(self.x, self.y)
             self._label.draw(gc, self.text)
 
     def _layout_as_overlay(self, size=None, force=False):
         """ Lays out the label as an overlay on another component.
         """
         if self.component is not None:
-            self.x = self.component.x
-            self.width = self.component.width
-            self.y = self.component.y2 + 1
-            self.height = self.component.padding_top
+            self.x = self.component.x + (self.component.width / 2.0)
+            self.y = self.component.y2
 
     def _text_changed(self, old, new):
         self._label.text = new
