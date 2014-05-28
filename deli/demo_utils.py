@@ -37,6 +37,6 @@ class Window(ABCHasStrictTraits):
         graph = self.setup_graph()
 
         if self.zoom_and_pan:
-            ZoomTool.attach_to(graph)
-            PanTool.attach_to(graph)
+            ZoomTool.attach_to(graph.canvas)
+            PanTool.attach_to(graph.canvas)
         return graph

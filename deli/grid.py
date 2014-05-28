@@ -72,6 +72,7 @@ class BaseGrid(AbstractOverlay):
 
         Overrides AbstractOverlay.
         """
+        other_component = getattr(other_component, 'canvas', other_component)
         self._compute_ticks(other_component)
         self._draw_component(gc, view_bounds)
 
@@ -95,7 +96,7 @@ class BaseGrid(AbstractOverlay):
         self.invalidate()
 
     #------------------------------------------------------------------------
-    # Event handlers for visual attributes.  These mostly just call request_redraw()
+    # Event handlers for visual attributes.
     #------------------------------------------------------------------------
 
     @on_trait_change("visible,line_color,line_style,line_width")

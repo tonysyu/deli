@@ -11,7 +11,7 @@ from traits.api import (Any, Bool, Float, Instance, Int, List, Property, Trait,
 from .coordinate_box import CoordinateBox
 
 
-DRAWING_ORDER = ['background', 'underlay', 'border', 'overlay']
+DRAWING_ORDER = ['background', 'underlay', 'plot', 'border', 'overlay']
 
 
 class NullDispatch(object):

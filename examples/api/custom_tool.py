@@ -52,7 +52,7 @@ class Demo(Window):
         plot = LinePlot(x_data=x, y_data=y)
         graph.add_plot(plot)
 
-        PrintTool.attach_to(graph)
+        PrintTool.attach_to(graph.canvas)
         return graph
 
 

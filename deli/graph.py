@@ -1,27 +1,49 @@
 """ Defines the Plot class.
 """
-from traits.api import Bool, Dict, Instance, Str
+from traits.api import Bool, Dict, Instance, Int, Str
 
 from .axis import BaseAxis, XAxis, YAxis
-from .base_graph import BaseGraph
+from .canvas import Canvas
+from .core.container import Container
 from .grid import BaseGrid, XGrid, YGrid
+from .layout.bounding_box import BoundingBox
 from .plot_label import PlotLabel
 from .plots.base_plot import BasePlot
 from .style import config
 from .utils.misc import new_item_name
 
 
-def replace_in_list(a_list, old, new):
-    if old in a_list:
-        a_list.remove(old)
-    if new is not None:
-        a_list.append(new)
-
-
-class Graph(BaseGraph):
+class Graph(Container):
     """ Represents a correlated set of data, plots, and axes in a single
     screen region.
     """
+
+    # The primary container for plot data.
+    canvas = Instance(Canvas)
+
+    margin = Int(50)
+
+    #--------------------------------------------------------------------------
+    #  Bounding box
+    #--------------------------------------------------------------------------
+
+    #: Bounding box in screen coordinates
+    screen_bbox = Instance(BoundingBox)
+
+    def _screen_bbox_default(self):
+        return BoundingBox.from_extents(self.x, self.y, self.x2, self.y2)
+
+    def _bounds_changed(self, old, new):
+        super(Graph, self)._bounds_changed(old, new)
+        self._update_bbox()
+
+    def _position_changed(self, old, new):
+        self._update_bbox()
+
+    def _update_bbox(self):
+        self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
+        self.canvas.bounds = (w - 2 * self.margin for w in self.bounds)
+        self.canvas.position = (self.margin, self.margin)
 
     #------------------------------------------------------------------------
     # Axis and Grids
@@ -71,9 +93,10 @@ class Graph(BaseGraph):
     # Object interface
     #--------------------------------------------------------------------------
 
-    def __init__(self, padding=50, **kwtraits):
-        super(BaseGraph, self).__init__(padding=padding, **kwtraits)
+    def __init__(self, padding=0, **kwtraits):
+        super(Graph, self).__init__(padding=padding, **kwtraits)
         self._init_components()
+        self.add(self.canvas)
 
     #------------------------------------------------------------------------
     # Public methods
@@ -82,35 +105,36 @@ class Graph(BaseGraph):
     def add_plot(self, plot, name=None):
         if name is None:
             name = new_item_name(self.plots, name_template='plot_{}')
-        self.add(plot)
+        self.canvas.add_plot(plot)
         self.plots[name] = plot
-        self.data_bbox.update_from_extents(*plot.data_extents)
-        plot.data_bbox = self.data_bbox
 
     #-------------------------------------------------------------------------
     # Event handlers
     #-------------------------------------------------------------------------
 
     def _x_grid_changed(self, old, new):
-        self._replace_underlay(old, new)
+        self.canvas.replace_underlay(old, new)
 
     def _y_grid_changed(self, old, new):
-        self._replace_underlay(old, new)
+        self.canvas.replace_underlay(old, new)
 
     def _x_axis_changed(self, old, new):
-        self._replace_underlay(old, new)
+        self.canvas.replace_underlay(old, new)
 
     def _y_axis_changed(self, old, new):
-        self._replace_underlay(old, new)
+        self.canvas.replace_underlay(old, new)
 
     #------------------------------------------------------------------------
     # Traits defaults
     #------------------------------------------------------------------------
 
     def _title_default(self):
-        title = PlotLabel(font=config.get('title.font'), component=self)
+        title = PlotLabel(font=config.get('title.font'), component=self.canvas)
         self.overlays.append(title)
         return title
+
+    def _canvas_default(self):
+        return Canvas(screen_bbox=self.screen_bbox)
 
     #------------------------------------------------------------------------
     # Private methods
@@ -118,18 +142,12 @@ class Graph(BaseGraph):
 
     def _init_components(self):
         if not self.x_grid and self.auto_grid:
-            self.x_grid = XGrid(component=self)
+            self.x_grid = XGrid(component=self.canvas)
         if not self.y_grid and self.auto_grid:
-            self.y_grid = YGrid(component=self)
+            self.y_grid = YGrid(component=self.canvas)
 
         if not self.x_axis and self.auto_axis:
-            self.x_axis = XAxis(component=self)
+            self.x_axis = XAxis(component=self.canvas)
 
         if not self.y_axis and self.auto_axis:
-            self.y_axis = YAxis(component=self)
-
-    def _replace_underlay(self, old, new):
-        replace_in_list(self.underlays, old, new)
-
-    def _replace_overlay(self, old, new):
-        replace_in_list(self.overlays, old, new)
+            self.y_axis = YAxis(component=self.canvas)

@@ -23,7 +23,7 @@ class Container(Component):
 
     # The layers that the container will draw first, so that they appear
     # under the component layers of the same name.
-    container_under_layers = Tuple('background', 'underlay')
+    container_under_layers = Tuple('background', 'underlay', 'plot')
 
     # The layers that the container will draw last, so that they appear
     # over the component layers of the same name.
@@ -99,7 +99,10 @@ class Container(Component):
             with gc:
                 gc.translate_ctm(*self.position)
                 for component in visible_components:
-                    component.draw_layer(layer, gc, view_bounds)
+                    if isinstance(component, Container) and layer == 'plot':
+                        component.draw(gc, view_bounds)
+                    else:
+                        component.draw_layer(layer, gc, view_bounds)
 
     def _get_visible_components(self, bounds):
         """ Returns a list of this plot's children that are in the bounds. """
@@ -137,8 +140,12 @@ class Container(Component):
         new_bounds = (x-self.x, y-self.y, width, height)
         return new_bounds
 
+    def _component_position_changed(self, component):
+        """Called by contained objects when their positions change"""
+        pass
+
     def _component_bounds_changed(self, component):
-        "Called by contained objects when their bounds change"
+        """Called by contained objects when their bounds change"""
         pass
 
     #------------------------------------------------------------------------
