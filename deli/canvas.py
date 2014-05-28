@@ -34,28 +34,11 @@ class Canvas(Container):
     #  Bounding box
     #--------------------------------------------------------------------------
 
-    #: Bounding box in screen coordinates
-    screen_bbox = Instance(BoundingBox)
-
     # The bounding box containing data added to plot.
     data_bbox = Instance(BoundingBox)
 
-    def _screen_bbox_default(self):
-        return BoundingBox.from_extents(self.x, self.y, self.x2, self.y2)
-
     def _data_bbox_default(self):
         return BoundingBox.from_extents(np.inf, np.inf, -np.inf, -np.inf)
-
-    def _bounds_changed(self):
-        super(Canvas, self)._bounds_changed()
-        self._update_bbox()
-
-    def _position_changed(self):
-        super(Canvas, self)._position_changed()
-        self._update_bbox()
-
-    def _update_bbox(self):
-        self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
 
     #--------------------------------------------------------------------------
     #  Transformations

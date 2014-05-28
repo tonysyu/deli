@@ -6,7 +6,6 @@ from .axis import BaseAxis, XAxis, YAxis
 from .canvas import Canvas
 from .core.container import Container
 from .grid import BaseGrid, XGrid, YGrid
-from .layout.bounding_box import BoundingBox
 from .plot_label import PlotLabel
 from .plots.base_plot import BasePlot
 from .style import config
@@ -26,19 +25,6 @@ class Graph(Container):
     #--------------------------------------------------------------------------
     #  Bounding box
     #--------------------------------------------------------------------------
-
-    #: Bounding box in screen coordinates
-    screen_bbox = Instance(BoundingBox)
-
-    def _screen_bbox_default(self):
-        return BoundingBox.from_extents(self.x, self.y, self.x2, self.y2)
-
-    def _bounds_changed(self):
-        super(Graph, self)._bounds_changed()
-        self._update_bbox()
-
-    def _position_changed(self):
-        self._update_bbox()
 
     def _update_bbox(self):
         self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)

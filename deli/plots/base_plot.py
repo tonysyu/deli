@@ -43,14 +43,6 @@ class BasePlot(Component):
     def _get_screen_to_data(self):
         return self.data_to_screen.inverted()
 
-    def _bounds_changed(self):
-        super(BasePlot, self)._bounds_changed()
-        self._update_bbox()
-
-    def _position_changed(self):
-        super(BasePlot, self)._position_changed()
-        self._update_bbox()
-
     #--------------------------------------------------------------------------
     #  BasePlot interface
     #--------------------------------------------------------------------------

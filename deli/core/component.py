@@ -82,10 +82,12 @@ class Component(CoordinateBox):
     def _bounds_changed(self):
         if self.container is not None:
             self.container._component_bounds_changed()
+        self._update_bbox()
 
     def _position_changed(self):
         if self.container is not None:
             self.container._component_position_changed()
+        self._update_bbox()
 
     def _update_bbox(self):
         self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
