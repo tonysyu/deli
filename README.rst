@@ -1,28 +1,48 @@
-=============================================
-Deli: Yet another plotting library for Python
-=============================================
+====
+Deli
+====
 
+Yet another plotting library for Python.
 
-Currently, this library isn't meant for public consumption. I'm using this as
-a venue for exploring some design patterns and playing around with fixes for
-things that bother me about existing plotting tools.
+Currently, this library isn't meant for public consumption. I'm just using this
+as an outlet for exploring some design patterns and playing around with fixes
+for things that bother me about existing plotting tools.
 
 See the ``examples`` directory to get a general feel for the API. These
 examples are also very minimal at the moment.
 
+
 Roadmap
--------
+=======
 
 * Integrate constraints-based layout
 * Rewrite layer-drawing dispatch
-* Generalize rendering backend (for ``Vispy``, javascript, etc. interfaces)
+* Generalize rendering backend (for Vispy, javascript, etc. interfaces)
 * Simplify ``Components`` and ``Container`` objects
 * Add typical plotting functionality (axis labels, bar charts, legends, etc.)
 * Add scripting interfaces (a la, ``matplotlib.pyplot``, ``ggplot``, etc.)
 
 
+Requirements
+============
+
+* numpy
+* traits
+* traitsui
+* pyface
+* enable
+* kiva
+* matplotlib
+
+
+Licence
+=======
+
+New BSD (a.k.a. Modified BSD). See ``LICENSE`` in this directory for details.
+
+
 Origin story
-------------
+============
 
 I started to learn Python while looking for a good plotting package for one of
 my first research papers. My research advisor suggested GnuPlot, but after
@@ -31,7 +51,7 @@ to spend my time using. Eventually, I settled on PyX [pyx]_, which produced
 beautiful figures, especially compared to what Matlab (which is what I used for
 my data analysis) could produce at the time (circa 2006). After that paper,
 I moved on to using and contributing to Matplotlib [matplotlib]_ (one of the
-more popular plotting libraries in Python). I also played around with `Chaco`
+more popular plotting libraries in Python). I also played around with Chaco
 during my graduate studies and use it extensively now, since I started work at
 Enthought Inc. [enthought]_,
 
@@ -48,7 +68,7 @@ rather late in life.)
 
 
 Why "Deli"
-----------
+==========
 
 I actually wanted to name this package "SpyGlass", which is an area of Austin,
 TX and a really great name for a data-visualization package. Alas, that name
