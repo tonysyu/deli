@@ -1,11 +1,24 @@
-=========================================
-Deli: Another plotting library for Python
-=========================================
+=============================================
+Deli: Yet another plotting library for Python
+=============================================
 
 
 Currently, this library isn't meant for public consumption. I'm using this as
 a venue for exploring some design patterns and playing around with fixes for
 things that bother me about existing plotting tools.
+
+See the ``examples`` directory to get a general feel for the API. These
+examples are also very minimal at the moment.
+
+Roadmap
+-------
+
+* Integrate constraints-based layout
+* Rewrite layer-drawing dispatch
+* Generalize rendering backend (for ``Vispy``, javascript, etc. interfaces)
+* Simplify ``Components`` and ``Container`` objects
+* Add typical plotting functionality (axis labels, bar charts, legends, etc.)
+* Add scripting interfaces (a la, ``matplotlib.pyplot``, ``ggplot``, etc.)
 
 
 Origin story
@@ -39,10 +52,12 @@ Why "Deli"
 
 I actually wanted to name this package "SpyGlass", which is an area of Austin,
 TX and a really great name for a data-visualization package. Alas, that name
-is already taken in PyPi. For some reason, I was stuck with naming it something
-Austin-related, and decided to name it after a popular taco place here,
-TacoDeli. It's a bit appropriate,... I guess: Plotting is nothing if not
-a highly customized way of ... ____
+is already taken in PyPi. For some reason, my mind was stuck with naming it
+something Austin-related, and I decided to name it after a popular taco place
+here, TacoDeli. It's somewhat appropriate, I think: Plotting usually entails
+combining a lot of little, highly-customizable components. The package itself
+is also a combination of parts and ideas from a number of other popular
+plotting packages. (It's a bit of a stretch, I know.)
 
 
 .. _pyx: http://pyx.sourceforge.net/
