@@ -3,7 +3,7 @@ from itertools import chain
 
 import numpy as np
 
-from enable.colors import white_color_trait
+from enable.colors import ColorTrait
 from kiva.constants import FILL
 from traits.api import Any, Bool, Instance, Int, List, Property, WeakRef
 
@@ -11,7 +11,7 @@ from ..layout.bounding_box import BoundingBox
 from .coordinate_box import CoordinateBox
 
 
-DRAWING_ORDER = ['background', 'underlay', 'plot', 'border', 'overlay']
+DRAWING_ORDER = ['background', 'underlay', 'plot', 'overlay']
 
 
 class NullDispatch(object):
@@ -96,7 +96,7 @@ class Component(CoordinateBox):
     #------------------------------------------------------------------------
 
     # The background color of this component.
-    bgcolor = white_color_trait
+    bgcolor = ColorTrait('transparent')
 
     # Is the component visible?
     visible = Bool(True)
@@ -158,14 +158,6 @@ class Component(CoordinateBox):
         """
         pass
 
-    def _draw_component(self, gc, view_bounds=None):
-        """ Renders the component.
-
-        Subclasses must implement this method to actually render themselves.
-        Note: This method is used only by the "old" drawing calls.
-        """
-        pass
-
     #------------------------------------------------------------------------
     # Public methods
     #------------------------------------------------------------------------
@@ -186,6 +178,7 @@ class Component(CoordinateBox):
         if self.layout_needed:
             self.do_layout()
 
+        # XXX: This causes underlays to draw once but overlays twice.
         for layer in self.draw_order:
             self.draw_layer(layer, gc, view_bounds)
 

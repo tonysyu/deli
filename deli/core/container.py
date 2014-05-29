@@ -27,7 +27,7 @@ class Container(Component):
 
     # The layers that the container will draw last, so that they appear
     # over the component layers of the same name.
-    container_over_layers = Tuple('overlay', 'border')
+    container_over_layers = Tuple('overlay')
 
     #------------------------------------------------------------------------
     # Private traits

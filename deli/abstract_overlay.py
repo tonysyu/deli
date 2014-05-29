@@ -14,11 +14,3 @@ class AbstractOverlay(Component):
     # The component that this object overlays. This can be None. By default, if
     # this object is called to draw(), it tries to render onto this component.
     component = Instance(Component)
-
-    # The background color (overrides Component).
-    bgcolor = "transparent"
-
-    def __init__(self, component=None, *args, **kw):
-        if component is not None:
-            self.component = component
-        super(AbstractOverlay, self).__init__(*args, **kw)
