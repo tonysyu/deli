@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from enable.base import empty_rectangle, intersect_bounds
 from enable.events import MouseEvent
 from kiva import affine
-from traits.api import Instance, List, Property, Tuple
+from traits.api import Instance, List, Property
 
 from .component import Component
 
@@ -21,20 +21,12 @@ class Container(Component):
     # The list of components within this frame
     components = Property    # List(Component)
 
-    # The layers that the container will draw first, so that they appear
-    # under the component layers of the same name.
-    container_under_layers = Tuple('background', 'underlay', 'plot')
-
-    # The layers that the container will draw last, so that they appear
-    # over the component layers of the same name.
-    container_over_layers = Tuple('overlay')
-
     #------------------------------------------------------------------------
     # Private traits
     #------------------------------------------------------------------------
 
     # Shadow trait for self.components
-    _components = List    # List(Component)
+    _components = List(Component)
 
     # Set of components that last handled a mouse event. This allows us to
     # generate mouse_enter and mouse_leave events of our own.
@@ -83,13 +75,14 @@ class Container(Component):
 
         draw_layer_ = super(Container, self).draw_layer
 
-        if layer in self.container_under_layers:
+        if layer == 'underlay':
             draw_layer_(layer, gc, view_bounds)
 
+        # Drawing children seems to lead to recursion issues.
         # XXX: `new_bounds` and `view_bounds` both seem to work...?
         self._draw_children(layer, gc, new_bounds)
 
-        if layer in self.container_over_layers:
+        if layer == 'overlay':
             draw_layer_(layer, gc, view_bounds)
 
     def _draw_children(self, layer, gc, view_bounds):
@@ -113,8 +106,8 @@ class Container(Component):
         for component in self.components:
             if not component.visible:
                 continue
-            tmp = intersect_bounds(component.outer_position +
-                                   component.outer_bounds, bounds)
+            tmp = intersect_bounds(component.position +
+                                   component.bounds, bounds)
             if tmp != empty_rectangle:
                 visible_components.append(component)
         return visible_components

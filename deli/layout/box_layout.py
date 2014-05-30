@@ -18,5 +18,5 @@ def apply_size_to_all_components(size, container, components, position=None):
             if not container._should_layout(component):
                 continue
 
-        component.outer_position = [0, 0]
-        component.outer_bounds = size
+        component.position = [0, 0]
+        component.bounds = size

@@ -1,8 +1,6 @@
 """ Defines the Component class """
 from itertools import chain
 
-import numpy as np
-
 from enable.colors import ColorTrait
 from kiva.constants import FILL
 from traits.api import Any, Bool, Instance, Int, List, Property, WeakRef
@@ -23,10 +21,6 @@ class NullDispatch(object):
 
 class Component(CoordinateBox):
     """ Component is the base class for most objects.
-
-    XXX: Padding has been removed. Remove outer bounds/position too!
-    Since Components can have a border, there is an additional set
-    of bounds and position attributes to define the "outer box" of components.
 
     This represents a general component of a composite structure [GoF]_, but,
     by itself, is only a leaf-component. `Containers`, which subclass
@@ -119,14 +113,6 @@ class Component(CoordinateBox):
     layout_needed = Property
 
     _layout_needed = Bool(True)
-
-    # XXX: Padding removed! Remove `outer_position`!
-    # The lower left corner of the padding outer box around the component.
-    outer_position = Property
-
-    # XXX: Padding removed! Remove `outer_bounds`!
-    # The number of horizontal and vertical pixels in the padding outer box.
-    outer_bounds = Property
 
     #------------------------------------------------------------------------
     # Abstract methods
@@ -333,24 +319,3 @@ class Component(CoordinateBox):
 
     def _set_window(self, win):
         self._window = win
-
-    #------------------------------------------------------------------------
-    # Outer position and bounds
-    #------------------------------------------------------------------------
-
-    def _get_outer_position(self):
-        border = self._get_visible_border()
-        pos = self.position
-        return (pos[0] - border,
-                pos[1] - border)
-
-    def _set_outer_position(self, new_pos):
-        border = self._get_visible_border()
-        self.position = [new_pos[0] + border,
-                         new_pos[1] + border]
-
-    def _get_outer_bounds(self):
-        return tuple(self.bounds)
-
-    def _set_outer_bounds(self, bounds):
-        self.bounds = tuple(bounds)
