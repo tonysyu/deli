@@ -2,7 +2,7 @@
 """
 
 def simple_container_do_layout(container, components=None):
-    """ Adjust layout so container stretches to window bounds (minus padding).
+    """ Adjust layout so container stretches to window bounds.
     """
     if components is None:
         components = container.components

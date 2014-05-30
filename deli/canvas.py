@@ -22,9 +22,6 @@ class Canvas(Container):
     just like a normal Container.
     """
 
-    def __init__(self, padding=0, **kwtraits):
-        super(Canvas, self).__init__(padding=padding, **kwtraits)
-
     def add_plot(self, plot):
         self.data_bbox.update_from_extents(*plot.data_extents)
         plot.data_bbox = self.data_bbox

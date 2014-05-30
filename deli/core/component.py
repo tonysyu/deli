@@ -24,7 +24,8 @@ class NullDispatch(object):
 class Component(CoordinateBox):
     """ Component is the base class for most objects.
 
-    Since Components can have a border and padding, there is an additional set
+    XXX: Padding has been removed. Remove outer bounds/position too!
+    Since Components can have a border, there is an additional set
     of bounds and position attributes to define the "outer box" of components.
 
     This represents a general component of a composite structure [GoF]_, but,
@@ -119,32 +120,11 @@ class Component(CoordinateBox):
 
     _layout_needed = Bool(True)
 
-    # The amount of space to put on the left side of the component
-    padding_left = Int(0)
-
-    # The amount of space to put on the right side of the component
-    padding_right = Int(0)
-
-    # The amount of space to put on top of the component
-    padding_top = Int(0)
-
-    # The amount of space to put below the component
-    padding_bottom = Int(0)
-
-    # This property allows a way to set the padding in bulk. It can either be
-    # set to a single Int (which sets padding on all sides) or a tuple/list of
-    # 4 Ints representing the (left, right, top, bottom) padding amounts.
-    padding = Property
-
-    # Readonly property expressing the total amount of horizontal padding
-    hpadding = Property
-
-    # Readonly property expressing the total amount of vertical padding
-    vpadding = Property
-
+    # XXX: Padding removed! Remove `outer_position`!
     # The lower left corner of the padding outer box around the component.
     outer_position = Property
 
+    # XXX: Padding removed! Remove `outer_bounds`!
     # The number of horizontal and vertical pixels in the padding outer box.
     outer_bounds = Property
 
@@ -192,15 +172,11 @@ class Component(CoordinateBox):
         elif self._window:
             self._window.redraw()
 
-    def is_in(self, x, y, include_padding=False):
+    def is_in(self, x, y):
         # A basic implementation of is_in(); subclasses should provide their
         # own if they are more accurate/faster/shinier.
-        if include_padding:
-            width, height = self.outer_bounds
-            x_pos, y_pos = self.outer_position
-        else:
-            width, height = self.bounds
-            x_pos, y_pos = self.position
+        width, height = self.bounds
+        x_pos, y_pos = self.position
 
         return ((x >= x_pos) and (x < (x_pos + width)) and
                 (y >= y_pos) and (y < (y_pos + height)))
@@ -359,41 +335,22 @@ class Component(CoordinateBox):
         self._window = win
 
     #------------------------------------------------------------------------
-    # Position and padding setters and getters
-    #------------------------------------------------------------------------
-
-    def _get_hpadding(self):
-        border_size = 2 * self._get_visible_border()
-        return border_size + self.padding_right + self.padding_left
-
-    def _get_vpadding(self):
-        border_size = 2 * self._get_visible_border()
-        return border_size + self.padding_bottom + self.padding_top
-
-    def _set_padding(self, value):
-        if np.isscalar(value):
-            value = [value] * 4
-        self.padding_left, self.padding_right = value[:2]
-        self.padding_top, self.padding_bottom = value[2:]
-
-    #------------------------------------------------------------------------
     # Outer position and bounds
     #------------------------------------------------------------------------
 
     def _get_outer_position(self):
         border = self._get_visible_border()
         pos = self.position
-        return (pos[0] - self.padding_left - border,
-                pos[1] - self.padding_bottom - border)
+        return (pos[0] - border,
+                pos[1] - border)
 
     def _set_outer_position(self, new_pos):
         border = self._get_visible_border()
-        self.position = [new_pos[0] + self.padding_left + border,
-                         new_pos[1] + self.padding_bottom + border]
+        self.position = [new_pos[0] + border,
+                         new_pos[1] + border]
 
     def _get_outer_bounds(self):
-        bounds = self.bounds
-        return (bounds[0] + self.hpadding, bounds[1] + self.vpadding)
+        return tuple(self.bounds)
 
     def _set_outer_bounds(self, bounds):
-        self.bounds = [bounds[0] - self.hpadding, bounds[1] - self.vpadding]
+        self.bounds = tuple(bounds)

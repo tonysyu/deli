@@ -79,8 +79,8 @@ class Graph(Container):
     # Object interface
     #--------------------------------------------------------------------------
 
-    def __init__(self, padding=0, **kwtraits):
-        super(Graph, self).__init__(padding=padding, **kwtraits)
+    def __init__(self, **kwtraits):
+        super(Graph, self).__init__(**kwtraits)
         self._init_components()
         self.add(self.canvas)
 
