@@ -1,6 +1,4 @@
-""" Defines the Plot class.
-"""
-from traits.api import Bool, Instance, Int
+from traits.api import Instance, Int
 
 from .axis import BaseAxis, XAxis, YAxis
 from .canvas import Canvas
@@ -35,14 +33,6 @@ class Graph(Container):
 
     # The grid that intersects the y-axis, i.e., a set of horizontal lines.
     y_grid = Instance(BaseGrid)
-
-    # Whether to automatically create the x_axis and y_axis if they were not
-    # already set by the caller.
-    auto_axis = Bool(True)
-
-    # Whether to automatically create the x_grid and y_grid if they were not
-    # already set by the caller.
-    auto_grid = Bool(True)
 
     #: The PlotLabel object that contains the title.
     title = Instance(PlotLabel)
@@ -98,10 +88,10 @@ class Graph(Container):
     def _update_bbox(self):
         """ Update bounding box when position or bounds change
 
-        Override Container method to make sure the canvas is stretched to the
+        Extend Container method to make sure the canvas is stretched to the
         desired size (based on the graph size and `margin`).
         """
-        self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
+        super(Graph, self)._update_bbox()
         self.canvas.bounds = (w - 2 * self.margin for w in self.bounds)
         self.canvas.position = (self.margin, self.margin)
 
@@ -110,13 +100,14 @@ class Graph(Container):
     #------------------------------------------------------------------------
 
     def _init_components(self):
-        if not self.x_grid and self.auto_grid:
+        if not self.x_grid:
             self.x_grid = XGrid(component=self.canvas)
-        if not self.y_grid and self.auto_grid:
+
+        if not self.y_grid:
             self.y_grid = YGrid(component=self.canvas)
 
-        if not self.x_axis and self.auto_axis:
+        if not self.x_axis:
             self.x_axis = XAxis(component=self.canvas)
 
-        if not self.y_axis and self.auto_axis:
+        if not self.y_axis:
             self.y_axis = YAxis(component=self.canvas)
