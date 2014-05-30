@@ -21,10 +21,6 @@ class Container(Component):
     # The list of components within this frame
     components = Property    # List(Component)
 
-    #------------------------------------------------------------------------
-    # Private traits
-    #------------------------------------------------------------------------
-
     # Shadow trait for self.components
     _components = List(Component)
 

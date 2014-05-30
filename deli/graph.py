@@ -1,15 +1,13 @@
 """ Defines the Plot class.
 """
-from traits.api import Bool, Dict, Instance, Int, Str
+from traits.api import Bool, Instance, Int
 
 from .axis import BaseAxis, XAxis, YAxis
 from .canvas import Canvas
 from .core.container import Container
 from .grid import BaseGrid, XGrid, YGrid
 from .plot_label import PlotLabel
-from .plots.base_plot import BasePlot
 from .style import config
-from .utils.misc import new_item_name
 
 
 class Graph(Container):
@@ -21,15 +19,6 @@ class Graph(Container):
     canvas = Instance(Canvas)
 
     margin = Int(config.get('container.graph.margin'))
-
-    #--------------------------------------------------------------------------
-    #  Bounding box
-    #--------------------------------------------------------------------------
-
-    def _update_bbox(self):
-        self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
-        self.canvas.bounds = (w - 2 * self.margin for w in self.bounds)
-        self.canvas.position = (self.margin, self.margin)
 
     #------------------------------------------------------------------------
     # Axis and Grids
@@ -55,22 +44,11 @@ class Graph(Container):
     # already set by the caller.
     auto_grid = Bool(True)
 
-    #------------------------------------------------------------------------
-    # General plotting traits
-    #------------------------------------------------------------------------
-
-    #: Mapping of plot names to *lists* of plots.
-    plots = Dict(Str, Instance(BasePlot))
-
-    #------------------------------------------------------------------------
-    # Annotations and decorations
-    #------------------------------------------------------------------------
-
     #: The PlotLabel object that contains the title.
     title = Instance(PlotLabel)
 
     #--------------------------------------------------------------------------
-    # Object interface
+    # Public interface
     #--------------------------------------------------------------------------
 
     def __init__(self, **kwtraits):
@@ -78,15 +56,12 @@ class Graph(Container):
         self._init_components()
         self.add(self.canvas)
 
-    #------------------------------------------------------------------------
-    # Public methods
-    #------------------------------------------------------------------------
-
     def add_plot(self, plot, name=None):
-        if name is None:
-            name = new_item_name(self.plots, name_template='plot_{}')
-        self.canvas.add_plot(plot)
-        self.plots[name] = plot
+        self.canvas.add_plot(plot, name=name)
+
+    #--------------------------------------------------------------------------
+    #  Bounding box
+    #--------------------------------------------------------------------------
 
     #-------------------------------------------------------------------------
     # Event handlers
@@ -115,6 +90,20 @@ class Graph(Container):
 
     def _canvas_default(self):
         return Canvas(screen_bbox=self.screen_bbox)
+
+    #--------------------------------------------------------------------------
+    #  Protected interface
+    #--------------------------------------------------------------------------
+
+    def _update_bbox(self):
+        """ Update bounding box when position or bounds change
+
+        Override Container method to make sure the canvas is stretched to the
+        desired size (based on the graph size and `margin`).
+        """
+        self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
+        self.canvas.bounds = (w - 2 * self.margin for w in self.bounds)
+        self.canvas.position = (self.margin, self.margin)
 
     #------------------------------------------------------------------------
     # Private methods

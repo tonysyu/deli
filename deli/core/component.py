@@ -31,8 +31,7 @@ class Component(CoordinateBox):
     1. 'background': Background image, shading
     2. 'underlay': Axes and grids
     3. 'plot': The main plot area itself
-    4. 'border': Plot borders
-    5. 'overlay': Legends, selection regions, and other tool-drawn elements
+    4. 'overlay': Legends, selection regions, and other tool-drawn elements
 
     .. [GoF] Design Patterns: Elements of Reusable Object Oriented Software,
              Gamma et al., Addison-Wesley, 1996.

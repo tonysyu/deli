@@ -28,10 +28,8 @@ class BaseGrid(AbstractOverlay):
     line_artist = Instance(LineArtist)
 
     def _line_artist_default(self):
+        # XXX: Replace these defaults with config values.
         return LineArtist(color='lightgray', style='dot')
-
-    # Set default background color to transparent.
-    bgcolor = 'none'
 
     #------------------------------------------------------------------------
     # Private traits; mostly cached information
