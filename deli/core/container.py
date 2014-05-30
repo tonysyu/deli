@@ -78,9 +78,8 @@ class Container(Component):
         if layer in ('background', 'underlay'):
             draw_layer_(layer, gc, view_bounds)
 
-        # Drawing children seems to lead to recursion issues.
-        # XXX: `new_bounds` and `view_bounds` both seem to work...?
-        self._draw_children(layer, gc, new_bounds)
+        if layer == 'plot':
+            self._draw_children(layer, gc, new_bounds)
 
         if layer == 'overlay':
             draw_layer_(layer, gc, view_bounds)
@@ -92,10 +91,7 @@ class Container(Component):
             with gc:
                 gc.translate_ctm(*self.position)
                 for component in visible_components:
-                    if isinstance(component, Container) and layer == 'plot':
-                        component.draw(gc, view_bounds)
-                    else:
-                        component.draw_layer(layer, gc, view_bounds)
+                    component.draw(gc, view_bounds)
 
     def _get_visible_components(self, bounds):
         """ Returns a list of this plot's children that are in the bounds. """
