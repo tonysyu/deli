@@ -20,18 +20,9 @@ class AbstractWindow(HasStrictTraits):
     # painted with this color before the component gets to draw.
     bgcolor = ColorTrait("sys_window")
 
-    # Unfortunately, for a while, there was a naming inconsistency and the
-    # background color trait named "bg_color".  This is still provided for
-    # backwards compatibility but should not be used in new code.
-    bg_color = Alias("bgcolor")
-
     alt_pressed = Bool(False)
     control_pressed = Bool(False)
     shift_pressed = Bool(False)
-
-    # A container that gets drawn after & on top of the main component, and
-    # which receives events first.
-    overlay = Instance(Container)
 
     # When the underlying toolkit control gets resized, this event gets set
     # to the new size of the window, expressed as a tuple (dx, dy).
@@ -45,7 +36,7 @@ class AbstractWindow(HasStrictTraits):
     # None, self.component, or self.overlay.
     _prev_event_handler = Instance(Component)
 
-    # (dx, dy) integer size of the Window.
+    # Integer size of the Window (width, height).
     _size = Trait(None, Tuple)
 
     #---------------------------------------------------------------------------
@@ -214,7 +205,7 @@ class AbstractWindow(HasStrictTraits):
             self.component = None
 
         self.control = None
-        if self._gc is not None :
+        if self._gc is not None:
             self._gc.window = None
             self._gc = None
 
@@ -246,43 +237,43 @@ class AbstractWindow(HasStrictTraits):
     #---------------------------------------------------------------------------
 
     def _on_left_down(self, event):
-        self._handle_mouse_event( 'left_down', event, set_focus = True)
+        self._handle_mouse_event('left_down', event, set_focus = True)
 
     def _on_left_up(self, event):
-        self._handle_mouse_event( 'left_up', event)
+        self._handle_mouse_event('left_up', event)
 
     def _on_left_dclick(self, event):
-        self._handle_mouse_event( 'left_dclick', event)
+        self._handle_mouse_event('left_dclick', event)
 
     def _on_right_down(self, event):
-        self._handle_mouse_event( 'right_down', event, set_focus = True)
+        self._handle_mouse_event('right_down', event, set_focus = True)
 
     def _on_right_up(self, event):
-        self._handle_mouse_event( 'right_up', event)
+        self._handle_mouse_event('right_up', event)
 
     def _on_right_dclick(self, event):
-        self._handle_mouse_event( 'right_dclick', event)
+        self._handle_mouse_event('right_dclick', event)
 
     def _on_middle_down(self, event):
-        self._handle_mouse_event( 'middle_down', event)
+        self._handle_mouse_event('middle_down', event)
 
     def _on_middle_up(self, event):
-        self._handle_mouse_event( 'middle_up', event)
+        self._handle_mouse_event('middle_up', event)
 
     def _on_middle_dclick(self, event):
-        self._handle_mouse_event( 'middle_dclick', event)
+        self._handle_mouse_event('middle_dclick', event)
 
     def _on_mouse_move(self, event):
-        self._handle_mouse_event( 'mouse_move', event, set_focus=False)
+        self._handle_mouse_event('mouse_move', event, set_focus=False)
 
     def _on_mouse_wheel(self, event):
-        self._handle_mouse_event( 'mouse_wheel', event)
+        self._handle_mouse_event('mouse_wheel', event)
 
     def _on_mouse_enter(self, event):
-        self._handle_mouse_event( 'mouse_enter', event)
+        self._handle_mouse_event('mouse_enter', event)
 
     def _on_mouse_leave(self, event):
-        self._handle_mouse_event( 'mouse_leave', event, set_focus=False)
+        self._handle_mouse_event('mouse_leave', event, set_focus=False)
 
     def _on_window_enter(self, event):
         pass

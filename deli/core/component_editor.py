@@ -24,15 +24,12 @@ class _ComponentEditor(Editor):
     # The plot editor is scrollable (overrides Traits UI Editor).
     scrollable = True
 
-    def init( self, parent ):
+    def init(self, parent):
         """ Finishes initializing the editor by creating the underlying toolkit
         widget.
         """
-
-        size = self._get_initial_size()
-
         self._window = Window(parent,
-                              size=size,
+                              size=self._get_initial_size(),
                               component=self.value)
 
         self.control = self._window.control
@@ -47,7 +44,7 @@ class _ComponentEditor(Editor):
         self._parent = None
         super(_ComponentEditor, self).dispose()
 
-    def update_editor( self ):
+    def update_editor(self):
         """ Updates the editor when the object trait changes externally to the
         editor.
         """
@@ -72,7 +69,7 @@ class _ComponentEditor(Editor):
         return width, height
 
 
-class ComponentEditor( BasicEditorFactory ):
+class ComponentEditor(BasicEditorFactory):
     """ wxPython editor factory for Enable components.
     """
     #---------------------------------------------------------------------------
