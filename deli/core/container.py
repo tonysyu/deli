@@ -75,7 +75,7 @@ class Container(Component):
 
         draw_layer_ = super(Container, self).draw_layer
 
-        if layer == 'underlay':
+        if layer in ('background', 'underlay'):
             draw_layer_(layer, gc, view_bounds)
 
         # Drawing children seems to lead to recursion issues.

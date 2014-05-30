@@ -6,6 +6,7 @@ from .core.container import Container
 from .layout.bbox_transform import BboxTransform
 from .layout.bounding_box import BoundingBox
 from .layout.box_layout import simple_container_do_layout
+from .style import config
 
 
 def replace_in_list(a_list, old, new):
@@ -21,6 +22,8 @@ class Canvas(Container):
     It can house plots and other plot components, and otherwise behaves
     just like a normal Container.
     """
+
+    bgcolor = config.get('background.canvas.color')
 
     def add_plot(self, plot):
         self.data_bbox.update_from_extents(*plot.data_extents)
