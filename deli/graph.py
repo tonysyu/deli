@@ -20,7 +20,7 @@ class Graph(Container):
     # The primary container for plot data.
     canvas = Instance(Canvas)
 
-    margin = Int(50)
+    margin = Int(config.get('container.graph.margin'))
 
     #--------------------------------------------------------------------------
     #  Bounding box

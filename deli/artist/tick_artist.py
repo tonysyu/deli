@@ -4,6 +4,7 @@ import numpy as np
 from traits.api import Float, Instance, Property
 
 from ..layout.bbox_transform import BaseTransform
+from ..style import config
 from .line_artist import LineArtist
 
 
@@ -21,9 +22,9 @@ class BaseTickArtist(LineArtist):
     #: i.e. x-position for a y-axis and y-position for an x-axis.
     locus = Float(0)
 
-    in_size = Float(5.0)
+    in_size = Float(config.get('in.tick_size'))
 
-    out_size = Float(5.0)
+    out_size = Float(config.get('out.tick_size'))
 
     size = Property
 
