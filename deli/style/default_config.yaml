@@ -7,7 +7,14 @@ line.width: 1
 
 font: 'modern 13'
 
-title.font: 'modern 15'
+label.margin: 2
+
+background.canvas.color: 'silver'
+container.graph.margin: 50
 
 axis.color: 'dimgray'
 axis.tick_label.offset: 8.0
+
+tick_size: 5.0
+
+title.font: 'modern 15'

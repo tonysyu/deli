@@ -38,8 +38,8 @@ class _QtWindowHandler(object):
 
         self._enable_window.resized = (dx, dy)
 
-        component.outer_position = [0, 0]
-        component.outer_bounds = [dx, dy]
+        component.position = [0, 0]
+        component.bounds = [dx, dy]
 
     #------------------------------------------------------------------------
     # Qt Keyboard event handlers

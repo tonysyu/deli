@@ -1,18 +1,15 @@
 """ Defines the Component class """
 from itertools import chain
 
-import numpy as np
-
-from enable.colors import white_color_trait
+from enable.colors import ColorTrait
 from kiva.constants import FILL
-from traits.api import (Any, Bool, Float, Instance, Int, List, Property, Str,
-                        Trait, WeakRef)
+from traits.api import Any, Bool, Instance, List, Property, Str, WeakRef
 
+from ..layout.bounding_box import BoundingBox
 from .coordinate_box import CoordinateBox
 
 
-DEFAULT_DRAWING_ORDER = ["background", "image", "underlay", "plot",
-                         "border", "overlay"]
+DRAWING_ORDER = ['background', 'underlay', 'plot', 'overlay']
 
 
 class NullDispatch(object):
@@ -25,12 +22,16 @@ class NullDispatch(object):
 class Component(CoordinateBox):
     """ Component is the base class for most objects.
 
-    Since Components can have a border and padding, there is an additional set
-    of bounds and position attributes to define the "outer box" of components.
-
     This represents a general component of a composite structure [GoF]_, but,
     by itself, is only a leaf-component. `Containers`, which subclass
     `Component`, compose components and other containers.
+
+    Drawing order is controlled by `_draw_<layer>` methods, where <layers> are:
+
+    1. 'background': Background image, shading
+    2. 'underlay': Axes and grids
+    3. 'plot': The main plot area itself
+    4. 'overlay': Legends, selection regions, and other tool-drawn elements
 
     .. [GoF] Design Patterns: Elements of Reusable Object Oriented Software,
              Gamma et al., Addison-Wesley, 1996.
@@ -62,20 +63,37 @@ class Component(CoordinateBox):
     tools = List
 
     # The order in which various rendering classes on this component are drawn.
-    # 1. 'background': Background image, shading.
-    # 2. 'image': A special layer for plots that render as images.
-    # 3. 'underlay': Axes and grids.
-    # 4. 'plot': The main plot area itself.
-    # 5. 'border': Plot borders.
-    # 6. 'overlay': Legends, selections, and other tool-drawn visual elements.
-    draw_order = Instance(list, args=(DEFAULT_DRAWING_ORDER,))
+    draw_order = Instance(list, args=(DRAWING_ORDER,))
+
+    #--------------------------------------------------------------------------
+    #  Bounding box
+    #--------------------------------------------------------------------------
+
+    #: Bounding box in screen coordinates
+    screen_bbox = Instance(BoundingBox)
+
+    def _screen_bbox_default(self):
+        return BoundingBox.from_extents(self.x, self.y, self.x2, self.y2)
+
+    def _bounds_changed(self):
+        if self.container is not None:
+            self.container._component_bounds_changed()
+        self._update_bbox()
+
+    def _position_changed(self):
+        if self.container is not None:
+            self.container._component_position_changed()
+        self._update_bbox()
+
+    def _update_bbox(self):
+        self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
 
     #------------------------------------------------------------------------
     # Basic appearance traits
     #------------------------------------------------------------------------
 
     # The background color of this component.
-    bgcolor = white_color_trait
+    bgcolor = ColorTrait('transparent')
 
     # Is the component visible?
     visible = Bool(True)
@@ -83,52 +101,10 @@ class Component(CoordinateBox):
     # Does the component use space in the layout even if it is not visible?
     invisible_layout = Bool(False)
 
-    # The width of the border around this component.
-    border_width = Int(1)
-
-    # Visibility of border.
-    border_visible = Bool(False)
-
-    #------------------------------------------------------------------------
-    # Layout traits
-    #------------------------------------------------------------------------
-
-    # The ratio of the component's width to its height.
-    aspect_ratio = Trait(None, None, Float)
-
     # A read-only property that returns True if this component needs layout.
     layout_needed = Property
 
     _layout_needed = Bool(True)
-
-    # The amount of space to put on the left side of the component
-    padding_left = Int(0)
-
-    # The amount of space to put on the right side of the component
-    padding_right = Int(0)
-
-    # The amount of space to put on top of the component
-    padding_top = Int(0)
-
-    # The amount of space to put below the component
-    padding_bottom = Int(0)
-
-    # This property allows a way to set the padding in bulk. It can either be
-    # set to a single Int (which sets padding on all sides) or a tuple/list of
-    # 4 Ints representing the (left, right, top, bottom) padding amounts.
-    padding = Property
-
-    # Readonly property expressing the total amount of horizontal padding
-    hpadding = Property
-
-    # Readonly property expressing the total amount of vertical padding
-    vpadding = Property
-
-    # The lower left corner of the padding outer box around the component.
-    outer_position = Property
-
-    # The number of horizontal and vertical pixels in the padding outer box.
-    outer_bounds = Property
 
     #------------------------------------------------------------------------
     # Abstract methods
@@ -137,14 +113,6 @@ class Component(CoordinateBox):
     def _do_layout(self):
         """ Called by do_layout() to do an actual layout call; it bypasses some
         additional logic to handle null bounds and setting **_layout_needed**.
-        """
-        pass
-
-    def _draw_component(self, gc, view_bounds=None):
-        """ Renders the component.
-
-        Subclasses must implement this method to actually render themselves.
-        Note: This method is used only by the "old" drawing calls.
         """
         pass
 
@@ -168,6 +136,7 @@ class Component(CoordinateBox):
         if self.layout_needed:
             self.do_layout()
 
+        # XXX: This causes underlays to draw once but overlays twice.
         for layer in self.draw_order:
             self.draw_layer(layer, gc, view_bounds)
 
@@ -181,15 +150,11 @@ class Component(CoordinateBox):
         elif self._window:
             self._window.redraw()
 
-    def is_in(self, x, y, include_padding=False):
+    def is_in(self, x, y):
         # A basic implementation of is_in(); subclasses should provide their
         # own if they are more accurate/faster/shinier.
-        if include_padding:
-            width, height = self.outer_bounds
-            x_pos, y_pos = self.outer_position
-        else:
-            width, height = self.bounds
-            x_pos, y_pos = self.position
+        width, height = self.bounds
+        x_pos, y_pos = self.position
 
         return ((x >= x_pos) and (x < (x_pos + width)) and
                 (y >= y_pos) and (y < (y_pos + height)))
@@ -242,8 +207,6 @@ class Component(CoordinateBox):
         together and want them to draw cooperatively. The container iterates
         through its components and asks them to draw only certain layers.
         """
-        # Don't render the selection layer if use_selection is false.  This
-        # is mostly for backwards compatibility.
         if self.layout_needed:
             self.do_layout()
 
@@ -281,10 +244,6 @@ class Component(CoordinateBox):
             # just overlays drawn at a different time in the rendering loop.
             if underlay.visible:
                 underlay.draw(self, gc, view_bounds)
-
-    def _get_visible_border(self):
-        """ Helper function to return the amount of border, if visible """
-        return self.border_width if self.border_visible else 0
 
     #------------------------------------------------------------------------
     # Tool-related methods and event dispatch
@@ -330,25 +289,17 @@ class Component(CoordinateBox):
     # Event handlers
     #------------------------------------------------------------------------
 
-    def _bounds_changed(self, old, new):
-        if self.container is not None:
-            self.container._component_bounds_changed(self)
-
     def _bounds_items_changed(self, event):
         if self.container is not None:
-            self.container._component_bounds_changed(self)
+            self.container._component_bounds_changed()
 
     def _container_changed(self, old, new):
         if new is None:
-            self.position = [0,0]
-
-    def _position_changed(self, *args):
-        if self.container is not None:
-            self.container._component_position_changed(self)
+            self.position = [0, 0]
 
     def _position_items_changed(self, *args):
         if self.container is not None:
-            self.container._component_position_changed(self)
+            self.container._component_position_changed()
 
     def _visible_changed(self, old, new):
         if new:
@@ -356,43 +307,3 @@ class Component(CoordinateBox):
 
     def _set_window(self, win):
         self._window = win
-
-    #------------------------------------------------------------------------
-    # Position and padding setters and getters
-    #------------------------------------------------------------------------
-
-    def _get_hpadding(self):
-        border_size = 2 * self._get_visible_border()
-        return border_size + self.padding_right + self.padding_left
-
-    def _get_vpadding(self):
-        border_size = 2 * self._get_visible_border()
-        return border_size + self.padding_bottom + self.padding_top
-
-    def _set_padding(self, value):
-        if np.isscalar(value):
-            value = [value] * 4
-        self.padding_left, self.padding_right = value[:2]
-        self.padding_top, self.padding_bottom = value[2:]
-
-    #------------------------------------------------------------------------
-    # Outer position and bounds
-    #------------------------------------------------------------------------
-
-    def _get_outer_position(self):
-        border = self._get_visible_border()
-        pos = self.position
-        return (pos[0] - self.padding_left - border,
-                pos[1] - self.padding_bottom - border)
-
-    def _set_outer_position(self, new_pos):
-        border = self._get_visible_border()
-        self.position = [new_pos[0] + self.padding_left + border,
-                         new_pos[1] + self.padding_bottom + border]
-
-    def _get_outer_bounds(self):
-        bounds = self.bounds
-        return (bounds[0] + self.hpadding, bounds[1] + self.vpadding)
-
-    def _set_outer_bounds(self, bounds):
-        self.bounds = [bounds[0] - self.hpadding, bounds[1] - self.vpadding]

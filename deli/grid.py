@@ -28,10 +28,8 @@ class BaseGrid(AbstractOverlay):
     line_artist = Instance(LineArtist)
 
     def _line_artist_default(self):
+        # XXX: Replace these defaults with config values.
         return LineArtist(color='lightgray', style='dot')
-
-    # Set default background color to transparent.
-    bgcolor = 'none'
 
     #------------------------------------------------------------------------
     # Private traits; mostly cached information
@@ -72,6 +70,7 @@ class BaseGrid(AbstractOverlay):
 
         Overrides AbstractOverlay.
         """
+        other_component = getattr(other_component, 'canvas', other_component)
         self._compute_ticks(other_component)
         self._draw_component(gc, view_bounds)
 
@@ -79,7 +78,7 @@ class BaseGrid(AbstractOverlay):
         """ Draws the component.
 
         This method is preserved for backwards compatibility. Overrides
-        PlotComponent.
+        Component.
         """
         with gc:
             self.line_artist.update_style(gc)
@@ -95,7 +94,7 @@ class BaseGrid(AbstractOverlay):
         self.invalidate()
 
     #------------------------------------------------------------------------
-    # Event handlers for visual attributes.  These mostly just call request_redraw()
+    # Event handlers for visual attributes.
     #------------------------------------------------------------------------
 
     @on_trait_change("visible,line_color,line_style,line_width")

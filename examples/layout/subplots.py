@@ -3,10 +3,10 @@ import numpy as np
 from traits.api import HasStrictTraits, Instance
 from traitsui.api import Item, View
 
-from deli.core.component_editor import ComponentEditor
+from deli.demo_utils.traitsui_editor import ComponentEditor
 from deli.core.constraints_container import ConstraintsContainer
 from deli.layout.api import align, vbox
-from deli.plot_canvas import PlotCanvas
+from deli.graph import Graph
 from deli.plots.line_plot import LinePlot
 from deli.plots.scatter_plot import ScatterPlot
 
@@ -14,8 +14,8 @@ from deli.plots.scatter_plot import ScatterPlot
 class Demo(HasStrictTraits):
 
     figure = Instance(ConstraintsContainer)
-    line_canvas = Instance(PlotCanvas)
-    scatter_canvas = Instance(PlotCanvas)
+    line_graph = Instance(Graph)
+    scatter_graph = Instance(Graph)
 
     traits_view = View(
         Item('figure',
@@ -28,34 +28,32 @@ class Demo(HasStrictTraits):
     )
 
     def _figure_default(self):
-        figure = ConstraintsContainer(bounds=(500, 500), padding=50)
+        figure = ConstraintsContainer(bounds=(500, 500))
 
-        figure.add(self.line_canvas, self.scatter_canvas)
-        spacing = (self.line_canvas.padding_bottom +
-                   self.scatter_canvas.padding_top)
+        figure.add(self.line_graph, self.scatter_graph)
         figure.layout_constraints = [
-            vbox(self.line_canvas, self.scatter_canvas, spacing=spacing),
-            align('layout_height', self.line_canvas, self.scatter_canvas),
+            vbox(self.line_graph, self.scatter_graph),
+            align('layout_height', self.line_graph, self.scatter_graph),
         ]
         return figure
 
-    def _line_canvas_default(self):
-        canvas = PlotCanvas()
-        canvas.title.text = "Line Plot"
+    def _line_graph_default(self):
+        graph = Graph()
+        graph.title.text = "Line Plot"
 
         x = np.linspace(0, 10.0, 100)
         plot = LinePlot(x_data=x, y_data=np.sin(x))
-        canvas.add(plot)
-        return canvas
+        graph.add_plot(plot)
+        return graph
 
-    def _scatter_canvas_default(self):
-        canvas = PlotCanvas()
-        canvas.title.text = "Scatter Plot"
+    def _scatter_graph_default(self):
+        graph = Graph()
+        graph.title.text = "Scatter Plot"
 
         x = np.linspace(0, 10.0, 100)
         plot = ScatterPlot(x_data=x, y_data=np.sin(x))
-        canvas.add(plot)
-        return canvas
+        graph.add_plot(plot)
+        return graph
 
 
 if __name__ == "__main__":

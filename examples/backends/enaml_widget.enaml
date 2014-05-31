@@ -1,0 +1,24 @@
+import numpy as np
+from enaml.widgets.api import Container, Window
+from scipy.special import jn
+
+from deli.demo_utils.enaml_widget import EnamlWidget
+from deli.graph import Graph
+from deli.plots.line_plot import LinePlot
+
+
+def create_graph():
+    graph = Graph()
+    graph.title.text = "Enaml widget"
+
+    x = np.linspace(-2.0, 10.0)
+    plot = LinePlot(x_data=x, y_data=np.sin(x))
+    graph.add_plot(plot)
+    return graph
+
+
+enamldef Main(Window):
+
+    Container:
+        EnamlWidget:
+            component << create_graph()

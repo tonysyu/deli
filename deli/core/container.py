@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from enable.base import empty_rectangle, intersect_bounds
 from enable.events import MouseEvent
 from kiva import affine
-from traits.api import Instance, List, Property, Tuple
+from traits.api import Instance, List, Property
 
 from .component import Component
 
@@ -21,20 +21,8 @@ class Container(Component):
     # The list of components within this frame
     components = Property    # List(Component)
 
-    # The layers that the container will draw first, so that they appear
-    # under the component layers of the same name.
-    container_under_layers = Tuple('background', 'underlay')
-
-    # The layers that the container will draw last, so that they appear
-    # over the component layers of the same name.
-    container_over_layers = Tuple('overlay', 'border')
-
-    #------------------------------------------------------------------------
-    # Private traits
-    #------------------------------------------------------------------------
-
     # Shadow trait for self.components
-    _components = List    # List(Component)
+    _components = List(Component)
 
     # Set of components that last handled a mouse event. This allows us to
     # generate mouse_enter and mouse_leave events of our own.
@@ -83,13 +71,13 @@ class Container(Component):
 
         draw_layer_ = super(Container, self).draw_layer
 
-        if layer in self.container_under_layers:
+        if layer in ('background', 'underlay'):
             draw_layer_(layer, gc, view_bounds)
 
-        # XXX: `new_bounds` and `view_bounds` both seem to work...?
-        self._draw_children(layer, gc, new_bounds)
+        if layer == 'plot':
+            self._draw_children(layer, gc, new_bounds)
 
-        if layer in self.container_over_layers:
+        if layer == 'overlay':
             draw_layer_(layer, gc, view_bounds)
 
     def _draw_children(self, layer, gc, view_bounds):
@@ -99,7 +87,7 @@ class Container(Component):
             with gc:
                 gc.translate_ctm(*self.position)
                 for component in visible_components:
-                    component.draw_layer(layer, gc, view_bounds)
+                    component.draw(gc, view_bounds)
 
     def _get_visible_components(self, bounds):
         """ Returns a list of this plot's children that are in the bounds. """
@@ -110,8 +98,8 @@ class Container(Component):
         for component in self.components:
             if not component.visible:
                 continue
-            tmp = intersect_bounds(component.outer_position +
-                                   component.outer_bounds, bounds)
+            tmp = intersect_bounds(component.position +
+                                   component.bounds, bounds)
             if tmp != empty_rectangle:
                 visible_components.append(component)
         return visible_components
@@ -137,13 +125,13 @@ class Container(Component):
         new_bounds = (x-self.x, y-self.y, width, height)
         return new_bounds
 
-    def _component_bounds_changed(self, component):
-        "Called by contained objects when their bounds change"
-        pass
+    def _component_position_changed(self):
+        """Called by contained objects when their positions change"""
+        self._position_changed()
 
-    def _component_position_changed(self, component):
-        "Called by contained objects when their position changes"
-        pass
+    def _component_bounds_changed(self):
+        """Called by contained objects when their bounds change"""
+        self._bounds_changed()
 
     #------------------------------------------------------------------------
     # Property setters & getters
@@ -167,6 +155,10 @@ class Container(Component):
     #------------------------------------------------------------------------
     # Event handling
     #------------------------------------------------------------------------
+
+    def _bounds_changed(self):
+        super(Container, self)._bounds_changed()
+        self._layout_needed = True
 
     def get_event_transform(self, event=None):
         return affine.affine_from_translation(-self.x, -self.y)
@@ -231,10 +223,6 @@ class Container(Component):
     #------------------------------------------------------------------------
     # Event handlers
     #------------------------------------------------------------------------
-
-    def _bounds_changed(self, old, new):
-        super(Container, self)._bounds_changed(old, new)
-        self._layout_needed = True
 
     def __components_items_changed(self, event):
         self._layout_needed = True

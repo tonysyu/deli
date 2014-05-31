@@ -27,7 +27,7 @@ class LabelArtist(HasStrictTraits):
     font = KivaFont(config.get('text.label.font'))
 
     #: Number of pixels of margin around the label, for both X and Y dimensions.
-    margin = Int(2)
+    margin = Int(config.get('label.margin'))
 
     #: Offset value from the current graphics-context position.
     x_offset = Float(0)

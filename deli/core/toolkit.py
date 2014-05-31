@@ -14,11 +14,6 @@ def _init_toolkit():
     toolkit = ETSConfig.toolkit
     backend = ETSConfig.kiva_backend
 
-    if not toolkit:
-        # Force Traits to decide on its toolkit if it hasn't already
-        from traitsui.toolkit import toolkit as traits_toolkit
-        traits_toolkit()
-
     # Import the selected backend
     backend = 'deli.core.%s.%s' % (toolkit, backend)
     try:
