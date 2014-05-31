@@ -3,7 +3,7 @@ from itertools import chain
 
 from enable.colors import ColorTrait
 from kiva.constants import FILL
-from traits.api import Any, Bool, Instance, Int, List, Property, WeakRef
+from traits.api import Any, Bool, Instance, List, Property, WeakRef
 
 from ..layout.bounding_box import BoundingBox
 from .coordinate_box import CoordinateBox
@@ -97,16 +97,6 @@ class Component(CoordinateBox):
 
     # Does the component use space in the layout even if it is not visible?
     invisible_layout = Bool(False)
-
-    # The width of the border around this component.
-    border_width = Int(1)
-
-    # Visibility of border.
-    border_visible = Bool(False)
-
-    #------------------------------------------------------------------------
-    # Layout traits
-    #------------------------------------------------------------------------
 
     # A read-only property that returns True if this component needs layout.
     layout_needed = Property
@@ -251,10 +241,6 @@ class Component(CoordinateBox):
             # just overlays drawn at a different time in the rendering loop.
             if underlay.visible:
                 underlay.draw(self, gc, view_bounds)
-
-    def _get_visible_border(self):
-        """ Helper function to return the amount of border, if visible """
-        return self.border_width if self.border_visible else 0
 
     #------------------------------------------------------------------------
     # Tool-related methods and event dispatch
