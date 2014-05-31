@@ -28,11 +28,12 @@ Requirements
 
 * numpy
 * traits
-* traitsui
 * pyface
 * enable
 * kiva
 * matplotlib
+* enaml (optional)
+* traitsui (optional)
 
 
 Licence
@@ -47,13 +48,13 @@ Origin story
 I started to learn Python while looking for a good plotting package for one of
 my first research papers. My research advisor suggested GnuPlot, but after
 looking at it for an afternoon, I was convinced that it was not what I wanted
-to spend my time using. Eventually, I settled on PyX [pyx]_, which produced
+to spend my time using. Eventually, I settled on PyX_, which produced
 beautiful figures, especially compared to what Matlab (which is what I used for
 my data analysis) could produce at the time (circa 2006). After that paper,
-I moved on to using and contributing to Matplotlib [matplotlib]_ (one of the
-more popular plotting libraries in Python). I also played around with Chaco
+I moved on to using and contributing to matplotlib_ (one of the
+more popular plotting libraries in Python). I also played around with chaco_
 during my graduate studies and use it extensively now, since I started work at
-Enthought Inc. [enthought]_,
+`Enthought Inc.`_.
 
 That's all to say: I've used a few plotting libraries in Python, and I know
 there are many recent additions to the mix. They all have their strengths (and
@@ -67,8 +68,8 @@ for the first time. (I'm not a software developer by training, so I read it
 rather late in life.)
 
 
-Why "Deli"
-==========
+Why the name "deli"?
+====================
 
 I actually wanted to name this package "SpyGlass", which is an area of Austin,
 TX and a really great name for a data-visualization package. Alas, that name
@@ -79,10 +80,10 @@ combining a lot of little, highly-customizable components. The package itself
 is also a combination of parts and ideas from a number of other popular
 plotting packages. (It's a bit of a stretch, I know.)
 
-
-.. _pyx: http://pyx.sourceforge.net/
+.. _PyX: http://pyx.sourceforge.net/
 .. _matplotlib: http://matplotlib.sourceforge.net/
 .. _mpltools: http://tonysyu.github.com/mpltools
-.. _enthought:  http://enthought.com/
+.. _chaco: https://chaco.readthedocs.org/en/latest/
+.. _Enthought Inc.:  http://enthought.com/
 .. [GoF] Design Patterns: Elements of Reusable Object Oriented Software,
          Gamma et al., Addison-Wesley, 1996.
