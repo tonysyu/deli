@@ -126,7 +126,7 @@ class ConstraintsContainer(Container):
             offset_table = self._offset_table
             width_var = self.layout_width
             height_var = self.layout_height
-            width, height = self.bounds
+            width, height = self.size
 
             def layout():
                 running_index = 1
@@ -134,8 +134,8 @@ class ConstraintsContainer(Container):
                     dx, dy = offset_table[offset_index]
                     nx, ny = item.left.value, item.bottom.value
                     item.position = (nx - dx, ny - dy)
-                    item.bounds = (item.layout_width.value,
-                                   item.layout_height.value)
+                    item.size = (item.layout_width.value,
+                                 item.layout_height.value)
                     offset_table[running_index] = (nx, ny)
                     running_index += 1
             mgr_layout(layout, width_var, height_var, (width, height))
@@ -203,10 +203,10 @@ class ConstraintsContainer(Container):
     #------------------------------------------------------------------------
     # Traits methods
     #------------------------------------------------------------------------
-    def _bounds_changed(self):
-        """ Run the solver when the container's bounds change.
+    def _size_changed(self):
+        """ Run the solver when the container's size changes.
         """
-        super(ConstraintsContainer, self)._bounds_changed()
+        super(ConstraintsContainer, self)._size_changed()
         self.refresh()
 
     def _layout_constraints_default(self):

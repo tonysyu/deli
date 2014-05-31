@@ -18,9 +18,6 @@ class ArrayDataSource(AbstractDataSource):
     # The data array itself.
     _data = NumericalSequenceTrait
 
-    # Cached values of min and max as long as **_data** doesn't change.
-    _cached_bounds = Tuple
-
     #------------------------------------------------------------------------
     # Public methods
     #------------------------------------------------------------------------

@@ -24,7 +24,7 @@ class CoordinateBox(HasStrictTraits):
 
     Primary attributes (not properties):
         position : [x, y]
-        bounds : [width, height]
+        size : [width, height]
 
     Secondary attributes (properties):
         x, y   : coordinates of the lower-left pixel of the box
@@ -33,10 +33,10 @@ class CoordinateBox(HasStrictTraits):
         height : the number of vertical pixels in the box; equal to y2-y+1
 
     Note that setting x and y will modify the position, but setting any of the
-    other secondary attributes will modify the bounds of the box.
+    other secondary attributes will modify the size of the box.
     """
 
-    bounds = bounds_trait
+    size = bounds_trait
 
     # The position relative to the container.  If container is None, then
     # position will be set to (0,0).
@@ -130,35 +130,35 @@ class CoordinateBox(HasStrictTraits):
         self.position[1] = val
 
     def _get_width(self):
-        return self.bounds[0]
+        return self.size[0]
 
     def _set_width(self, val):
-        old_value = self.bounds[0]
-        self.bounds[0] = val
+        old_value = self.size[0]
+        self.size[0] = val
         self.trait_property_changed('width', old_value, val)
 
     def _get_height(self):
-        return self.bounds[1]
+        return self.size[1]
 
     def _set_height(self, val):
-        old_value = self.bounds[1]
-        self.bounds[1] = val
+        old_value = self.size[1]
+        self.size[1] = val
         self.trait_property_changed('height', old_value, val)
 
     def _get_x2(self):
-        if self.bounds[0] == 0: return self.position[0]
-        return self.position[0] + self.bounds[0] - 1
+        if self.size[0] == 0: return self.position[0]
+        return self.position[0] + self.size[0] - 1
 
     def _set_x2(self, val):
-        self.position[0] = val - self.bounds[0] + 1
+        self.position[0] = val - self.size[0] + 1
 
     def _get_y2(self):
-        if self.bounds[1] == 0:
+        if self.size[1] == 0:
             return self.position[1]
-        return self.position[1] + self.bounds[1] - 1
+        return self.position[1] + self.size[1] - 1
 
     def _set_y2(self, val):
-        self.position[1] = val - self.bounds[1] + 1
+        self.position[1] = val - self.size[1] + 1
 
     def __constraints_vars_default(self):
         obj_name = self.id if hasattr(self, 'id') else ''

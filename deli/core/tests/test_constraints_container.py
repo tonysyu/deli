@@ -11,13 +11,13 @@ SIZE = (WIDTH, HEIGHT)
 
 
 def test_child_container_fills_parent_container():
-    parent = ConstraintsContainer(bounds=SIZE)
+    parent = ConstraintsContainer(size=SIZE)
     child = ConstraintsContainer()
     parent.add(child)
     # XXX: For some reason, the layout width/height is temporarily set to the
     # bounds-size, but it gets changed before access.
-    assert_array_equal(parent.bounds, SIZE)
-    assert_array_equal(child.bounds, SIZE)
+    assert_array_equal(parent.size, SIZE)
+    assert_array_equal(child.size, SIZE)
 
 
 def _test_parent_stretches_around_child(child, size):

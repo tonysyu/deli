@@ -28,7 +28,7 @@ class Demo(HasStrictTraits):
     )
 
     def _figure_default(self):
-        figure = ConstraintsContainer(bounds=(500, 500))
+        figure = ConstraintsContainer(size=(500, 500))
 
         figure.add(self.line_graph, self.scatter_graph)
         figure.layout_constraints = [

@@ -121,9 +121,9 @@ class AbstractWindow(HasStrictTraits):
         # If possible, size the new component according to the size of the
         # toolkit control
         size = self._get_control_size()
-        if (size is not None) and hasattr(self.component, "bounds"):
+        if (size is not None) and hasattr(self.component, "size"):
             self.component.position = [0, 0]
-            self.component.bounds = list(size)
+            self.component.size = list(size)
         self.redraw()
 
     #---------------------------------------------------------------------------

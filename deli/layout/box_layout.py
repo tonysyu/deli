@@ -2,7 +2,7 @@
 """
 
 def simple_container_do_layout(container, components=None):
-    """ Adjust layout so container stretches to window bounds.
+    """ Adjust layout so container stretches to window size.
     """
     if components is None:
         components = container.components
@@ -19,4 +19,4 @@ def apply_size_to_all_components(size, container, components, position=None):
                 continue
 
         component.position = [0, 0]
-        component.bounds = size
+        component.size = size

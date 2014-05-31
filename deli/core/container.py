@@ -99,7 +99,7 @@ class Container(Component):
             if not component.visible:
                 continue
             tmp = intersect_bounds(component.position +
-                                   component.bounds, bounds)
+                                   component.size, bounds)
             if tmp != empty_rectangle:
                 visible_components.append(component)
         return visible_components
@@ -117,7 +117,7 @@ class Container(Component):
     def _local_bounds(self, view_bounds):
         """ Return bounds transformed to local space. """
         # Check if we are visible
-        tmp = intersect_bounds(self.position + self.bounds, view_bounds)
+        tmp = intersect_bounds(self.position + self.size, view_bounds)
         if tmp == empty_rectangle:
             return empty_rectangle
         # Transform view_bounds transformed into our coordinate space.
@@ -129,9 +129,9 @@ class Container(Component):
         """Called by contained objects when their positions change"""
         self._position_changed()
 
-    def _component_bounds_changed(self):
-        """Called by contained objects when their bounds change"""
-        self._bounds_changed()
+    def _component_size_changed(self):
+        """Called by contained objects when their size change"""
+        self._size_changed()
 
     #------------------------------------------------------------------------
     # Property setters & getters
@@ -156,8 +156,8 @@ class Container(Component):
     # Event handling
     #------------------------------------------------------------------------
 
-    def _bounds_changed(self):
-        super(Container, self)._bounds_changed()
+    def _size_changed(self):
+        super(Container, self)._size_changed()
         self._layout_needed = True
 
     def get_event_transform(self, event=None):

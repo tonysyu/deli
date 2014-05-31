@@ -39,7 +39,7 @@ class _QtWindowHandler(object):
         self._enable_window.resized = (dx, dy)
 
         component.position = [0, 0]
-        component.bounds = [dx, dy]
+        component.size = [dx, dy]
 
     #------------------------------------------------------------------------
     # Qt Keyboard event handlers

@@ -75,9 +75,9 @@ class Component(CoordinateBox):
     def _screen_bbox_default(self):
         return BoundingBox.from_extents(self.x, self.y, self.x2, self.y2)
 
-    def _bounds_changed(self):
+    def _size_changed(self):
         if self.container is not None:
-            self.container._component_bounds_changed()
+            self.container._component_size_changed()
         self._update_bbox()
 
     def _position_changed(self):
@@ -112,7 +112,7 @@ class Component(CoordinateBox):
 
     def _do_layout(self):
         """ Called by do_layout() to do an actual layout call; it bypasses some
-        additional logic to handle null bounds and setting **_layout_needed**.
+        additional logic to handle null size and setting **_layout_needed**.
         """
         pass
 
@@ -153,7 +153,7 @@ class Component(CoordinateBox):
     def is_in(self, x, y):
         # A basic implementation of is_in(); subclasses should provide their
         # own if they are more accurate/faster/shinier.
-        width, height = self.bounds
+        width, height = self.size
         x_pos, y_pos = self.position
 
         return ((x >= x_pos) and (x < (x_pos + width)) and
@@ -178,13 +178,13 @@ class Component(CoordinateBox):
         ----------
         size : (width, height)
             Size at which to lay out the component; either or both values can
-            be 0. If it is None, then use `bounds` for layout
+            be 0. If it is None, then use `size` for layout
         force : Boolean
             If False, do layout only if `layout_needed` is True.
         """
         if self.layout_needed or force:
             if size is not None:
-                self.bounds = size
+                self.size = size
             self._do_layout()
             self._layout_needed = False
 
@@ -289,9 +289,9 @@ class Component(CoordinateBox):
     # Event handlers
     #------------------------------------------------------------------------
 
-    def _bounds_items_changed(self, event):
+    def _size_items_changed(self, event):
         if self.container is not None:
-            self.container._component_bounds_changed()
+            self.container._component_size_changed()
 
     def _container_changed(self, old, new):
         if new is None:
