@@ -42,7 +42,6 @@ class _ComponentEditor(Editor):
         editor.
         """
         self._window.component = self.value
-        return
 
     def _get_initial_size(self):
         """ Compute the initial size of the component.

@@ -8,12 +8,13 @@ from collections import deque
 from traits.api import (Any, Bool, Callable, Dict, Either, Instance, List,
                         Property)
 
-from ..layout.layout_helpers import expand_constraints
+from ..layout.layout_helpers import expand_constraints, vbox
 from ..layout.layout_manager import LayoutManager
 from ..layout.utils import add_symbolic_contents_constraints
 from ..utils.misc import new_item_name
 from .container import Container
 from .coordinate_box import CoordinateBox, get_from_constraints_namespace
+from deli.testing.debug import layout_info
 
 
 class ConstraintsContainer(Container):
@@ -21,8 +22,6 @@ class ConstraintsContainer(Container):
     constraints-based layout solver.
 
     """
-
-    bgcolor = 'none'
 
     # A read-only symbolic object that represents the left boundary of
     # the component
@@ -209,6 +208,9 @@ class ConstraintsContainer(Container):
         """
         super(ConstraintsContainer, self)._bounds_changed()
         self.refresh()
+
+    def _layout_constraints_default(self):
+        return lambda container: [vbox(*container._components)]
 
     def _layout_constraints_changed(self):
         """ Refresh the layout when the user constraints change.
