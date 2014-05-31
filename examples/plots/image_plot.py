@@ -1,6 +1,6 @@
 from skimage import data
 
-from deli.demo_utils import TraitsWindow
+from deli.demo_utils.traitsui import TraitsWindow
 from deli.graph import Graph
 from deli.plots.image_plot import ImagePlot
 

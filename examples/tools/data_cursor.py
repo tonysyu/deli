@@ -1,6 +1,6 @@
 import numpy as np
 
-from deli.demo_utils import TraitsWindow
+from deli.demo_utils.traitsui import TraitsWindow
 from deli.graph import Graph
 from deli.plots.line_plot import LinePlot
 from deli.tools.data_cursor_tool import DataCursorTool

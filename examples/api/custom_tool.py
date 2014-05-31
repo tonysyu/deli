@@ -2,7 +2,7 @@ from numpy import linspace
 
 from traits.api import Instance
 
-from deli.demo_utils import TraitsWindow
+from deli.demo_utils.traitsui import TraitsWindow
 from deli.graph import Graph
 from deli.plots.line_plot import LinePlot
 from deli.tools.base_tool import BaseTool, BaseToolState
@@ -46,7 +46,7 @@ class Demo(TraitsWindow):
 
     def setup_graph(self):
         graph = Graph()
-        graph.title.text = "Line Plot"
+        graph.title.text = "Hold shift-key to print coordinates"
 
         x = y = linspace(0, 1)
         plot = LinePlot(x_data=x, y_data=y)

@@ -1,7 +1,7 @@
 from numpy import linspace
 from scipy.special import jn
 
-from deli.demo_utils import TraitsWindow
+from deli.demo_utils.traitsui import TraitsWindow
 from deli.graph import Graph
 from deli.plots.line_plot import LinePlot
 
