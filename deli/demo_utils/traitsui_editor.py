@@ -1,18 +1,11 @@
-""" Defines a Traits editor for displaying an Enable component.
-"""
-#-------------------------------------------------------------------------------
-#  Written by: David C. Morrill
-#  Date: 01/26/2007
-#  (c) Copyright 2007 by Enthought, Inc.
-#----------------------------------------------------------------------------
-from enable.colors import ColorTrait
+from __future__ import absolute_import
 
+from enable.colors import ColorTrait
 from traits.api import Property, Tuple
 from traitsui.api import BasicEditorFactory
-
 from traitsui.qt4.editor import Editor
 
-from .window import Window
+from ..core.window import Window
 
 
 class _ComponentEditor(Editor):

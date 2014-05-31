@@ -5,10 +5,10 @@ from abc import abstractmethod
 from traits.api import ABCHasStrictTraits, Bool, Instance, Str, Tuple
 from traitsui.api import UItem, View
 
-from deli.core.component_editor import ComponentEditor
-from deli.graph import Graph
-from deli.tools.pan_tool import PanTool
-from deli.tools.zoom_tool import ZoomTool
+from .traitsui_editor import ComponentEditor
+from ..graph import Graph
+from ..tools.pan_tool import PanTool
+from ..tools.zoom_tool import ZoomTool
 
 
 WIDTH = 700
