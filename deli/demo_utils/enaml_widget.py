@@ -20,7 +20,6 @@ class EnamlWidget(RawWidget):
     #: Internal storage for the enable window
     _window = Typed(Window)
 
-
     #: Deli canvases expand freely in width and height by default
     hug_width = set_default('ignore')
     hug_height = set_default('ignore')
