@@ -80,9 +80,9 @@ class Component(CoordinateBox):
             self.container._component_size_changed()
         self._update_bbox()
 
-    def _position_changed(self):
+    def _origin_changed(self):
         if self.container is not None:
-            self.container._component_position_changed()
+            self.container._component_origin_changed()
         self._update_bbox()
 
     def _update_bbox(self):
@@ -154,7 +154,7 @@ class Component(CoordinateBox):
         # A basic implementation of is_in(); subclasses should provide their
         # own if they are more accurate/faster/shinier.
         width, height = self.size
-        x_pos, y_pos = self.position
+        x_pos, y_pos = self.origin
 
         return ((x >= x_pos) and (x < (x_pos + width)) and
                 (y >= y_pos) and (y < (y_pos + height)))
@@ -222,7 +222,7 @@ class Component(CoordinateBox):
         """ Draws the background layer of a component.
         """
         if self.bgcolor not in ("clear", "transparent", "none"):
-            rect = tuple(self.position) + (self.width-1, self.height-1)
+            rect = tuple(self.origin) + (self.width-1, self.height-1)
 
             with gc:
                 gc.set_antialias(False)
@@ -295,11 +295,11 @@ class Component(CoordinateBox):
 
     def _container_changed(self, old, new):
         if new is None:
-            self.position = [0, 0]
+            self.origin = [0, 0]
 
-    def _position_items_changed(self, *args):
+    def _origin_items_changed(self, *args):
         if self.container is not None:
-            self.container._component_position_changed()
+            self.container._component_origin_changed()
 
     def _visible_changed(self, old, new):
         if new:

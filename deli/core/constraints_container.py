@@ -133,7 +133,7 @@ class ConstraintsContainer(Container):
                 for offset_index, item in self._layout_table:
                     dx, dy = offset_table[offset_index]
                     nx, ny = item.left.value, item.bottom.value
-                    item.position = (nx - dx, ny - dy)
+                    item.origin = (nx - dx, ny - dy)
                     item.size = (item.layout_width.value,
                                  item.layout_height.value)
                     offset_table[running_index] = (nx, ny)

@@ -86,14 +86,14 @@ class Graph(Container):
     #--------------------------------------------------------------------------
 
     def _update_bbox(self):
-        """ Update bounding box when position or size change
+        """ Update bounding box when origin or size changes.
 
         Extend Container method to make sure the canvas is stretched to the
         desired size (based on the graph size and `margin`).
         """
         super(Graph, self)._update_bbox()
         self.canvas.size = (w - 2 * self.margin for w in self.size)
-        self.canvas.position = (self.margin, self.margin)
+        self.canvas.origin = (self.margin, self.margin)
 
     #------------------------------------------------------------------------
     # Private methods

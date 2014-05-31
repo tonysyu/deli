@@ -42,7 +42,7 @@ class BaseGrid(AbstractOverlay):
     # Public methods
     #------------------------------------------------------------------------
 
-    @on_trait_change("size,size_items,position,position_items")
+    @on_trait_change("size,size_items,origin,origin_items")
     def invalidate(self):
         """ Invalidate cached information about the grid.
         """
@@ -83,11 +83,11 @@ class BaseGrid(AbstractOverlay):
         with gc:
             self.line_artist.update_style(gc)
             gc.set_antialias(False)
-            gc.clip_to_rect(*(self.component.position + self.component.size))
+            gc.clip_to_rect(*(self.component.origin + self.component.size))
             self.line_artist.draw_segments(gc, self._line_starts,
                                                self._line_ends)
 
-    def _position_changed_for_component(self):
+    def _origin_changed_for_component(self):
         self.invalidate()
 
     def _size_changed_for_component(self):

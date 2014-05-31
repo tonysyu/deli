@@ -85,7 +85,7 @@ class Container(Component):
         visible_components = self._get_visible_components(view_bounds)
         if visible_components:
             with gc:
-                gc.translate_ctm(*self.position)
+                gc.translate_ctm(*self.origin)
                 for component in visible_components:
                     component.draw(gc, view_bounds)
 
@@ -98,7 +98,7 @@ class Container(Component):
         for component in self.components:
             if not component.visible:
                 continue
-            tmp = intersect_bounds(component.position +
+            tmp = intersect_bounds(component.origin +
                                    component.size, bounds)
             if tmp != empty_rectangle:
                 visible_components.append(component)
@@ -117,7 +117,7 @@ class Container(Component):
     def _local_bounds(self, view_bounds):
         """ Return bounds transformed to local space. """
         # Check if we are visible
-        tmp = intersect_bounds(self.position + self.size, view_bounds)
+        tmp = intersect_bounds(self.origin + self.size, view_bounds)
         if tmp == empty_rectangle:
             return empty_rectangle
         # Transform view_bounds transformed into our coordinate space.
@@ -125,9 +125,9 @@ class Container(Component):
         new_bounds = (x-self.x, y-self.y, width, height)
         return new_bounds
 
-    def _component_position_changed(self):
-        """Called by contained objects when their positions change"""
-        self._position_changed()
+    def _component_origin_changed(self):
+        """Called by contained objects when their origins change"""
+        self._origin_changed()
 
     def _component_size_changed(self):
         """Called by contained objects when their size change"""

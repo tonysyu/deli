@@ -38,7 +38,7 @@ class _QtWindowHandler(object):
 
         self._enable_window.resized = (dx, dy)
 
-        component.position = [0, 0]
+        component.origin = [0, 0]
         component.size = [dx, dy]
 
     #------------------------------------------------------------------------

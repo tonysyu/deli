@@ -58,7 +58,7 @@ class BaseAxis(AbstractOverlay):
 
     locus = Array
 
-    @on_trait_change('component.position')
+    @on_trait_change('component.origin')
     def _update_locus(self):
         self.tick_artist.locus = self.locus
     #------------------------------------------------------------------------
