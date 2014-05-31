@@ -1,11 +1,11 @@
 import numpy as np
 
-from deli.demo_utils import Window
+from deli.demo_utils import TraitsWindow
 from deli.graph import Graph
 from deli.plots.scatter_plot import ScatterPlot
 
 
-class Demo(Window):
+class Demo(TraitsWindow):
 
     def setup_graph(self):
         graph = Graph()

@@ -1,11 +1,11 @@
 from skimage import data
 
-from deli.demo_utils import Window
+from deli.demo_utils import TraitsWindow
 from deli.graph import Graph
 from deli.plots.image_plot import ImagePlot
 
 
-class Demo(Window):
+class Demo(TraitsWindow):
 
     def setup_graph(self):
         graph = Graph()

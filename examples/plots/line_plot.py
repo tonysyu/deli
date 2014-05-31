@@ -1,12 +1,12 @@
 from numpy import linspace
 from scipy.special import jn
 
-from deli.demo_utils import Window
+from deli.demo_utils import TraitsWindow
 from deli.graph import Graph
 from deli.plots.line_plot import LinePlot
 
 
-class Demo(Window):
+class Demo(TraitsWindow):
 
     def setup_graph(self):
         graph = Graph()

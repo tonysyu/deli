@@ -2,7 +2,7 @@ from numpy import linspace
 
 from traits.api import Instance
 
-from deli.demo_utils import Window
+from deli.demo_utils import TraitsWindow
 from deli.graph import Graph
 from deli.plots.line_plot import LinePlot
 from deli.tools.base_tool import BaseTool, BaseToolState
@@ -42,7 +42,7 @@ class PrintOnMove(BaseToolState):
             self.exit_state(event)
 
 
-class Demo(Window):
+class Demo(TraitsWindow):
 
     def setup_graph(self):
         graph = Graph()

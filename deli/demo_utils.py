@@ -13,7 +13,7 @@ WIDTH = 700
 HEIGHT = 500
 
 
-class Window(ABCHasStrictTraits):
+class TraitsWindow(ABCHasStrictTraits):
     """ A simple TraitsUI window for displaying a Graph """
 
     title = Str

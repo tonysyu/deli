@@ -1,12 +1,12 @@
 import numpy as np
 
-from deli.demo_utils import Window
+from deli.demo_utils import TraitsWindow
 from deli.graph import Graph
 from deli.plots.line_plot import LinePlot
 from deli.tools.data_cursor_tool import DataCursorTool
 
 
-class Demo(Window):
+class Demo(TraitsWindow):
 
     def setup_graph(self):
         x = np.linspace(0, 2 * np.pi)
