@@ -72,6 +72,9 @@ class BaseAxis(AbstractOverlay):
         if component is not None:
             self.component = component
 
+    def data_offset_to_label(self, data_offset):
+        return str(data_offset)
+
     #------------------------------------------------------------------------
     # Component and AbstractOverlay interface
     #------------------------------------------------------------------------
@@ -117,7 +120,8 @@ class BaseAxis(AbstractOverlay):
         xy_tick = self._get_tick_positions()
         for xy_screen, data_offset in zip(xy_tick, axial_offsets):
             gc.translate_ctm(*xy_screen)
-            self.tick_label_artist.draw(gc, str(data_offset))
+            label = self.data_offset_to_label(data_offset)
+            self.tick_label_artist.draw(gc, label)
             gc.translate_ctm(*(-xy_screen))
 
     #------------------------------------------------------------------------
