@@ -49,10 +49,11 @@ def serve_and_open(html, ip='127.0.0.1', port=8888, n_retries=50, debug=False):
         Run app in debug-mode. Note that this causes two tabs to open up.
     """
     port = find_open_port(ip, port, n_retries)
+    config = {'repeat': 3}
 
     @app.route('/')
     def server():
-        return render_template('base.html', content=html)
+        return render_template('base.html', config=config, content=html)
 
     open_browser(ip, port)
     app.run(host=ip, port=port, debug=debug)
