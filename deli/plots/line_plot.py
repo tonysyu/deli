@@ -19,10 +19,7 @@ class LinePlot(BasePointPlot):
     #------------------------------------------------------------------------
 
     def get_screen_points(self):
-        x = self.x_src.get_data()
-        y = self.y_src.get_data()
-        xy_points = np.column_stack((x, y))
-
+        xy_points = np.column_stack((self.x_data, self.y_data))
         return [self.data_to_screen.transform(xy_points)]
 
     #--------------------------------------------------------------------------

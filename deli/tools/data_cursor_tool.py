@@ -87,8 +87,8 @@ class DataCursorTool(BaseTool):
         self.overlay.label.text_color = choose_black_or_white(flag_color)
 
     def on_mouse_move(self, event):
-        x_data = self.component.x_src.get_data()
-        y_data = self.component.y_src.get_data()
+        x_data = self.component.x_data
+        y_data = self.component.y_data
 
         screen_to_data = self.component.screen_to_data.transform
         x_cursor, y_cursor = screen_to_data((event.x, event.y))

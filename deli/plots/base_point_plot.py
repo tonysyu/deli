@@ -1,9 +1,7 @@
 """ Defines the base class for XY plots.
 """
-from traits.api import CArray, Instance, Property, Range
+from traits.api import CArray, Range
 
-from ..abstract_data_source import AbstractDataSource
-from ..array_data_source import ArrayDataSource
 from .base_plot import BasePlot
 
 
@@ -20,17 +18,11 @@ class BasePointPlot(BasePlot):
     # Data-related traits
     #------------------------------------------------------------------------
 
-    #: The data source to use for the x coordinate.
-    x_src = Instance(ArrayDataSource)
+    #: The data for the x coordinate.
+    x_data = CArray
 
-    #: The data source to use as y points.
-    y_src = Instance(AbstractDataSource)
-
-    #: Convenience property for creating `x_src`.
-    x_data = Property(CArray)
-
-    #: Convenience property for creating `y_src`.
-    y_data = Property(CArray)
+    #: The data for the y coordinate.
+    y_data = CArray
 
     #------------------------------------------------------------------------
     # Appearance-related traits
@@ -54,16 +46,6 @@ class BasePointPlot(BasePlot):
     #--------------------------------------------------------------------------
 
     def _get_data_extents(self):
-        x = self.x_src.get_data()
-        y = self.y_src.get_data()
+        x = self.x_data
+        y = self.y_data
         return (x.min(), y.min(), x.max(), y.max())
-
-    #--------------------------------------------------------------------------
-    #  Traits definitions
-    #--------------------------------------------------------------------------
-
-    def _set_x_data(self, x):
-        self.x_src = ArrayDataSource(x)
-
-    def _set_y_data(self, y):
-        self.y_src = ArrayDataSource(y)
