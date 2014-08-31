@@ -2,7 +2,7 @@ from atom.api import Typed, observe, set_default
 from enaml.widgets.api import RawWidget
 from enaml.core.declarative import d_
 
-from ..core.window import Window
+from ..app.window import Window
 from ..core.component import Component
 
 

@@ -15,7 +15,7 @@ def _init_toolkit():
     backend = ETSConfig.kiva_backend
 
     # Import the selected backend
-    backend = 'deli.core.%s.%s' % (toolkit, backend)
+    backend = 'deli.app.%s.%s' % (toolkit, backend)
     try:
         __import__(backend)
     except (ImportError, SystemExit):

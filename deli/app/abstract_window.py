@@ -2,8 +2,8 @@ from enable.colors import ColorTrait
 from traits.api import (Any, Bool, Event, HasStrictTraits, Instance, Property,
                         Trait, Tuple)
 
-from .component import Component
-from .container import Container
+from ..core.component import Component
+from ..core.container import Container
 
 
 def Alias(name):

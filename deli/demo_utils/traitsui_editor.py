@@ -5,7 +5,7 @@ from traits.api import Property, Tuple
 from traitsui.api import BasicEditorFactory
 from traitsui.qt4.editor import Editor
 
-from ..core.window import Window
+from ..app.window import Window
 
 
 class _ComponentEditor(Editor):
