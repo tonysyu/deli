@@ -108,8 +108,7 @@ class Container(Component):
         """ Returns True if it is appropriate for the container to lay out
         the component; False if not.
         """
-        if not component or \
-            (not component.visible and not component.invisible_layout):
+        if not component or not component.visible:
             return False
         else:
             return True

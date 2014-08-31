@@ -98,9 +98,6 @@ class Component(CoordinateBox):
     # Is the component visible?
     visible = Bool(True)
 
-    # Does the component use space in the layout even if it is not visible?
-    invisible_layout = Bool(False)
-
     # A read-only property that returns True if this component needs layout.
     layout_needed = Property
 
@@ -189,7 +186,7 @@ class Component(CoordinateBox):
             self._layout_needed = False
 
         for layer in chain(self.underlays, self.overlays):
-            if layer.visible or layer.invisible_layout:
+            if layer.visible:
                 layer.do_layout()
 
     def get_preferred_size(self):
