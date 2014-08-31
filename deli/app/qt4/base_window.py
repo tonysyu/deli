@@ -205,7 +205,7 @@ class _Window(AbstractWindow):
             # Convert the keypress to a standard enable key if possible, otherwise
             # to text.
             key_code = event.key()
-            key = KEY_MAP.get(key_code)    
+            key = KEY_MAP.get(key_code)
             if key is None:
                 key = unichr(key_code).lower()
 
