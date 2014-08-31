@@ -2,19 +2,20 @@ from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from uuid import uuid4
 
-from casuarius import ConstraintVariable, LinearSymbolic, LinearConstraint
+from kiwisolver import Variable, Constraint
+
 from traits.api import HasTraits, Instance, Range
 
 from .ab_constrainable import ABConstrainable
 from .constraints_namespace import ConstraintsNamespace
 from .geometry import Box
+from .linear_symbolic import LinearSymbolic
 from .utils import add_symbolic_constraints, STRENGTHS
 
 
 #------------------------------------------------------------------------------
 # Default Spacing
 #------------------------------------------------------------------------------
-
 class DefaultSpacing(HasTraits):
     """ A class which encapsulates the default spacing parameters for
     the various layout helper objects.
@@ -37,7 +38,6 @@ DefaultSpacing = DefaultSpacing()
 #------------------------------------------------------------------------------
 # Helper Functions
 #------------------------------------------------------------------------------
-
 def expand_constraints(component, constraints):
     """ A function which expands any DeferredConstraints in the provided
     list. This is a generator function which yields the flattened stream
@@ -49,6 +49,7 @@ def expand_constraints(component, constraints):
         The constrainable component with which the constraints are
         associated. This will be passed to the .get_constraints()
         method of any DeferredConstraint instance.
+
     constraints : list
         The list of constraints.
 
@@ -64,7 +65,7 @@ def expand_constraints(component, constraints):
                 if item is not None:
                     yield item
         else:
-            if cn is not None and isinstance(cn, LinearConstraint):
+            if cn is not None and isinstance(cn, Constraint):
                 yield cn
 
 
@@ -79,7 +80,6 @@ def is_spacer(item):
 #------------------------------------------------------------------------------
 # Deferred Constraints
 #------------------------------------------------------------------------------
-
 class DeferredConstraints(object):
     """ Abstract base class for objects that will yield lists of
     constraints upon request.
@@ -91,11 +91,9 @@ class DeferredConstraints(object):
         """ Initialize a DeferredConstraints instance.
 
         """
-        # __or__() will set these default strength and weight. If
-        # provided, they will be combined with the constraints created
-        # by this instance.
+        # __or__() will set the default_strength. If provided, it will be
+        # combined with the constraints created by this instance.
         self.default_strength = None
-        self.default_weight = None
 
     def __or__(self, other):
         """ Set the strength of all of the constraints to a common
@@ -103,13 +101,13 @@ class DeferredConstraints(object):
 
         """
         if isinstance(other, (float, int, long)):
-            self.default_weight = float(other)
+            self.default_string = float(other)
         elif isinstance(other, basestring):
             if other not in STRENGTHS:
                 raise ValueError('Invalid strength %r' % other)
             self.default_strength = other
         else:
-            msg = 'Strength must be a string. Got %s instead.'
+            msg = 'Strength must be a string or number. Got %s instead.'
             raise TypeError(msg % type(other))
         return self
 
@@ -122,7 +120,7 @@ class DeferredConstraints(object):
             return self
 
     def get_constraints(self, component):
-        """ Returns a list of weighted LinearConstraints.
+        """ Returns a list of constraints.
 
         Parameters
         ----------
@@ -133,18 +131,15 @@ class DeferredConstraints(object):
 
         Returns
         -------
-        result : list of LinearConstraints
-            The list of LinearConstraint objects which have been
-            weighted by any provided strengths and weights.
+        result : list of Constraints
+            The list of Constraint objects which have been
+            weighted by any provided strengths.
 
         """
         cn_list = self._get_constraints(component)
         strength = self.default_strength
         if strength is not None:
             cn_list = [cn | strength for cn in cn_list]
-        weight = self.default_weight
-        if weight is not None:
-            cn_list = [cn | weight for cn in cn_list]
         return cn_list
 
     @abstractmethod
@@ -177,7 +172,6 @@ class DeferredConstraints(object):
 #------------------------------------------------------------------------------
 # Deferred Constraints Implementations
 #------------------------------------------------------------------------------
-
 class DeferredConstraintsFunction(DeferredConstraints):
     """ A concrete implementation of DeferredConstraints which will
     call a function to get the constraint list upon request.
@@ -190,10 +184,13 @@ class DeferredConstraintsFunction(DeferredConstraints):
         ----------
         func : callable
             A callable object which will return the list of constraints.
+
         *args
             The arguments to pass to 'func'.
+
         **kwds
             The keyword arguments to pass to 'func'.
+
         """
         super(DeferredConstraintsFunction, self).__init__()
         self.func = func
@@ -221,8 +218,10 @@ class AbutmentHelper(DeferredConstraints):
         orientation
             A string which is either 'horizontal' or 'vertical' which
             indicates the abutment orientation.
+
         *items
             The components to abut in the given orientation.
+
         **config
             Configuration options for how this helper should behave.
             The following options are currently supported:
@@ -271,8 +270,10 @@ class AlignmentHelper(DeferredConstraints):
         anchor
             A string which is either 'left', 'right', 'top', 'bottom',
             'v_center', or 'h_center'.
+
         *items
             The components to align on the given anchor.
+
         **config
             Configuration options for how this helper should behave.
             The following options are currently supported:
@@ -375,8 +376,10 @@ class LinearBoxHelper(BoxHelper):
         orientation : str
             The layout orientation of the box. This must be either
             'horizontal' or 'vertical'.
+
         *items
             The components to align on the given anchor.
+
         **config
             Configuration options for how this helper should behave.
             The following options are currently supported:
@@ -504,8 +507,10 @@ class _GridCell(object):
         ----------
         item : object
             The item contained in the cell.
+
         row : int
             The row index of the cell.
+
         col : int
             The column index of the cell.
 
@@ -539,6 +544,7 @@ class GridHelper(BoxHelper):
             The rows to layout in the grid. A row must be composed of
             constrainable objects and None. An item will be expanded
             to span all of the cells in which it appears.
+
         **config
             Configuration options for how this helper should behave.
             The following options are currently supported:
@@ -548,19 +554,23 @@ class GridHelper(BoxHelper):
                 a item. If given, it is used to add constraints on the
                 alignment of items in a row. The constraints will only
                 be applied to items that do not span rows.
+
             row_spacing
                 An integer >= 0 which indicates how many pixels of
                 space should be placed between rows in the grid. The
                 default is the value of DefaultSpacing.ABUTMENT.
+
             column_align
                 A string which is the name of a constraint variable on
                 a item. If given, it is used to add constraints on the
                 alignment of items in a column. The constraints will
                 only be applied to items that do not span columns.
+
             column_spacing
                 An integer >= 0 which indicates how many pixels of
                 space should be placed between columns in the grid.
                 The default is the value of DefaultSpacing.ABUTMENT.
+
             margins
                 A int, tuple of ints, or Box of ints >= 0 which
                 indicate how many pixels of margin to add around
@@ -641,12 +651,12 @@ class GridHelper(BoxHelper):
         cn_id = self.constraints_id
         for idx in xrange(num_rows + 1):
             name = 'row' + str(idx)
-            var = ConstraintVariable('{0}|{1}'.format(cn_id, name))
+            var = Variable('{0}|{1}'.format(cn_id, name))
             row_vars.append(var)
             constraints.append(var >= 0)
         for idx in xrange(num_cols + 1):
             name = 'col' + str(idx)
-            var = ConstraintVariable('{0}|{1}'.format(cn_id, name))
+            var = Variable('{0}|{1}'.format(cn_id, name))
             col_vars.append(var)
             constraints.append(var >= 0)
 
@@ -810,8 +820,10 @@ class BaseConstraintFactory(AbstractConstraintFactory):
         ----------
         first_anchor : LinearSymbolic
             A symbolic object that can be used in a constraint expression.
+
         spacer : Spacer
             A spacer instance to put space between the items.
+
         second_anchor : LinearSymbolic
             The second anchor for the constraint expression.
 
@@ -851,12 +863,15 @@ class SequenceConstraintFactory(BaseConstraintFactory):
             A valid sequence of constrainable objects. These inclue
             instances of Constrainable, LinearSymbolic, Spacer,
             and int.
+
         first_anchor_name : string
             The name of the anchor on the first item in a constraint
             pair.
+
         second_anchor_name : string
             The name of the anchor on the second item in a constraint
             pair.
+
         spacing : int
             The spacing to use between items if no spacing is explicitly
             provided by in the sequence of items.
@@ -967,9 +982,11 @@ class AbutmentConstraintFactory(SequenceConstraintFactory):
             A valid sequence of constrainable objects. These inclue
             instances of Constrainable, LinearSymbolic, Spacer,
             and int.
+
         orientation : string
             Either 'vertical' or 'horizontal', which represents the
             orientation in which to abut the items.
+
         spacing : int
             The spacing to use between items if no spacing is explicitly
             provided by in the sequence of items.
@@ -1019,10 +1036,12 @@ class AlignmentConstraintFactory(SequenceConstraintFactory):
             A valid sequence of constrainable objects. These inclue
             instances of Constrainable, LinearSymbolic, Spacer,
             and int.
+
         anchor_name : string
             The name of the anchor on the components which should be
             aligned. Either 'left', 'right', 'top', 'bottom', 'v_center',
             or 'h_center'.
+
         spacing : int
             The spacing to use between items if no spacing is explicitly
             provided by in the sequence of items.
@@ -1054,10 +1073,9 @@ class Spacer(object):
     """
     __metaclass__ = ABCMeta
 
-    def __init__(self, amt, strength=None, weight=None):
+    def __init__(self, amt, strength=None):
         self.amt = max(0, amt)
         self.strength = strength
-        self.weight = weight
 
     def when(self, switch):
         """ A simple method that can be used to switch off the generated
@@ -1069,16 +1087,13 @@ class Spacer(object):
 
     def constrain(self, first_anchor, second_anchor):
         """ Returns the list of generated constraints appropriately
-        weighted by the default strength and weight, if provided.
+        weighted by the default strength, if provided.
 
         """
         constraints = self._constrain(first_anchor, second_anchor)
         strength = self.strength
         if strength is not None:
             constraints = [cn | strength for cn in constraints]
-        weight = self.weight
-        if weight is not None:
-            constraints = [cn | weight for cn in constraints]
         return constraints
 
     @abstractmethod
@@ -1136,12 +1151,10 @@ class FlexSpacer(Spacer):
     a weaker preference for being that minimum.
 
     """
-    def __init__(self, amt, min_strength='required', min_weight=1.0, eq_strength='medium', eq_weight=1.25):
+    def __init__(self, amt, min_strength='required', eq_strength='medium'):
         self.amt = max(0, amt)
         self.min_strength = min_strength
-        self.min_weight = min_weight
         self.eq_strength = eq_strength
-        self.eq_weight = eq_weight
 
     def constrain(self, first_anchor, second_anchor):
         """ Return list of LinearConstraint objects that are appropriate to
@@ -1157,8 +1170,8 @@ class FlexSpacer(Spacer):
 
         """
         return [
-            ((first_anchor + self.amt) <= second_anchor) | self.min_strength | self.min_weight,
-            ((first_anchor + self.amt) == second_anchor) | self.eq_strength | self.eq_weight,
+            ((first_anchor + self.amt) <= second_anchor) | self.min_strength,
+            ((first_anchor + self.amt) == second_anchor) | self.eq_strength,
         ]
 
 
@@ -1173,23 +1186,23 @@ class LayoutSpacer(Spacer):
     def __eq__(self, other):
         if not isinstance(other, int):
             raise TypeError('space can only be created from ints')
-        return EqSpacer(other, self.strength, self.weight)
+        return EqSpacer(other, self.strength)
 
     def __le__(self, other):
         if not isinstance(other, int):
             raise TypeError('space can only be created from ints')
-        return LeSpacer(other, self.strength, self.weight)
+        return LeSpacer(other, self.strength)
 
     def __ge__(self, other):
         if not isinstance(other, int):
             raise TypeError('space can only be created from ints')
-        return GeSpacer(other, self.strength, self.weight)
+        return GeSpacer(other, self.strength)
 
     def _constrain(self, first_anchor, second_anchor):
         """ Returns a greater than or equal to spacing constraint.
 
         """
-        spacer = GeSpacer(self.amt, self.strength, self.weight)
+        spacer = GeSpacer(self.amt, self.strength)
         return spacer._constrain(first_anchor, second_anchor)
 
     def flex(self, **kwargs):
@@ -1202,7 +1215,6 @@ class LayoutSpacer(Spacer):
 #------------------------------------------------------------------------------
 # Layout Helper Functions and Objects
 #------------------------------------------------------------------------------
-
 def horizontal(*items, **config):
     """ Create a DeferredConstraints object composed of horizontal
     abutments for the given sequence of items.
@@ -1252,4 +1264,3 @@ def grid(*rows, **config):
 
 
 spacer = LayoutSpacer(DefaultSpacing.ABUTMENT)
-

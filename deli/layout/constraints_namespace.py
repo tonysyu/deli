@@ -1,4 +1,6 @@
-from casuarius import ConstraintVariable, LinearSymbolic
+from kiwisolver import Variable as ConstraintsVariable
+
+from .linear_symbolic import LinearSymbolic
 
 
 class ConstraintsNamespace(object):
@@ -44,7 +46,7 @@ class ConstraintsNamespace(object):
             res = constraints[name]
         else:
             label = '{0}|{1}|{2}'.format(self._name, self._owner, name)
-            res = constraints[name] = ConstraintVariable(label)
+            res = constraints[name] = ConstraintsVariable(label)
         return res
 
     def __setattr__(self, name, value):

@@ -14,7 +14,6 @@ from ..layout.utils import add_symbolic_contents_constraints
 from ..utils.misc import new_item_name
 from .container import Container
 from .coordinate_box import CoordinateBox, get_from_constraints_namespace
-from deli.testing.debug import layout_info
 
 
 class ConstraintsContainer(Container):
@@ -132,10 +131,10 @@ class ConstraintsContainer(Container):
                 running_index = 1
                 for offset_index, item in self._layout_table:
                     dx, dy = offset_table[offset_index]
-                    nx, ny = item.left.value, item.bottom.value
+                    nx, ny = item.left.value(), item.bottom.value()
                     item.origin = (nx - dx, ny - dy)
-                    item.size = (item.layout_width.value,
-                                 item.layout_height.value)
+                    item.size = (item.layout_width.value(),
+                                 item.layout_height.value())
                     offset_table[running_index] = (nx, ny)
                     running_index += 1
             mgr_layout(layout, width_var, height_var, (width, height))
