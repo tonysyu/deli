@@ -19,5 +19,4 @@ class ScatterPlot(BasePointPlot):
     def _render(self, gc, points, selected_points=None):
         with gc:
             gc.clip_to_rect(*self.screen_bbox.bounds)
-            self.marker.update_style(gc)
             self.marker.draw(gc, points)

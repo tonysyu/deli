@@ -51,5 +51,6 @@ class MarkerArtist(HasStrictTraits):
             return
 
         with gc:
+            self.update_style(gc)
             gc.draw_marker_at_points(points, self.size,
                                      self._marker.kiva_marker)

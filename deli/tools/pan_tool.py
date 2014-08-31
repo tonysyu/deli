@@ -1,5 +1,5 @@
 import numpy as np
-from traits.api import CArray, Either
+from traits.api import CArray
 
 from .base_tool import BaseTool, BaseToolState
 
@@ -15,7 +15,7 @@ class PanTool(BaseTool):
 
 class DraggingState(BaseToolState):
 
-    _last_position = Either(None, CArray)
+    _last_position = CArray
 
     def on_enter(self, event):
         self._last_position = np.array((event.x, event.y))
@@ -35,5 +35,5 @@ class DraggingState(BaseToolState):
         self.component.request_redraw()
 
     def on_left_up(self, event):
-        self._last_position = None
+        self._last_position = ()
         self.exit_state(event)

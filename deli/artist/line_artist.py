@@ -38,9 +38,11 @@ class LineArtist(HasStrictTraits):
         points : array, shape (N, 2)
             Draw a line through a series of (x, y) points.
         """
-        gc.begin_path()
-        gc.lines(points)
-        gc.stroke_path()
+        with gc:
+            self.update_style(gc)
+            gc.begin_path()
+            gc.lines(points)
+            gc.stroke_path()
 
     def draw_segments(self, gc, starts, ends):
         """ Draw a series of straight line segments between points.
@@ -57,6 +59,8 @@ class LineArtist(HasStrictTraits):
         starts = np.atleast_2d(starts)
         ends = np.atleast_2d(ends)
 
-        gc.begin_path()
-        gc.line_set(starts, ends)
-        gc.stroke_path()
+        with gc:
+            self.update_style(gc)
+            gc.begin_path()
+            gc.line_set(starts, ends)
+            gc.stroke_path()

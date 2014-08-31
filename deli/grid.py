@@ -81,7 +81,6 @@ class BaseGrid(AbstractOverlay):
         Component.
         """
         with gc:
-            self.line_artist.update_style(gc)
             gc.set_antialias(False)
             gc.clip_to_rect(*(self.component.origin + self.component.size))
             self.line_artist.draw_segments(gc, self._line_starts,

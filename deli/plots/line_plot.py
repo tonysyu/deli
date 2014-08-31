@@ -19,7 +19,6 @@ class LinePlot(BasePointPlot):
     def _render(self, gc, points, selected_points=None):
         with gc:
             gc.clip_to_rect(*self.screen_bbox.bounds)
-            self.line.update_style(gc)
             self.line.draw(gc, points)
 
     def _color_changed(self):

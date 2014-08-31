@@ -104,13 +104,11 @@ class BaseAxis(AbstractOverlay):
     def _draw_axis_line(self, gc):
         """ Draws the line for the axis. """
         xy_axis_min, xy_axis_max = self._compute_xy_end_points()
-        self.line_artist.update_style(gc)
         self.line_artist.draw_segments(gc, xy_axis_min, xy_axis_max)
 
     def _draw_ticks(self, gc):
         """ Draws the tick marks for the axis.
         """
-        self.tick_artist.update_style(gc)
         self.tick_artist.draw(gc, self.tick_grid.axial_offsets)
 
     def _draw_labels(self, gc):
