@@ -1,5 +1,7 @@
 """ Defines the base class for XY plots.
 """
+import numpy as np
+
 from traits.api import CArray, Range
 
 from .base_plot import BasePlot
@@ -44,6 +46,10 @@ class BasePointPlot(BasePlot):
     #--------------------------------------------------------------------------
     #  BasePlot interface
     #--------------------------------------------------------------------------
+
+    def get_screen_points(self):
+        xy_points = np.column_stack((self.x_data, self.y_data))
+        return self.data_to_screen.transform(xy_points)
 
     def _get_data_extents(self):
         x = self.x_data

@@ -1,5 +1,3 @@
-import numpy as np
-
 from traits.api import DelegatesTo, Instance
 
 from ..artist.marker_artist import MarkerArtist
@@ -13,14 +11,6 @@ class ScatterPlot(BasePointPlot):
     color = DelegatesTo('marker')
 
     marker = Instance(MarkerArtist, ())
-
-    #------------------------------------------------------------------------
-    #  Public interface
-    #------------------------------------------------------------------------
-
-    def get_screen_points(self):
-        xy_points = np.column_stack((self.x_data, self.y_data))
-        return self.data_to_screen.transform(xy_points)
 
     #--------------------------------------------------------------------------
     #  Private interface

@@ -1,15 +1,9 @@
-from enable.api import ColorTrait
-from traits.api import HasStrictTraits
-
-from ..style import config
+from .base_patch_artist import BasePatchArtist
 
 
-class PolygonArtist(HasStrictTraits):
+class PolygonArtist(BasePatchArtist):
     """ A Flyweight object for drawing filled polygons.
     """
-
-    fill_color = ColorTrait(config.get('polygon.fill_color'))
-    edge_color = ColorTrait(config.get('polygon.edge_color'))
 
     def draw(self, gc, vertices):
         with gc:
