@@ -41,9 +41,16 @@ class MockWindow(ABCHasStrictTraits):
         context.get_full_text_extent.side_effect = calculate_text_extent
         return context
 
-    def show(self):
+    def _setup(self):
         self.setup_graph()
-        bounds = self.origin + self.size
         self.graph.origin = self.origin
         self.graph.size = self.size
+
+    def show(self):
+        self._setup()
+        bounds = self.origin + self.size
         self.graph.draw(self.context, view_bounds=bounds)
+
+    def serialize(self):
+        self._setup()
+        return self.graph.serialize()

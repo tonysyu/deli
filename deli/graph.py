@@ -13,6 +13,8 @@ class Graph(Container):
     screen region.
     """
 
+    label = 'graph'
+
     # The primary container for plot data.
     canvas = Instance(Canvas)
 
@@ -48,6 +50,19 @@ class Graph(Container):
 
     def add_plot(self, plot, name=None):
         self.canvas.add_plot(plot, name=name)
+
+    def serialize_shallow(self):
+        return {self.label: {}}
+
+    def serialize(self):
+        children = ('canvas', 'title', 'x_axis', 'y_axis', 'x_grid', 'y_grid')
+        serialized_children = {child: getattr(self, child).serialize()
+                               for child in children}
+        serialized_values = self.serialize_shallow()
+        values = serialized_values[self.label]
+        assert len(set(values).intersection(serialized_children)) == 0
+        serialized_values[self.label].update(serialized_children)
+        return serialized_values
 
     #--------------------------------------------------------------------------
     #  Bounding box

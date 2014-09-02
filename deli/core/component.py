@@ -162,6 +162,9 @@ class Component(CoordinateBox):
         delete any transient state it may have (such as backbuffers)."""
         pass
 
+    def serialize(self):
+        return {}
+
     #------------------------------------------------------------------------
     # Layout-related concrete methods
     #------------------------------------------------------------------------
