@@ -55,7 +55,10 @@ class Demo(HasStrictTraits):
         graph.add_plot(plot)
         return graph
 
+    def show(self):
+        self.configure_traits()
+
 
 if __name__ == "__main__":
     demo = Demo()
-    demo.configure_traits()
+    demo.show()

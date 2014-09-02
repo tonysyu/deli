@@ -42,3 +42,6 @@ class TraitsWindow(ABCHasStrictTraits):
             ZoomTool.attach_to(graph.canvas)
             PanTool.attach_to(graph.canvas)
         return graph
+
+    def show(self):
+        self.configure_traits()

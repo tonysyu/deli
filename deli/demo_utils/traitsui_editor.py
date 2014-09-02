@@ -62,7 +62,7 @@ class _ComponentEditor(Editor):
 
 
 class ComponentEditor(BasicEditorFactory):
-    """ wxPython editor factory for Enable components.
+    """ Editor factory for deli components.
     """
     #---------------------------------------------------------------------------
     #  Trait definitions:
@@ -74,7 +74,7 @@ class ComponentEditor(BasicEditorFactory):
     # The background color for the window
     bgcolor = ColorTrait('sys_window')
 
-    # The default size of the Window wrapping this Enable component
+    # The default size of the Window wrapping this component
     size = Tuple((400,400))
 
     # Convenience function for accessing the width

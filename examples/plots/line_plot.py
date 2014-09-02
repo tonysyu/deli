@@ -23,4 +23,4 @@ class Demo(TraitsWindow):
 
 if __name__ == '__main__':
     demo = Demo()
-    demo.configure_traits()
+    demo.show()

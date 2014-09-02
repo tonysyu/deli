@@ -25,7 +25,10 @@ class Demo(HasStrictTraits):
         figure.add(a, b)
         return figure
 
+    def show(self):
+        self.configure_traits()
+
 
 if __name__ == "__main__":
     demo = Demo()
-    demo.configure_traits()
+    demo.show()
