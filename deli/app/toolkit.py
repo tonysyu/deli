@@ -13,7 +13,6 @@ def _init_toolkit():
 
     # Import the selected backend
     backend = 'deli.app.{}'.format(backend_path)
-    print backend
     try:
         __import__(backend)
     except (ImportError, SystemExit):

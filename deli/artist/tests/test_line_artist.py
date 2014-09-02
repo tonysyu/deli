@@ -7,18 +7,6 @@ from deli.artist.line_artist import LineArtist
 POINTS = np.arange(10).reshape(5, 2)
 
 
-class MockContext(object):
-
-    def begin_path(self):
-        pass
-
-    def lines(self, points):
-        pass
-
-    def stroke_path(self):
-        pass
-
-
 def test_draw():
     artist = LineArtist()
     context = MagicMock()
