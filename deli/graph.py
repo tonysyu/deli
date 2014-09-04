@@ -6,14 +6,13 @@ from .core.container import Container
 from .grid import BaseGrid, XGrid, YGrid
 from .plot_label import PlotLabel
 from .style import config
+from .utils.serialization import iter_attrs
 
 
 class Graph(Container):
     """ Represents a correlated set of data, plots, and axes in a single
     screen region.
     """
-
-    label = 'graph'
 
     # The primary container for plot data.
     canvas = Instance(Canvas)
@@ -51,22 +50,13 @@ class Graph(Container):
     def add_plot(self, plot, name=None):
         self.canvas.add_plot(plot, name=name)
 
-    def serialize_shallow(self):
-        return {self.label: {}}
+    #--------------------------------------------------------------------------
+    # Serialization interface
+    #--------------------------------------------------------------------------
 
-    def serialize(self):
+    def _iter_children(self):
         children = ('canvas', 'title', 'x_axis', 'y_axis', 'x_grid', 'y_grid')
-        serialized_children = {child: getattr(self, child).serialize()
-                               for child in children}
-        serialized_values = self.serialize_shallow()
-        values = serialized_values[self.label]
-        assert len(set(values).intersection(serialized_children)) == 0
-        serialized_values[self.label].update(serialized_children)
-        return serialized_values
-
-    #--------------------------------------------------------------------------
-    #  Bounding box
-    #--------------------------------------------------------------------------
+        return iter_attrs(self, children)
 
     #-------------------------------------------------------------------------
     # Event handlers

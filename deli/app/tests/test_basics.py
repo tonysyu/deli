@@ -31,4 +31,8 @@ def test_draw():
 def test_serialize():
     demo = Demo()
     output = demo.serialize()
-    assert 'graph' in output
+
+    assert 'Graph' in output
+    graph_dict = output['Graph']
+
+    assert 'Canvas' in graph_dict

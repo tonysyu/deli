@@ -40,6 +40,9 @@ class Component(CoordinateBox):
     # The element ID of this component.
     id = Str
 
+    # Name of the class or protocol for this component. Defaults to class name.
+    label = Str
+
     #------------------------------------------------------------------------
     # Components and containers
     #------------------------------------------------------------------------
@@ -162,7 +165,34 @@ class Component(CoordinateBox):
         delete any transient state it may have (such as backbuffers)."""
         pass
 
+    #--------------------------------------------------------------------------
+    # Serialization interface
+    #--------------------------------------------------------------------------
+
     def serialize(self):
+        """Return serialized attributes for this class.
+        """
+        serialized_children = self._serialize_children()
+        serialized_values = self.serialize_shallow()
+        values = serialized_values[self.label]
+
+        assert len(set(values).intersection(serialized_children)) == 0
+        serialized_values[self.label].update(serialized_children)
+
+        return serialized_values
+
+    def serialize_shallow(self):
+        """Return serialized attributes for this class, not including children.
+        """
+        return {self.label: {}}
+
+    def _iter_children(self):
+        """Yield child objects for serialization."""
+        return ()
+
+    def _serialize_children(self):
+        for child in self._iter_children():
+            return {child.label: child.serialize()}
         return {}
 
     #------------------------------------------------------------------------
@@ -286,7 +316,7 @@ class Component(CoordinateBox):
         self.request_redraw()
 
     #------------------------------------------------------------------------
-    # Event handlers
+    # Traits methods
     #------------------------------------------------------------------------
 
     def _size_items_changed(self, event):
@@ -307,3 +337,6 @@ class Component(CoordinateBox):
 
     def _set_window(self, win):
         self._window = win
+
+    def _label_default(self):
+        return self.__class__.__name__
