@@ -1,12 +1,13 @@
 import numpy as np
 
 from enable.api import ColorTrait, LineStyle
-from traits.api import CFloat, HasStrictTraits, Range
+from traits.api import CFloat, Range
 
 from ..style import config
+from .base_artist import BaseArtist
 
 
-class LineArtist(HasStrictTraits):
+class LineArtist(BaseArtist):
     """ A Flyweight object for drawing lines.
     """
 

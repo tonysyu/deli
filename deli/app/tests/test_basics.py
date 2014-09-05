@@ -33,6 +33,9 @@ def test_serialize():
     output = demo.serialize()
 
     assert 'Graph' in output
-    graph_dict = output['Graph']
+    graph_attrs = output['Graph']
 
-    assert 'Canvas' in graph_dict
+    assert 'Canvas' in graph_attrs
+    canvas_attrs = graph_attrs['Canvas']
+
+    assert 'LinePlot' in canvas_attrs

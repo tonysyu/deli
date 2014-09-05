@@ -1,10 +1,13 @@
 """ Defines the base class for XY plots.
 """
+from itertools import chain
+
 from traits.api import Instance, Property, Tuple
 
 from ..core.component import Component
 from ..layout.bounding_box import BoundingBox
 from ..layout.bbox_transform import BboxTransform
+from ..utils.serialization import iter_attrs
 
 
 class BasePlot(Component):
@@ -24,6 +27,9 @@ class BasePlot(Component):
 
     #: The extents of the data (x_min, y_min, x_max, y_max)
     data_extents = Property(Tuple)
+
+    #: Artists associated with this plot.
+    artists = Property(Tuple)
 
     #: Bounding box for data in the plot graph. Note that this bounding box
     #: does not just describe the data in this plot; it's the currently
@@ -50,3 +56,10 @@ class BasePlot(Component):
     def _get_data_extents(self):
         msg = "`BasePlot` subclasses must implement `_get_data_extents`"
         raise NotImplementedError(msg)
+
+    #--------------------------------------------------------------------------
+    # Serialization interface
+    #--------------------------------------------------------------------------
+
+    def _iter_children(self):
+        return chain(iter_attrs(self, ['data_extents']), self.artists)

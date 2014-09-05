@@ -7,6 +7,7 @@ from traits.api import Any, Bool, Instance, List, Property, Str, WeakRef
 
 from ..layout.bounding_box import BoundingBox
 from .coordinate_box import CoordinateBox
+from .serializable_mixin import SerializableMixin
 
 
 DRAWING_ORDER = ['background', 'underlay', 'plot', 'overlay']
@@ -19,7 +20,7 @@ class NullDispatch(object):
         pass
 
 
-class Component(CoordinateBox):
+class Component(CoordinateBox, SerializableMixin):
     """ Component is the base class for most objects.
 
     This represents a general component of a composite structure [GoF]_, but,
@@ -164,36 +165,6 @@ class Component(CoordinateBox):
         cleanup is called on the component to give it the opportunity to
         delete any transient state it may have (such as backbuffers)."""
         pass
-
-    #--------------------------------------------------------------------------
-    # Serialization interface
-    #--------------------------------------------------------------------------
-
-    def serialize(self):
-        """Return serialized attributes for this class.
-        """
-        serialized_children = self._serialize_children()
-        serialized_values = self.serialize_shallow()
-        values = serialized_values[self.label]
-
-        assert len(set(values).intersection(serialized_children)) == 0
-        serialized_values[self.label].update(serialized_children)
-
-        return serialized_values
-
-    def serialize_shallow(self):
-        """Return serialized attributes for this class, not including children.
-        """
-        return {self.label: {}}
-
-    def _iter_children(self):
-        """Yield child objects for serialization."""
-        return ()
-
-    def _serialize_children(self):
-        for child in self._iter_children():
-            return {child.label: child.serialize()}
-        return {}
 
     #------------------------------------------------------------------------
     # Layout-related concrete methods

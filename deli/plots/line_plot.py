@@ -23,3 +23,6 @@ class LinePlot(BasePointPlot):
 
     def _color_changed(self):
         self.request_redraw()
+
+    def _get_artists(self):
+        return (self.line,)
