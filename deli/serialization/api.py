@@ -7,7 +7,6 @@ def register_default_serializers(manager):
         module = import_module(mod_name, package='deli.serialization')
         module.register_serializers(manager)
 
-
 serialization_manager = SerializationManager()
 register_default_serializers(serialization_manager)
 

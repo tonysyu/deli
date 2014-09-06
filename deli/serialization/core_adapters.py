@@ -1,22 +1,24 @@
 from ..core.component import Component
 from ..canvas import Canvas
 from ..graph import Graph
-from .default_adapter import (DefaultSerializationAdapter,
-                              create_simple_serialization_adapter)
-from . import utils
+from .default_adapter import (DefaultAdapter,
+                              create_simple_adapter)
 
 
-GraphSerializationAdapter = create_simple_serialization_adapter(['canvas'])
+class DictAdapter(DefaultAdapter):
+
+    def serialize(self, handler):
+        dict_obj = self.adaptee
+        return {key: handler.serialize(value)
+                for key, value in dict_obj.iteritems()}
 
 
-class CanvasSerializationAdapter(DefaultSerializationAdapter):
-
-    def _serialize_hook(self, handler):
-        canvas = self.adaptee
-        return {'plots': utils.serialize_dict(canvas.plots, handler)}
+GraphAdapter = create_simple_adapter(['canvas'])
+CanvasAdapter = create_simple_adapter(['plots'])
 
 
 def register_serializers(manager):
-    manager.register(DefaultSerializationAdapter, Component)
-    manager.register(GraphSerializationAdapter, Graph)
-    manager.register(CanvasSerializationAdapter, Canvas)
+    manager.register(DictAdapter, dict)
+    manager.register(DefaultAdapter, Component)
+    manager.register(GraphAdapter, Graph)
+    manager.register(CanvasAdapter, Canvas)

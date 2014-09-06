@@ -1,9 +1,15 @@
 from traits.api import Adapter, Constant, List, Str
 
-from .utils import get_protocol, serialize_children
+
+def get_protocol(obj):
+    return obj.__class__.__name__
 
 
-class DefaultSerializationAdapter(Adapter):
+def serialize_children(obj, children, handler):
+    return {name: handler.serialize(getattr(obj, name)) for name in children}
+
+
+class DefaultAdapter(Adapter):
 
     version = Constant(1)
     children = List(Str)
@@ -23,7 +29,7 @@ class DefaultSerializationAdapter(Adapter):
         return {}
 
 
-def create_simple_serialization_adapter(children_names):
-    class SimpleSerializationAdapter(DefaultSerializationAdapter):
+def create_simple_adapter(children_names):
+    class SimpleAdapter(DefaultAdapter):
         children = List(Str, value=children_names)
-    return SimpleSerializationAdapter
+    return SimpleAdapter
