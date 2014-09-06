@@ -1,5 +1,6 @@
-from collections import Mapping
+from abc import abstractmethod
 
+from traits.api import ABCHasStrictTraits, Adapter, Constant, List, Str
 from traits.adaptation.api import AdaptationManager
 
 from deli.core.component import Component
@@ -10,8 +11,39 @@ def get_protocol(obj):
     return obj.__class__.__name__
 
 
-def serialize_default(obj):
-    return {'__protocol__': get_protocol(obj), '__version__': 1}
+def serialize_children(obj, children, handler):
+    return {name: handler.serialize(getattr(obj, name)) for name in children}
+
+
+def serialize_dict(obj, handler):
+    return {key: handler.serialize(value) for key, value in obj.iteritems()}
+
+
+class ISerializeFactory(ABCHasStrictTraits):
+
+    @abstractmethod
+    def serialize(self, handler):
+        """ Return serialized output of object. """
+
+
+class DefaultSerializationAdapter(Adapter):
+
+    version = Constant(1)
+    children = List(Str)
+
+    def serialize(self, handler):
+        obj = self.adaptee
+        blob = self._serialize_required_attrs(obj)
+        blob.update(serialize_children(obj, self.children, handler))
+        blob.update(self._serialize_hook(handler))
+        return blob
+
+    def _serialize_required_attrs(self, obj):
+        return {'__protocol__': get_protocol(obj),
+                '__version__': self.version}
+
+    def _serialize_hook(self, handler):
+        return {}
 
 
 class SerializationManager(AdaptationManager):
@@ -20,56 +52,42 @@ class SerializationManager(AdaptationManager):
         super(SerializationManager, self).__init__(*args, **traits)
 
     def register(self, serialize_func, from_protocol):
-        self.register_factory(serialize_func, from_protocol, Mapping)
+        self.register_factory(serialize_func, from_protocol, ISerializeFactory)
 
     def serialize(self, obj):
-        return self.adapt(obj, Mapping)
+        serialization_factory = self.adapt(obj, ISerializeFactory)
+        return serialization_factory.serialize(self)
 
 
 default_serialization_manager = SerializationManager()
-default_serialization_manager.register(serialize_default, Component)
-default_serialization_manager.register(serialize_default, BaseArtist)
+default_serialization_manager.register(DefaultSerializationAdapter, Component)
+default_serialization_manager.register(DefaultSerializationAdapter, BaseArtist)
 
 
-def serialize_dict(obj):
-    serialize = default_serialization_manager.serialize
-    return {key: serialize(value) for key, value in obj.iteritems()}
-
-
-default_serialization_manager.register(serialize_dict, dict)
-
-
-def serialize_with_default_attrs(func):
-    def wrapped(obj, *args, **kwargs):
-        blob = serialize_default(obj)
-        blob.update(func(obj, *args, **kwargs))
-        return blob
-    return wrapped
-
-
-@serialize_with_default_attrs
-def serialize_graph(obj):
-    return serialize_children(obj, ['canvas'])
+def create_simple_serialization_adapter(children_names):
+    class SimpleSerializationAdapter(DefaultSerializationAdapter):
+        children = List(Str, value=children_names)
+    return SimpleSerializationAdapter
 
 
 from deli.graph import Graph
-default_serialization_manager.register(serialize_graph, Graph)
+graph_adapter = create_simple_serialization_adapter(['canvas'])
+default_serialization_manager.register(graph_adapter, Graph)
 
 
-@serialize_with_default_attrs
 def serialize_canvas(obj):
     return {'plots': serialize_dict(obj.plots)}
 
 
+class CanvasSerializationAdapter(DefaultSerializationAdapter):
+
+    def _serialize_hook(self, handler):
+        obj = self.adaptee
+        return {'plots': serialize_dict(obj.plots, handler)}
+
+
 from deli.canvas import Canvas
-default_serialization_manager.register(serialize_canvas, Canvas)
-
-
-def serialize_children(obj, children_names):
-    serialize = default_serialization_manager.serialize
-    print [serialize(getattr(obj, name)) for name in children_names]
-    return {name: serialize(getattr(obj, name))
-            for name in children_names}
+default_serialization_manager.register(CanvasSerializationAdapter, Canvas)
 
 
 def serialize_list(objects):
