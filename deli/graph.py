@@ -6,7 +6,6 @@ from .core.container import Container
 from .grid import BaseGrid, XGrid, YGrid
 from .plot_label import PlotLabel
 from .style import config
-from .utils.serialization import iter_attrs
 
 
 class Graph(Container):
@@ -49,14 +48,6 @@ class Graph(Container):
 
     def add_plot(self, plot, name=None):
         self.canvas.add_plot(plot, name=name)
-
-    #--------------------------------------------------------------------------
-    # Serialization interface
-    #--------------------------------------------------------------------------
-
-    def _iter_children(self):
-        children = ('canvas', 'title', 'x_axis', 'y_axis', 'x_grid', 'y_grid')
-        return iter_attrs(self, children)
 
     #-------------------------------------------------------------------------
     # Event handlers

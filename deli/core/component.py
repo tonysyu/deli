@@ -7,7 +7,6 @@ from traits.api import Any, Bool, Instance, List, Property, Str, WeakRef
 
 from ..layout.bounding_box import BoundingBox
 from .coordinate_box import CoordinateBox
-from .serializable_mixin import SerializableMixin
 
 
 DRAWING_ORDER = ['background', 'underlay', 'plot', 'overlay']
@@ -20,7 +19,7 @@ class NullDispatch(object):
         pass
 
 
-class Component(CoordinateBox, SerializableMixin):
+class Component(CoordinateBox):
     """ Component is the base class for most objects.
 
     This represents a general component of a composite structure [GoF]_, but,

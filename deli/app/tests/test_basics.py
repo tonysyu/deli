@@ -2,6 +2,7 @@ import numpy as np
 
 from deli.graph import Graph
 from deli.plots.line_plot import LinePlot
+from deli.serialization.api import serialize
 from deli.testing.mock_window import MockWindow
 
 
@@ -28,14 +29,14 @@ def test_draw():
     demo.context.show_text.assert_called_with(demo.graph.title.text)
 
 
-def test_serialize():
+def test_serialization():
     demo = Demo()
-    output = demo.serialize()
+    output = serialize(demo.graph)
 
-    assert 'Graph' in output
-    graph_attrs = output['Graph']
+    assert output['__protocol__'] == 'Graph'
 
-    assert 'Canvas' in graph_attrs
-    canvas_attrs = graph_attrs['Canvas']
+    canvas = output['canvas']
+    assert canvas['__protocol__'] == 'Canvas'
 
-    assert 'LinePlot' in canvas_attrs
+    plots = canvas['plots'].values()
+    assert plots[0]['__protocol__'] == 'LinePlot'

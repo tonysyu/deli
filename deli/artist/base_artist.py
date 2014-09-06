@@ -1,9 +1,7 @@
 from traits.api import HasStrictTraits, Property
 
-from ..core.serializable_mixin import SerializableMixin
 
-
-class BaseArtist(HasStrictTraits, SerializableMixin):
+class BaseArtist(HasStrictTraits):
 
     label = Property
 
