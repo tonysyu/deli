@@ -2,7 +2,6 @@ import numpy as np
 
 from deli.graph import Graph
 from deli.plots.line_plot import LinePlot
-from deli.serialization.api import serialize
 from deli.testing.mock_window import MockWindow
 
 
@@ -27,16 +26,3 @@ def test_draw():
     demo.context.begin_path.assert_called_with()
     demo.context.stroke_path.assert_called_with()
     demo.context.show_text.assert_called_with(demo.graph.title.text)
-
-
-def test_serialization():
-    demo = Demo()
-    output = serialize(demo.graph)
-
-    assert output['__protocol__'] == 'Graph'
-
-    canvas = output['canvas']
-    assert canvas['__protocol__'] == 'Canvas'
-
-    plots = canvas['plots'].values()
-    assert plots[0]['__protocol__'] == 'LinePlot'
