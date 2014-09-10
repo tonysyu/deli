@@ -4,16 +4,31 @@
 
 <head>
   <title> deli plot </title>
+  <link rel="stylesheet" href="/static/css/flot.css" type="text/css"/>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" ></script>
+  <script src="/static/flot/jquery.flot.js"></script>
+
+  <script type="text/javascript">
+
+    plot_line = function(d1) {
+      $.plot("#placeholder", [d1]);
+    };
+
+	</script>
+
 </head>
 
 <body>
 
-  {% for i in range(config.repeat) %}
-    <h1>{{ content }}</h1>
-  {% endfor %}
+  <div class="demo-container">
+    <div id="placeholder" class="demo-placeholder">
+      <script type="text/javascript">
+        plot_line({{ data }});
+      </script>
+    </div>
+  </div>
 
 </body>
 
 </html>
-
-

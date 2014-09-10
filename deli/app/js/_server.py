@@ -1,44 +1,41 @@
 """
 A Simple server used to show deli images.
 """
-import webbrowser
-import socket
-import itertools
-import random
+import flask
 
-from flask import Flask, render_template
-
-app = Flask(__name__)
+from deli.app.js.utils import find_open_port, open_browser
 
 
-def open_browser(ip, port):
-    webbrowser.open('http://{0}:{1}'.format(ip, port))
+# Set the project root directory as the static folder.
+app = flask.Flask(__name__, static_url_path='')
 
 
-def find_open_port(ip, port, n=50):
-    """Find an open port near the specified port.
+@app.route('/static/flot/<path:filename>')
+def send_flot_files(filename):
+    return flask.send_from_directory('static/flot', filename)
 
-    Adapted from `mpld3._server`.
+
+@app.route('/static/css/<path:filename>')
+def send_css_files(filename):
+    return flask.send_from_directory('static/css', filename)
+
+
+def create_plot(data, url='/', template='base.html'):
+    """Create web page displaying the given data and route the given URL there.
     """
-    ports = itertools.chain((port + i for i in range(n)),
-                            (port + random.randint(-2 * n, 2 * n)))
-
-    for port in ports:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = s.connect_ex((ip, port))
-        s.close()
-        if result != 0:
-            return port
-    raise ValueError("no open ports found")
+    @app.route(url)
+    def server():
+        return flask.render_template(template, data=data)
+    return server
 
 
-def serve_and_open(html, ip='127.0.0.1', port=8888, n_retries=50, debug=False):
+def open_app(app, ip='127.0.0.1', port=8888, n_retries=50, debug=False):
     """Start a server serving the given HTML, and open a browser
 
     Parameters
     ----------
-    html : str
-        HTML to serve
+    data : anything
+        Data sent to rendered template.
     ip : string (default = '127.0.0.1')
         IP address at which the HTML will be served.
     port : int
@@ -46,18 +43,19 @@ def serve_and_open(html, ip='127.0.0.1', port=8888, n_retries=50, debug=False):
     n_retries : int
         The number of nearby ports to search if the specified port is in use.
     debug : bool
-        Run app in debug-mode. Note that this causes two tabs to open up.
+        Run app in debug mode. Note that debug mode causes two tabs to open up.
     """
     port = find_open_port(ip, port, n_retries)
-    config = {'repeat': 3}
-
-    @app.route('/')
-    def server():
-        return render_template('base.html', config=config, content=html)
 
     open_browser(ip, port)
     app.run(host=ip, port=port, debug=debug)
 
 
 if __name__ == '__main__':
-    serve_and_open('Hello')
+    import numpy as np
+    x = np.linspace(0, 10)
+    data = np.transpose([x, np.sin(x)]).tolist()
+
+    # Why doesn't the result need to be saved to prevent garbage collection?
+    create_plot(data)
+    open_app(app)
