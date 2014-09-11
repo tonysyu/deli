@@ -10,11 +10,13 @@
   <script src="/static/flot/jquery.flot.js"></script>
 
   <script type="text/javascript">
-
-    plot_line = function(d1) {
-      $.plot("#placeholder", [d1]);
+    plot = function(data) {
+      var element = document.getElementById("deliplot");
+      console.log(element);
+      var context = element.getContext("2d");
+      context.rect(0, 0, data.width, data.height);
+      context.stroke();
     };
-
 	</script>
 
 </head>
@@ -22,11 +24,11 @@
 <body>
 
   <div class="demo-container">
-    <div id="placeholder" class="demo-placeholder">
+    <canvas id="deliplot">
       <script type="text/javascript">
-        plot_line({{ data }});
+        plot({{ data|tojson }});
       </script>
-    </div>
+    </canvas>
   </div>
 
 </body>
