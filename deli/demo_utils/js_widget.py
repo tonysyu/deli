@@ -31,8 +31,8 @@ class JSWindow(ABCHasStrictTraits):
         return graph
 
     def show(self):
+        # XXX: This does not update the sizes of child components (e.g. canvas)
+        self.graph.do_layout()
         data = serialization_manager.serialize(self.graph)
-        data['width'] = self.graph.width
-        data['height'] = self.graph.height
         create_plot(data)
         show()

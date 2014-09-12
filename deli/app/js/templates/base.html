@@ -4,17 +4,14 @@
 
 <head>
   <title> deli plot </title>
-  <link rel="stylesheet" href="/static/css/flot.css" type="text/css"/>
-
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" ></script>
-  <script src="/static/flot/jquery.flot.js"></script>
 
   <script type="text/javascript">
     plot = function(data) {
       var element = document.getElementById("deliplot");
       console.log(element);
       var context = element.getContext("2d");
-      context.rect(0, 0, data.width, data.height);
+      context.rect(data.origin[0], data.origin[1], data.size[0], data.size[1]);
       context.stroke();
     };
 	</script>
@@ -24,10 +21,14 @@
 <body>
 
   <div class="demo-container">
-    <canvas id="deliplot">
+    <canvas id="deliplot"
+            width={{ data["size"][0] }}
+            height={{ data["size"][1] }}>
+
       <script type="text/javascript">
         plot({{ data|tojson }});
       </script>
+
     </canvas>
   </div>
 

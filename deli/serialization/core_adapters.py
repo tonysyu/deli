@@ -1,14 +1,14 @@
 from ..core.component import Component
 from ..canvas import Canvas
 from ..graph import Graph
-from .default_adapter import (DefaultAdapter, create_simple_adapter)
 
 
-GraphAdapter = create_simple_adapter(['canvas'])
-CanvasAdapter = create_simple_adapter(['plots'])
+component_attrs = ['origin', 'size']
+graph_attrs = component_attrs + ['canvas']
+canvas_attrs = component_attrs + ['plots']
 
 
 def register_serializers(manager):
-    manager.register(DefaultAdapter, Component)
-    manager.register(GraphAdapter, Graph)
-    manager.register(CanvasAdapter, Canvas)
+    manager.register_attrs(component_attrs, Component)
+    manager.register_attrs(graph_attrs, Graph)
+    manager.register_attrs(canvas_attrs, Canvas)

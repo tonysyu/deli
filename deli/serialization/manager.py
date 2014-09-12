@@ -3,6 +3,8 @@ from abc import abstractmethod
 from traits.api import ABCHasStrictTraits, Type
 from traits.adaptation.api import AdaptationManager
 
+from .default_adapter import create_simple_adapter
+
 
 class ISerializeFactory(ABCHasStrictTraits):
 
@@ -20,6 +22,12 @@ class SerializationManager(AdaptationManager):
 
     def register(self, serialize_func, from_protocol):
         self.register_factory(serialize_func, from_protocol, self._interface)
+
+    def register_attrs(self, attrs, from_protocol):
+        """Register a simple adapter based on the attributes to be serialized.
+        """
+        adapter = create_simple_adapter(attrs)
+        self.register(adapter, from_protocol)
 
     def serialize(self, obj):
         serialization_factory = self.adapt(obj, self._interface)
