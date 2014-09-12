@@ -1,11 +1,11 @@
 from traits.api import Array, Instance
 
 from ..stylus.image_stylus import ImageStylus
-from .base_plot import BasePlot
+from .base_artist import BaseArtist
 
 
-class ImagePlot(BasePlot):
-    """ A plot for image data. """
+class ImageArtist(BaseArtist):
+    """ An artist for image data. """
 
     data = Array
 

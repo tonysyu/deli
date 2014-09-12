@@ -3,7 +3,7 @@ from traits.api import CArray, HasStrictTraits, Instance, Str
 
 from ..abstract_overlay import AbstractOverlay
 from ..stylus.flag_label_stylus import FlagLabelStylus
-from ..plots.base_point_plot import BasePointPlot
+from ..artist.base_point_artist import BasePointArtist
 from ..utils.text import switch_delimiters
 from .base_tool import BaseTool
 
@@ -70,7 +70,7 @@ class DataCursorOverlay(AbstractOverlay):
 
 class DataCursorTool(BaseTool):
 
-    component = Instance(BasePointPlot)
+    component = Instance(BasePointArtist)
 
     overlay = Instance(AbstractOverlay)
 

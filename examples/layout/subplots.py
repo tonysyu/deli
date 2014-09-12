@@ -7,8 +7,8 @@ from deli.demo_utils.traitsui_editor import ComponentEditor
 from deli.core.constraints_container import ConstraintsContainer
 from deli.layout.api import align, vbox
 from deli.graph import Graph
-from deli.plots.line_plot import LinePlot
-from deli.plots.scatter_plot import ScatterPlot
+from deli.artist.line_artist import LineArtist
+from deli.artist.scatter_artist import ScatterArtist
 
 
 class Demo(HasStrictTraits):
@@ -39,20 +39,20 @@ class Demo(HasStrictTraits):
 
     def _line_graph_default(self):
         graph = Graph()
-        graph.title.text = "Line Plot"
+        graph.title.text = "Line Artist"
 
         x = np.linspace(0, 10.0, 100)
-        plot = LinePlot(x_data=x, y_data=np.sin(x))
-        graph.add_plot(plot)
+        artist = LineArtist(x_data=x, y_data=np.sin(x))
+        graph.add_artist(artist)
         return graph
 
     def _scatter_graph_default(self):
         graph = Graph()
-        graph.title.text = "Scatter Plot"
+        graph.title.text = "Scatter Artist"
 
         x = np.linspace(0, 10.0, 100)
-        plot = ScatterPlot(x_data=x, y_data=np.sin(x))
-        graph.add_plot(plot)
+        artist = ScatterArtist(x_data=x, y_data=np.sin(x))
+        graph.add_artist(artist)
         return graph
 
     def show(self):

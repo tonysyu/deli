@@ -1,11 +1,11 @@
 from traits.api import DelegatesTo, Instance
 
 from ..stylus.line_stylus import LineStylus
-from .base_point_plot import BasePointPlot
+from .base_point_artist import BasePointArtist
 
 
-class LinePlot(BasePointPlot):
-    """ A plot for line data.
+class LineArtist(BasePointArtist):
+    """ An artist for line data.
     """
     # The color of the line.
     color = DelegatesTo('line')

@@ -7,7 +7,7 @@ class Demo(MockWindow):
 
     def setup_graph(self):
         graph = Graph()
-        graph.title.text = "Line Plot"
+        graph.title.text = "Line Artist"
         return graph
 
 

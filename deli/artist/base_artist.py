@@ -1,4 +1,4 @@
-""" Defines the base class for XY plots.
+""" Defines the base class for XY artists.
 """
 from traits.api import Instance, Property, Tuple
 
@@ -7,14 +7,14 @@ from ..layout.bounding_box import BoundingBox
 from ..layout.bbox_transform import BboxTransform
 
 
-class BasePlot(Component):
-    """ Base class for all plots.
+class BaseArtist(Component):
+    """ Base class for all artists.
 
-    Unlike styluses, plots may contain the data that they render. Plots are
-    simply specific types of plots: For example, line-plots, marker-plots, and
-    bar-plots, may all be the same data associated with different plots.  As
-    a result, plots may use a few different styluses to compose a plot; for
-    example, a box-and-whisker plot might have separate styluses to draw
+    Unlike styluses, artists may contain the data that they render. Artists are
+    simply specific types of artists: For example, line-artists, marker-artists, and
+    bar-artists, may all be the same data associated with different artists.  As
+    a result, artists may use a few different styluses to compose a plot; for
+    example, a box-and-whisker artist might have separate styluses to draw
     rectangles, error-bars (whiskers), and points (outliers).
     """
 
@@ -25,11 +25,11 @@ class BasePlot(Component):
     #: The extents of the data (x_min, y_min, x_max, y_max)
     data_extents = Property(Tuple)
 
-    #: Styluses associated with this plot.
+    #: Styluses associated with this artist.
     styluses = Property(Tuple)
 
-    #: Bounding box for data in the plot graph. Note that this bounding box
-    #: does not just describe the data in this plot; it's the currently
+    #: Bounding box for data in the graph. Note that this bounding box
+    #: does not just describe the data in this artist; it's the currently
     #: displayed limits of the plot in data space.
     data_bbox = Instance(BoundingBox)
 
@@ -47,9 +47,9 @@ class BasePlot(Component):
         return self.data_to_screen.inverted()
 
     #--------------------------------------------------------------------------
-    #  BasePlot interface
+    #  BaseArtist interface
     #--------------------------------------------------------------------------
 
     def _get_data_extents(self):
-        msg = "`BasePlot` subclasses must implement `_get_data_extents`"
+        msg = "`BaseArtist` subclasses must implement `_get_data_extents`"
         raise NotImplementedError(msg)

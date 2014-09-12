@@ -5,7 +5,7 @@ from ..graph import Graph
 
 component_attrs = ['origin', 'size']
 graph_attrs = component_attrs + ['canvas']
-canvas_attrs = component_attrs + ['plots']
+canvas_attrs = component_attrs + ['artists']
 
 
 def register_serializers(manager):

@@ -46,8 +46,8 @@ class Graph(Container):
         self._init_components()
         self.add(self.canvas)
 
-    def add_plot(self, plot, name=None):
-        self.canvas.add_plot(plot, name=name)
+    def add_artist(self, artist, name=None):
+        self.canvas.add_artist(artist, name=name)
 
     #-------------------------------------------------------------------------
     # Event handlers

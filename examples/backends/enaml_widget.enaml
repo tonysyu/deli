@@ -4,7 +4,7 @@ from scipy.special import jn
 
 from deli.demo_utils.enaml_widget import EnamlWidget
 from deli.graph import Graph
-from deli.plots.line_plot import LinePlot
+from deli.artist.line_artist import LineArtist
 
 
 def create_graph():
@@ -12,8 +12,8 @@ def create_graph():
     graph.title.text = "Enaml widget"
 
     x = np.linspace(-2.0, 10.0)
-    plot = LinePlot(x_data=x, y_data=np.sin(x))
-    graph.add_plot(plot)
+    artist = LineArtist(x_data=x, y_data=np.sin(x))
+    graph.add_artist(artist)
     return graph
 
 

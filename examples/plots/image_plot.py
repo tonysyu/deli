@@ -2,15 +2,15 @@ from skimage import data
 
 from deli.demo_utils.traitsui import TraitsWindow
 from deli.graph import Graph
-from deli.plots.image_plot import ImagePlot
+from deli.artist.image_artist import ImageArtist
 
 
 class Demo(TraitsWindow):
 
     def setup_graph(self):
         graph = Graph()
-        plot = ImagePlot(data=data.lena())
-        graph.add_plot(plot)
+        artist = ImageArtist(data=data.lena())
+        graph.add_artist(artist)
         return graph
 
 

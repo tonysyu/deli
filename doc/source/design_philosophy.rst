@@ -54,11 +54,13 @@ Naming is important, and so is consistency.
 Basic structure
 ---------------
 
+An artist draws on a canvas with styluses.
+
 stylus:
    Rendering objects that know how to draw primitive objects (e.g. lines,
    bars, etc.). Stylus instances have all the style information needed these
    primitives, but doesn't hold any data. These should be passed at draw time.
-plot:
+artist:
    A simple object that combines styluses and data.
 canvas:
    The area where a plot is drawn. A plot-canvas may be composed of multiple

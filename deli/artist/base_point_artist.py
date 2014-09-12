@@ -1,14 +1,14 @@
-""" Defines the base class for XY plots.
+""" Defines the base class for XY artists.
 """
 import numpy as np
 
 from traits.api import CArray, Range
 
-from .base_plot import BasePlot
+from .base_artist import BaseArtist
 
 
-class BasePointPlot(BasePlot):
-    """ Base class for simple point data plots that consist of a single x data
+class BasePointArtist(BaseArtist):
+    """ Base class for simple point data artists that consist of a single x data
     array and a single y data array.
 
     Subclasses handle the actual plotting, but this base class takes care of
@@ -44,7 +44,7 @@ class BasePointPlot(BasePlot):
         self._render(gc, pts)
 
     #--------------------------------------------------------------------------
-    #  BasePlot interface
+    #  BaseArtist interface
     #--------------------------------------------------------------------------
 
     def get_screen_points(self):

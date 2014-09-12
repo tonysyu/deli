@@ -6,7 +6,7 @@ from deli.stylus.rect_stylus import RectangleStylus
 from deli.axis import XAxis
 from deli.demo_utils.traitsui import TraitsWindow
 from deli.graph import Graph
-from deli.plots.base_point_plot import BasePointPlot
+from deli.artist.base_point_artist import BasePointArtist
 
 
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -23,7 +23,7 @@ class OrdinalAxis(XAxis):
         return ''
 
 
-class BarPlot(BasePointPlot):
+class BarArtist(BasePointArtist):
     """ A plot for line data.
     """
 
@@ -48,13 +48,13 @@ class Demo(TraitsWindow):
 
     def setup_graph(self):
         graph = Graph()
-        graph.title.text = "Bar Plot"
+        graph.title.text = "Bar Artist"
         graph.x_axis = OrdinalAxis(component=graph.canvas,
                                    labels=ALPHA[:10])
 
         x = np.arange(10)
-        plot = BarPlot(x_data=x, y_data=np.sin(x))
-        graph.add_plot(plot)
+        artist = BarArtist(x_data=x, y_data=np.sin(x))
+        graph.add_artist(artist)
         return graph
 
 

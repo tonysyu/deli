@@ -1,7 +1,7 @@
 import numpy as np
 
 from deli.graph import Graph
-from deli.plots.line_plot import LinePlot
+from deli.artist.line_artist import LineArtist
 from deli.testing.mock_window import MockWindow
 
 
@@ -13,10 +13,10 @@ class Demo(MockWindow):
 
     def setup_graph(self):
         graph = Graph()
-        graph.title.text = "Line Plot"
+        graph.title.text = "Line Artist"
 
-        plot = LinePlot(x_data=x, y_data=y)
-        graph.add_plot(plot)
+        artist = LineArtist(x_data=x, y_data=y)
+        graph.add_artist(artist)
         return graph
 
 

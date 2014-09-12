@@ -6,7 +6,7 @@ from .core.container import Container
 from .layout.bbox_transform import BboxTransform
 from .layout.bounding_box import BoundingBox
 from .layout.box_layout import simple_container_do_layout
-from .plots.base_plot import BasePlot
+from .artist.base_artist import BaseArtist
 from .style import config
 from .utils.misc import new_item_name
 
@@ -21,16 +21,16 @@ def replace_in_list(a_list, old, new):
 class Canvas(Container):
     """ Represents a mapping from 2-D data space into 2-D screen space.
 
-    It can house plots and other plot components, and otherwise behaves
+    It can house artists and other plot components, and otherwise behaves
     just like a normal Container.
     """
 
     bgcolor = config.get('background.canvas.color')
 
-    #: Mapping of plot names to *lists* of plots.
-    plots = Dict(Str, Instance(BasePlot))
+    #: Mapping of artist names to *lists* of artists.
+    artists = Dict(Str, Instance(BaseArtist))
 
-    # The bounding box containing data added to plot.
+    # The bounding box containing data added this canvas.
     data_bbox = Instance(BoundingBox)
 
     #: Transform from data space to screen space.
@@ -47,14 +47,14 @@ class Canvas(Container):
     #  Public interface
     #--------------------------------------------------------------------------
 
-    def add_plot(self, plot, name=None):
+    def add_artist(self, artist, name=None):
         if name is None:
-            name = new_item_name(self.plots, name_template='plot_{}')
+            name = new_item_name(self.artists, name_template='artist_{}')
 
-        self.data_bbox.update_from_extents(*plot.data_extents)
-        plot.data_bbox = self.data_bbox
-        self.plots[name] = plot
-        self.add(plot)
+        self.data_bbox.update_from_extents(*artist.data_extents)
+        artist.data_bbox = self.data_bbox
+        self.artists[name] = artist
+        self.add(artist)
 
     def replace_underlay(self, old, new):
         replace_in_list(self.underlays, old, new)
@@ -67,7 +67,7 @@ class Canvas(Container):
     #--------------------------------------------------------------------------
 
     def _iter_children(self):
-        return self.plots.values()
+        return self.artists.values()
 
     #--------------------------------------------------------------------------
     #  Traits properties and defaults
@@ -93,6 +93,6 @@ class Canvas(Container):
         """ Adjust component layout (called by do_layout()).
 
         Override Container method to make sure that child components,
-        i.e. plots, fill the canvas.
+        i.e. artists, fill the canvas.
         """
         self.calculate_layout(self)

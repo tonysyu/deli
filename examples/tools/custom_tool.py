@@ -4,7 +4,7 @@ from traits.api import Instance
 
 from deli.demo_utils.traitsui import TraitsWindow
 from deli.graph import Graph
-from deli.plots.line_plot import LinePlot
+from deli.artist.line_artist import LineArtist
 from deli.tools.base_tool import BaseTool, BaseToolState
 from deli.tools.key_spec import KeySpec, shift_key
 
@@ -49,8 +49,8 @@ class Demo(TraitsWindow):
         graph.title.text = "Hold shift-key to print coordinates"
 
         x = y = linspace(0, 1)
-        plot = LinePlot(x_data=x, y_data=y)
-        graph.add_plot(plot)
+        artist = LineArtist(x_data=x, y_data=y)
+        graph.add_artist(artist)
 
         PrintTool.attach_to(graph.canvas)
         return graph

@@ -1,11 +1,11 @@
 from traits.api import DelegatesTo, Instance
 
 from ..stylus.marker_stylus import MarkerStylus
-from .base_point_plot import BasePointPlot
+from .base_point_artist import BasePointArtist
 
 
-class ScatterPlot(BasePointPlot):
-    """ A plot for a data points that should display as markers
+class ScatterArtist(BasePointArtist):
+    """ An artist for data points that should display as markers
     """
     # The color of the markers.
     color = DelegatesTo('marker')
