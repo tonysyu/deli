@@ -1,16 +1,16 @@
 import numpy as np
 from mock import MagicMock
 
-from deli.artist.line_artist import LineArtist
+from deli.stylus.line_stylus import LineStylus
 
 
 POINTS = np.arange(10).reshape(5, 2)
 
 
 def test_draw():
-    artist = LineArtist()
+    stylus = LineStylus()
     context = MagicMock()
-    artist.draw(context, POINTS)
+    stylus.draw(context, POINTS)
 
     context.begin_path.assert_called_with()
     context.lines.assert_called_with(POINTS)
@@ -25,9 +25,9 @@ def test_style_set_during_draw():
         'set_line_width': width
     }
 
-    artist = LineArtist(alpha=alpha, width=width)
+    stylus = LineStylus(alpha=alpha, width=width)
     context = MagicMock()
-    artist.draw(context, POINTS)
+    stylus.draw(context, POINTS)
 
     for method_name, value in style.items():
         method = getattr(context, method_name)

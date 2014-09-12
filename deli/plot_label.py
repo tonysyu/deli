@@ -3,7 +3,7 @@
 from traits.api import DelegatesTo, Instance
 
 from .abstract_overlay import AbstractOverlay
-from .artist.label_artist import LabelArtist
+from .stylus.label_stylus import LabelStylus
 
 
 LabelDelegate = DelegatesTo("_label")
@@ -12,7 +12,7 @@ LabelDelegate = DelegatesTo("_label")
 class PlotLabel(AbstractOverlay):
     """ A label used by plots.
 
-    This class wraps a simple LabelArtist, and delegates some traits to it.
+    This class wraps a simple LabelStylus, and delegates some traits to it.
     """
 
     #: The text of the label.
@@ -25,7 +25,7 @@ class PlotLabel(AbstractOverlay):
     visible = False
 
     # The Label instance this plot label is wrapping.
-    _label = Instance(LabelArtist, {'x_origin': 'center',
+    _label = Instance(LabelStylus, {'x_origin': 'center',
                                     'y_origin': 'bottom',
                                     'y_offset': 20})
 

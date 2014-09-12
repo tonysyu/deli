@@ -6,7 +6,7 @@ from traits.api import (Float, HasStrictTraits, Instance, Int, Property,
 from kiva.constants import STROKE
 
 
-class MarkerArtist(HasStrictTraits):
+class MarkerStylus(HasStrictTraits):
     """ A Flyweight object for drawing markers.
     """
 

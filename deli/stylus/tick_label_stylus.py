@@ -1,15 +1,15 @@
-from .label_artist import LabelArtist
+from .label_stylus import LabelStylus
 from ..utils.traits import Alias
 
 
-class XTickLabelArtist(LabelArtist):
+class XTickLabelStylus(LabelStylus):
 
     y_origin = 'top'
 
     offset = Alias('y_offset')
 
 
-class YTickLabelArtist(LabelArtist):
+class YTickLabelStylus(LabelStylus):
 
     x_origin = 'right'
 

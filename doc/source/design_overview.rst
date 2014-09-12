@@ -11,21 +11,21 @@ Design overview
    node[shape=record, style=filled, fillcolor=gray95]
    edge[dir=back, arrowtail=odiamond, arrowhead=empty]
 
-   graph_node[label = "{Graph | canvas \lartists \l | add_plot(plot) \l}"]
-   graph_artist1[label = "{Graph artist 1 | style \l | draw(context, data) \l }"]
+   graph_node[label = "{Graph | canvas \lstyluses \l | add_plot(plot) \l}"]
+   graph_stylus1[label = "{Graph stylus 1 | style \l | draw(context, data) \l }"]
    canvas[label = "{Canvas | plots \l | add_plot(plot) \l}"]
-   plot1[label = "{Plot 1 | data \ldata_extents \lartists \l\
+   plot1[label = "{Plot 1 | data \ldata_extents \lstyluses \l\
                    | _render(context) \l}"]
-   artist1[label = "{Artist 1 | style \l | draw(context, screen_data) \l }"]
+   stylus1[label = "{Stylus 1 | style \l | draw(context, screen_data) \l }"]
 
-   {rank=same; graph_node; graph_artist1;}
-   {rank=same; plot1; artist1;}
+   {rank=same; graph_node; graph_stylus1;}
+   {rank=same; plot1; stylus1;}
 
-   graph_node -> graph_artist1;
-   graph_artist1 -> canvas;
+   graph_node -> graph_stylus1;
+   graph_stylus1 -> canvas;
    graph_node -> canvas;
    {rank=same; canvas -> plot1};
-   plot1 -> artist1;
+   plot1 -> stylus1;
 
 
 `Graph`
@@ -38,17 +38,17 @@ Design overview
    plots to keep track of their data bounds and knows how switch between screen
    and data space.
 `*Plot`
-   Wrapper objects for data and artists. This object needs to report its data
+   Wrapper objects for data and styluses. This object needs to report its data
    extents to the canvas.
-`*Artist`
+`*Stylus`
    Flyweight objects that invoke the drawing primitives (e.g. `begin_path()`,
-   `stroke_path()`) on the graphics `context`. A given artist expects specific
-   keys in the `data` dictionary passed on calls to `draw`. Note that artists
+   `stroke_path()`) on the graphics `context`. A given stylus expects specific
+   keys in the `data` dictionary passed on calls to `draw`. Note that styluses
    don't know how to convert between screen and data space, so the plot must
    pass data in screen space.
 `data`
    A dictionary of the data to plot. The keys of this dictionary depend on the
-   artist. A `LineArtist` might only expect `'x'` and `'y'` to be in the
+   stylus. A `LineStylus` might only expect `'x'` and `'y'` to be in the
    dictionary.
 `style`
    A dictionary containing style information (color, line-width, etc)
@@ -69,7 +69,7 @@ Design overview
          bounds: [0, 0, 400, 600]
          plots:
             - class: 'line'
-              artists:
+              styluses:
                  - class:'line'
                    style:
                       color: 'black'

@@ -1,6 +1,6 @@
 from traits.api import DelegatesTo, Instance
 
-from ..artist.marker_artist import MarkerArtist
+from ..stylus.marker_stylus import MarkerStylus
 from .base_point_plot import BasePointPlot
 
 
@@ -10,7 +10,7 @@ class ScatterPlot(BasePointPlot):
     # The color of the markers.
     color = DelegatesTo('marker')
 
-    marker = Instance(MarkerArtist, ())
+    marker = Instance(MarkerStylus, ())
 
     #--------------------------------------------------------------------------
     #  Private interface

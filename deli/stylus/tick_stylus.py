@@ -5,7 +5,7 @@ from traits.api import Float, Instance, Property
 
 from ..layout.bbox_transform import BaseTransform
 from ..style import config
-from .line_artist import LineArtist
+from .line_stylus import LineStylus
 
 
 def offsets_to_points(axial_offsets, axial_coordinate, locus=0):
@@ -16,7 +16,7 @@ def offsets_to_points(axial_offsets, axial_coordinate, locus=0):
     return np.transpose(np.broadcast_arrays(*points))
 
 
-class BaseTickArtist(LineArtist):
+class BaseTickStylus(LineStylus):
 
     #: The screen position of the axis in the dimension that's fixed;
     #: i.e. x-position for a y-axis and y-position for an x-axis.
@@ -44,7 +44,7 @@ class BaseTickArtist(LineArtist):
         """ Return starting and ending points from positions. """
 
 
-class XTickArtist(BaseTickArtist):
+class XTickStylus(BaseTickStylus):
     """ A Flyweight object for drawing x-ticks.
     """
 
@@ -56,7 +56,7 @@ class XTickArtist(BaseTickArtist):
         return starts, ends
 
 
-class YTickArtist(BaseTickArtist):
+class YTickStylus(BaseTickStylus):
     """ A Flyweight object for drawing y-ticks.
     """
 

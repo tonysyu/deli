@@ -34,14 +34,14 @@ Part of the design was a reaction to Chaco and Matplotlib.
 
 And a few random ideas.
 
-* Use Artist primitives for drawing.
+* Use Stylus primitives for drawing.
 
-  - Artists are Flyweights (see [GoF]_) with interfaces for different
+  - Styluses are Flyweights (see [GoF]_) with interfaces for different
     parameters inputs and little, if any, knowledge of the data. Instead data
     is passed in at draw time with only 
-  - An artist defines its own graphics context which updates its own settings
+  - An stylus defines its own graphics context which updates its own settings
     (color, alpha, anti-aliasing, etc.) but you can pass in any
-    instance-specific parameters you like to override the artist default
+    instance-specific parameters you like to override the stylus default
 
 * State should be a simple dict
 
@@ -54,12 +54,12 @@ Naming is important, and so is consistency.
 Basic structure
 ---------------
 
-artist:
+stylus:
    Rendering objects that know how to draw primitive objects (e.g. lines,
-   bars, etc.). Artist instances have all the style information needed these
+   bars, etc.). Stylus instances have all the style information needed these
    primitives, but doesn't hold any data. These should be passed at draw time.
 plot:
-   A simple object that combines artists and data.
+   A simple object that combines styluses and data.
 canvas:
    The area where a plot is drawn. A plot-canvas may be composed of multiple
    "plots". For example, point data maybe drawn as a line-plot and

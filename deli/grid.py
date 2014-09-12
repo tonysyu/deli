@@ -5,7 +5,7 @@ import numpy as np
 from traits.api import Array, Instance, on_trait_change
 
 from .abstract_overlay import AbstractOverlay
-from .artist.line_artist import LineArtist
+from .stylus.line_stylus import LineStylus
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
 from .utils.drawing import hline_segments, vline_segments
 
@@ -25,11 +25,11 @@ class BaseGrid(AbstractOverlay):
     # Appearance traits
     #------------------------------------------------------------------------
 
-    line_artist = Instance(LineArtist)
+    line_stylus = Instance(LineStylus)
 
-    def _line_artist_default(self):
+    def _line_stylus_default(self):
         # XXX: Replace these defaults with config values.
-        return LineArtist(color='lightgray', style='dot')
+        return LineStylus(color='lightgray', style='dot')
 
     #------------------------------------------------------------------------
     # Private traits; mostly cached information
@@ -83,7 +83,7 @@ class BaseGrid(AbstractOverlay):
         with gc:
             gc.set_antialias(False)
             gc.clip_to_rect(*(self.component.origin + self.component.size))
-            self.line_artist.draw_segments(gc, self._line_starts,
+            self.line_stylus.draw_segments(gc, self._line_starts,
                                                self._line_ends)
 
     def _origin_changed_for_component(self):

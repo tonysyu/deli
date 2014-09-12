@@ -1,9 +1,9 @@
 from enable.api import ColorTrait
 
-from .base_patch_artist import BasePatchArtist
+from .base_patch_stylus import BasePatchStylus
 
 
-class RectangleArtist(BasePatchArtist):
+class RectangleStylus(BasePatchStylus):
     """ A Flyweight object for drawing filled rectangles.
     """
 

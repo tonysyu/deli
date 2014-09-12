@@ -1,18 +1,18 @@
 from enable.api import ColorTrait
 from traits.api import HasStrictTraits, Instance, Property
 
-from .label_artist import LabelArtist
-from .polygon_artist import PolygonArtist
+from .label_stylus import LabelStylus
+from .polygon_stylus import PolygonStylus
 
 
 DEFAULT_LABEL_STYLE = {'x_origin': 'left', 'x_offset': 20, 'margin': 5}
 
 
-class FlagArtist(PolygonArtist):
+class FlagStylus(PolygonStylus):
 
     def draw(self, gc, rect, origin=(0, 0)):
         vertices = self._poly_vertices(origin, rect)
-        super(FlagArtist, self).draw(gc, vertices)
+        super(FlagStylus, self).draw(gc, vertices)
 
     def _poly_vertices(self, origin, rect):
         x, y, width, height = rect
@@ -23,14 +23,14 @@ class FlagArtist(PolygonArtist):
                 (x, y + height)]
 
 
-class FlagLabelArtist(HasStrictTraits):
+class FlagLabelStylus(HasStrictTraits):
 
     text_color = Property(ColorTrait)
     fill_color = Property(ColorTrait)
     edge_color = Property(ColorTrait)
 
-    label = Instance(LabelArtist, DEFAULT_LABEL_STYLE)
-    flag = Instance(FlagArtist, ())
+    label = Instance(LabelStylus, DEFAULT_LABEL_STYLE)
+    flag = Instance(FlagStylus, ())
 
     def _set_text_color(self, value):
         self.label.color = value

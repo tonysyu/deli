@@ -1,6 +1,6 @@
 from traits.api import Array, Instance
 
-from ..artist.image_artist import ImageArtist
+from ..stylus.image_stylus import ImageStylus
 from .base_plot import BasePlot
 
 
@@ -9,7 +9,7 @@ class ImagePlot(BasePlot):
 
     data = Array
 
-    image = Instance(ImageArtist, ())
+    image = Instance(ImageStylus, ())
 
     def _draw_plot(self, gc, view_bounds=None):
         height, width = self.data.shape[:2]

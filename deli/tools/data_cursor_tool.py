@@ -2,7 +2,7 @@ import numpy as np
 from traits.api import CArray, HasStrictTraits, Instance, Str
 
 from ..abstract_overlay import AbstractOverlay
-from ..artist.flag_label_artist import FlagLabelArtist
+from ..stylus.flag_label_stylus import FlagLabelStylus
 from ..plots.base_point_plot import BasePointPlot
 from ..utils.text import switch_delimiters
 from .base_tool import BaseTool
@@ -42,7 +42,7 @@ class DataCursorOverlay(AbstractOverlay):
     _text = Str
 
     def _label_default(self):
-        return FlagLabelArtist()
+        return FlagLabelStylus()
 
     def reset(self):
         self._text = ''

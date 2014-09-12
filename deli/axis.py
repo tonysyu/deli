@@ -7,10 +7,10 @@ from traits.api import (Array, DelegatesTo, Instance, Property,
                         cached_property, on_trait_change)
 
 from .abstract_overlay import AbstractOverlay
-from .artist.label_artist import LabelArtist
-from .artist.tick_artist import XTickArtist, YTickArtist
-from .artist.tick_label_artist import XTickLabelArtist, YTickLabelArtist
-from .artist.line_artist import LineArtist
+from .stylus.label_stylus import LabelStylus
+from .stylus.tick_stylus import XTickStylus, YTickStylus
+from .stylus.tick_label_stylus import XTickLabelStylus, YTickLabelStylus
+from .stylus.line_stylus import LineStylus
 from .layout.bbox_transform import BaseTransform, BboxTransform
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
 from .style import config
@@ -29,14 +29,14 @@ class BaseAxis(AbstractOverlay):
     # Appearance traits
     #------------------------------------------------------------------------
 
-    #: Artist responsible for drawing tick labels.
-    tick_label_artist = Instance(LabelArtist)
+    #: Stylus responsible for drawing tick labels.
+    tick_label_stylus = Instance(LabelStylus)
 
-    #: Artist responsible for drawing ticks.
-    tick_artist = Instance(LineArtist)
+    #: Stylus responsible for drawing ticks.
+    tick_stylus = Instance(LineStylus)
 
-    #: Artist responsible for drawing the axis line.
-    line_artist = Instance(LineArtist)
+    #: Stylus responsible for drawing the axis line.
+    line_stylus = Instance(LineStylus)
 
     #------------------------------------------------------------------------
     # Private Traits
@@ -60,7 +60,7 @@ class BaseAxis(AbstractOverlay):
 
     @on_trait_change('component.origin')
     def _update_locus(self):
-        self.tick_artist.locus = self.locus
+        self.tick_stylus.locus = self.locus
     #------------------------------------------------------------------------
     # Public interface
     #------------------------------------------------------------------------
@@ -104,12 +104,12 @@ class BaseAxis(AbstractOverlay):
     def _draw_axis_line(self, gc):
         """ Draws the line for the axis. """
         xy_axis_min, xy_axis_max = self._compute_xy_end_points()
-        self.line_artist.draw_segments(gc, xy_axis_min, xy_axis_max)
+        self.line_stylus.draw_segments(gc, xy_axis_min, xy_axis_max)
 
     def _draw_ticks(self, gc):
         """ Draws the tick marks for the axis.
         """
-        self.tick_artist.draw(gc, self.tick_grid.axial_offsets)
+        self.tick_stylus.draw(gc, self.tick_grid.axial_offsets)
 
     def _draw_labels(self, gc):
         """ Draws the tick labels for the axis.
@@ -119,7 +119,7 @@ class BaseAxis(AbstractOverlay):
         for xy_screen, data_offset in zip(xy_tick, axial_offsets):
             gc.translate_ctm(*xy_screen)
             label = self.data_offset_to_label(data_offset)
-            self.tick_label_artist.draw(gc, label)
+            self.tick_label_stylus.draw(gc, label)
             gc.translate_ctm(*(-xy_screen))
 
     #------------------------------------------------------------------------
@@ -141,16 +141,16 @@ class XAxis(BaseAxis):
 
     locus = DelegatesTo('component', 'y')
 
-    def _line_artist_default(self):
-        return LineArtist(color=config.get('axis.line.color'))
+    def _line_stylus_default(self):
+        return LineStylus(color=config.get('axis.line.color'))
 
-    def _tick_artist_default(self):
-        return XTickArtist(color=config.get('axis.tick.color'),
+    def _tick_stylus_default(self):
+        return XTickStylus(color=config.get('axis.tick.color'),
                            locus=self.locus,
                            transform=self.transform)
 
-    def _tick_label_artist_default(self):
-        return XTickLabelArtist(offset=-config.get('axis.tick_label.offset'),
+    def _tick_label_stylus_default(self):
+        return XTickLabelStylus(offset=-config.get('axis.tick_label.offset'),
                                 color=config.get('axis.tick_label.color'))
 
     def _tick_grid_default(self):
@@ -173,16 +173,16 @@ class YAxis(BaseAxis):
 
     locus = DelegatesTo('component', 'x')
 
-    def _line_artist_default(self):
-        return LineArtist(color=config.get('axis.line.color'))
+    def _line_stylus_default(self):
+        return LineStylus(color=config.get('axis.line.color'))
 
-    def _tick_artist_default(self):
-        return YTickArtist(color=config.get('axis.tick.color'),
+    def _tick_stylus_default(self):
+        return YTickStylus(color=config.get('axis.tick.color'),
                            locus=self.locus,
                            transform=self.transform)
 
-    def _tick_label_artist_default(self):
-        return YTickLabelArtist(offset=-config.get('axis.tick_label.offset'),
+    def _tick_label_stylus_default(self):
+        return YTickLabelStylus(offset=-config.get('axis.tick_label.offset'),
                                 color=config.get('axis.tick_label.color'))
 
     def _tick_grid_default(self):

@@ -10,7 +10,7 @@ from traits.api import (Enum, Float, HasStrictTraits, Int, Property, Str,
 from ..style import config
 
 
-class LabelArtist(HasStrictTraits):
+class LabelStylus(HasStrictTraits):
     """ A Flyweight object for drawing text labels.
     """
 
@@ -42,7 +42,7 @@ class LabelArtist(HasStrictTraits):
     _y_origin_factor = Property(Int, depends_on='y_origin')
 
     def __init__(self, **traits):
-        super(LabelArtist, self).__init__(**traits)
+        super(LabelStylus, self).__init__(**traits)
 
     def update_style(self, gc):
         gc.set_fill_color(self.color_)

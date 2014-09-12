@@ -18,7 +18,7 @@ def kiva_array_from_numpy_array(data):
     return GraphicsContextArray(data, pix_format=kiva_depth)
 
 
-class ImageArtist(HasStrictTraits):
+class ImageStylus(HasStrictTraits):
 
     _cached_image = Instance(GraphicsContextArray)
     _cache_valid = Bool(False)

@@ -1,7 +1,7 @@
 from traits.api import HasStrictTraits, Property
 
 
-class BaseArtist(HasStrictTraits):
+class BaseStylus(HasStrictTraits):
 
     label = Property
 

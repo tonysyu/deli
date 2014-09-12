@@ -2,7 +2,7 @@ import numpy as np
 
 from traits.api import Any, DelegatesTo, Instance
 
-from deli.artist.rect_artist import RectangleArtist
+from deli.stylus.rect_stylus import RectangleStylus
 from deli.axis import XAxis
 from deli.demo_utils.traitsui import TraitsWindow
 from deli.graph import Graph
@@ -27,7 +27,7 @@ class BarPlot(BasePointPlot):
     """ A plot for line data.
     """
 
-    artist = Instance(RectangleArtist, ())
+    stylus = Instance(RectangleStylus, ())
 
     #--------------------------------------------------------------------------
     #  Private interface
@@ -37,11 +37,11 @@ class BarPlot(BasePointPlot):
         x0, y0 = self.data_to_screen.transform([0, 0])
         with gc:
             gc.clip_to_rect(*self.screen_bbox.bounds)
-            # self.artist.update_style(gc)
+            # self.stylus.update_style(gc)
             width = 20
             for x, y in points:
                 rect = (x-width/2.0, y0, width, y - y0)
-                self.artist.draw(gc, rect)
+                self.stylus.draw(gc, rect)
 
 
 class Demo(TraitsWindow):

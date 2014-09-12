@@ -1,7 +1,7 @@
-from .base_patch_artist import BasePatchArtist
+from .base_patch_stylus import BasePatchStylus
 
 
-class PolygonArtist(BasePatchArtist):
+class PolygonStylus(BasePatchStylus):
     """ A Flyweight object for drawing filled polygons.
     """
 

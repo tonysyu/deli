@@ -4,10 +4,10 @@ from enable.api import ColorTrait, LineStyle
 from traits.api import CFloat, Range
 
 from ..style import config
-from .base_artist import BaseArtist
+from .base_stylus import BaseStylus
 
 
-class LineArtist(BaseArtist):
+class LineStylus(BaseStylus):
     """ A Flyweight object for drawing lines.
     """
 

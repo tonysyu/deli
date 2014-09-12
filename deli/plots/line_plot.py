@@ -1,6 +1,6 @@
 from traits.api import DelegatesTo, Instance
 
-from ..artist.line_artist import LineArtist
+from ..stylus.line_stylus import LineStylus
 from .base_point_plot import BasePointPlot
 
 
@@ -10,7 +10,7 @@ class LinePlot(BasePointPlot):
     # The color of the line.
     color = DelegatesTo('line')
 
-    line = Instance(LineArtist, ())
+    line = Instance(LineStylus, ())
 
     #--------------------------------------------------------------------------
     #  Private interface
@@ -24,5 +24,5 @@ class LinePlot(BasePointPlot):
     def _color_changed(self):
         self.request_redraw()
 
-    def _get_artists(self):
+    def _get_styluses(self):
         return (self.line,)
