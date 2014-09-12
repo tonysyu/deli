@@ -58,107 +58,6 @@ class Container(Component):
             for component in self._components:
                 component.cleanup(window)
 
-    #------------------------------------------------------------------------
-    # Protected methods
-    #------------------------------------------------------------------------
-
-    def draw_layer(self, layer, gc, view_bounds):
-        """ Renders the named *layer* of this component.
-        """
-        new_bounds = self._local_bounds(view_bounds)
-        if new_bounds == empty_rectangle:
-            return
-
-        draw_layer_ = super(Container, self).draw_layer
-
-        if layer in ('background', 'underlay'):
-            draw_layer_(layer, gc, view_bounds)
-
-        if layer == 'plot':
-            self._draw_children(layer, gc, new_bounds)
-
-        if layer == 'overlay':
-            draw_layer_(layer, gc, view_bounds)
-
-    def _draw_children(self, layer, gc, view_bounds):
-        # Draw children with coordinates relative to container.
-        visible_components = self._get_visible_components(view_bounds)
-        if visible_components:
-            with gc:
-                gc.translate_ctm(*self.origin)
-                for component in visible_components:
-                    component.draw(gc, view_bounds)
-
-    def _get_visible_components(self, bounds):
-        """ Returns a list of this plot's children that are in the bounds. """
-        if bounds is None:
-            return [c for c in self.components if c.visible]
-
-        visible_components = []
-        for component in self.components:
-            if not component.visible:
-                continue
-            tmp = intersect_bounds(component.origin +
-                                   component.size, bounds)
-            if tmp != empty_rectangle:
-                visible_components.append(component)
-        return visible_components
-
-    def _should_layout(self, component):
-        """ Returns True if it is appropriate for the container to lay out
-        the component; False if not.
-        """
-        if not component or not component.visible:
-            return False
-        else:
-            return True
-
-    def _local_bounds(self, view_bounds):
-        """ Return bounds transformed to local space. """
-        # Check if we are visible
-        tmp = intersect_bounds(self.origin + self.size, view_bounds)
-        if tmp == empty_rectangle:
-            return empty_rectangle
-        # Transform view_bounds transformed into our coordinate space.
-        x, y, width, height = view_bounds
-        new_bounds = (x-self.x, y-self.y, width, height)
-        return new_bounds
-
-    def _component_origin_changed(self):
-        """Called by contained objects when their origins change"""
-        self._origin_changed()
-
-    def _component_size_changed(self):
-        """Called by contained objects when their size change"""
-        self._size_changed()
-
-    #------------------------------------------------------------------------
-    # Property setters & getters
-    #------------------------------------------------------------------------
-
-    def _get_components(self):
-        return self._components
-
-    def _get_layout_needed(self):
-        # Override the parent implementation to take into account whether any
-        # of our contained components need layout.
-        if self._layout_needed:
-            return True
-        else:
-            for c in self.components:
-                if c.layout_needed:
-                    return True
-            else:
-                return False
-
-    #------------------------------------------------------------------------
-    # Event handling
-    #------------------------------------------------------------------------
-
-    def _size_changed(self):
-        super(Container, self)._size_changed()
-        self._layout_needed = True
-
     def get_event_transform(self, event=None):
         return affine.affine_from_translation(-self.x, -self.y)
 
@@ -200,6 +99,59 @@ class Container(Component):
         if not event.handled:
             super(Container, self).dispatch(event, suffix)
 
+    def draw_layer(self, layer, gc, view_bounds):
+        """ Renders the named *layer* of this component.
+        """
+        new_bounds = self._local_bounds(view_bounds)
+        if new_bounds == empty_rectangle:
+            return
+
+        draw_layer_ = super(Container, self).draw_layer
+
+        if layer in ('background', 'underlay'):
+            draw_layer_(layer, gc, view_bounds)
+
+        if layer == 'plot':
+            self._draw_children(layer, gc, new_bounds)
+
+        if layer == 'overlay':
+            draw_layer_(layer, gc, view_bounds)
+
+    #------------------------------------------------------------------------
+    # Property setters & getters
+    #------------------------------------------------------------------------
+
+    def _get_components(self):
+        return self._components
+
+    def _get_layout_needed(self):
+        # Override the parent implementation to take into account whether any
+        # of our contained components need layout.
+        if self._layout_needed:
+            return True
+        else:
+            for c in self.components:
+                if c.layout_needed:
+                    return True
+            else:
+                return False
+
+    #------------------------------------------------------------------------
+    # Event handlers
+    #------------------------------------------------------------------------
+
+    def _component_origin_changed(self):
+        """Called by contained objects when their origins change"""
+        self._origin_changed()
+
+    def _component_size_changed(self):
+        """Called by contained objects when their size change"""
+        self._size_changed()
+
+    def _size_changed(self):
+        super(Container, self)._size_changed()
+        self._layout_needed = True
+
     @contextmanager
     def _local_event_transform(self, event):
         """ Translate event location to be relative to this container. """
@@ -219,9 +171,44 @@ class Container(Component):
                 component.dispatch(event, suffix)
                 event.handled = False
 
-    #------------------------------------------------------------------------
-    # Event handlers
-    #------------------------------------------------------------------------
-
     def __components_items_changed(self, event):
         self._layout_needed = True
+
+    #--------------------------------------------------------------------------
+    # Private interface
+    #--------------------------------------------------------------------------
+
+    def _draw_children(self, layer, gc, view_bounds):
+        # Draw children with coordinates relative to container.
+        visible_components = self._get_visible_components(view_bounds)
+        if visible_components:
+            with gc:
+                gc.translate_ctm(*self.origin)
+                for component in visible_components:
+                    component.draw(gc, view_bounds)
+
+    def _get_visible_components(self, bounds):
+        """ Returns a list of this plot's children that are in the bounds. """
+        if bounds is None:
+            return [c for c in self.components if c.visible]
+
+        visible_components = []
+        for component in self.components:
+            if not component.visible:
+                continue
+            tmp = intersect_bounds(component.origin +
+                                   component.size, bounds)
+            if tmp != empty_rectangle:
+                visible_components.append(component)
+        return visible_components
+
+    def _local_bounds(self, view_bounds):
+        """ Return bounds transformed to local space. """
+        # Check if we are visible
+        tmp = intersect_bounds(self.origin + self.size, view_bounds)
+        if tmp == empty_rectangle:
+            return empty_rectangle
+        # Transform view_bounds transformed into our coordinate space.
+        x, y, width, height = view_bounds
+        new_bounds = (x-self.x, y-self.y, width, height)
+        return new_bounds

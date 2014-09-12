@@ -14,9 +14,5 @@ def simple_container_do_layout(container, components=None):
 
 def apply_size_to_all_components(size, container, components):
     for component in components:
-        if hasattr(container, '_should_layout'):
-            if not container._should_layout(component):
-                continue
-
         component.origin = [0, 0]
         component.size = size
