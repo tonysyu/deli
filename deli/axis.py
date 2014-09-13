@@ -11,6 +11,7 @@ from .stylus.label_stylus import LabelStylus
 from .stylus.tick_stylus import XTickStylus, YTickStylus
 from .stylus.tick_label_stylus import XTickLabelStylus, YTickLabelStylus
 from .stylus.line_stylus import LineStylus
+from .stylus.segment_stylus import SegmentStylus
 from .layout.bbox_transform import BaseTransform, BboxTransform
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
 from .style import config
@@ -36,7 +37,7 @@ class BaseAxis(AbstractOverlay):
     tick_stylus = Instance(LineStylus)
 
     #: Stylus responsible for drawing the axis line.
-    line_stylus = Instance(LineStylus)
+    line_stylus = Instance(SegmentStylus)
 
     #------------------------------------------------------------------------
     # Private Traits
@@ -104,7 +105,7 @@ class BaseAxis(AbstractOverlay):
     def _draw_axis_line(self, gc):
         """ Draws the line for the axis. """
         xy_axis_min, xy_axis_max = self._compute_xy_end_points()
-        self.line_stylus.draw_segments(gc, xy_axis_min, xy_axis_max)
+        self.line_stylus.draw(gc, xy_axis_min, xy_axis_max)
 
     def _draw_ticks(self, gc):
         """ Draws the tick marks for the axis.
@@ -142,7 +143,7 @@ class XAxis(BaseAxis):
     locus = DelegatesTo('component', 'y')
 
     def _line_stylus_default(self):
-        return LineStylus(color=config.get('axis.line.color'))
+        return SegmentStylus(color=config.get('axis.line.color'))
 
     def _tick_stylus_default(self):
         return XTickStylus(color=config.get('axis.tick.color'),
@@ -174,7 +175,7 @@ class YAxis(BaseAxis):
     locus = DelegatesTo('component', 'x')
 
     def _line_stylus_default(self):
-        return LineStylus(color=config.get('axis.line.color'))
+        return SegmentStylus(color=config.get('axis.line.color'))
 
     def _tick_stylus_default(self):
         return YTickStylus(color=config.get('axis.tick.color'),

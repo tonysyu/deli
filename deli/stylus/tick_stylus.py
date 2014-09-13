@@ -5,7 +5,7 @@ from traits.api import Float, Instance, Property
 
 from ..layout.bbox_transform import BaseTransform
 from ..style import config
-from .line_stylus import LineStylus
+from .segment_stylus import SegmentStylus
 
 
 def offsets_to_points(axial_offsets, axial_coordinate, locus=0):
@@ -16,7 +16,7 @@ def offsets_to_points(axial_offsets, axial_coordinate, locus=0):
     return np.transpose(np.broadcast_arrays(*points))
 
 
-class BaseTickStylus(LineStylus):
+class BaseTickStylus(SegmentStylus):
 
     #: The screen position of the axis in the dimension that's fixed;
     #: i.e. x-position for a y-axis and y-position for an x-axis.
@@ -37,7 +37,7 @@ class BaseTickStylus(LineStylus):
 
     def draw(self, gc, offsets):
         tick_segments = self._offsets_to_segments(offsets)
-        self.draw_segments(gc, *tick_segments)
+        super(BaseTickStylus, self).draw(gc, *tick_segments)
 
     @abstractmethod
     def _offsets_to_segments(self, offsets):
