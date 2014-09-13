@@ -4,7 +4,7 @@ from ..graph import Graph
 
 
 component_attrs = ['origin', 'size']
-graph_attrs = component_attrs + ['canvas']
+graph_attrs = component_attrs + ['canvas', 'title']
 canvas_attrs = component_attrs + ['artists']
 
 

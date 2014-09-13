@@ -50,7 +50,3 @@ class MockWindow(ABCHasStrictTraits):
         self._setup()
         bounds = self.origin + self.size
         self.graph.draw(self.context, view_bounds=bounds)
-
-    def serialize(self):
-        self._setup()
-        return self.graph.serialize()
