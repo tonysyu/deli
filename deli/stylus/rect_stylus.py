@@ -13,8 +13,7 @@ class RectangleStylus(BasePatchStylus):
 
     def draw(self, gc, rect):
         with gc:
-            if self.edge_color is not 'none':
-                gc.set_stroke_color(self.edge_color_)
+            gc.set_stroke_color(self.edge_color_)
             if self.fill_color is not 'none':
                 gc.set_fill_color(self.fill_color_)
                 gc.fill_path()

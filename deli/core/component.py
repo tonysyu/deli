@@ -2,7 +2,6 @@
 from itertools import chain
 
 from enable.colors import ColorTrait
-from kiva.constants import FILL
 from traits.api import Any, Bool, Instance, List, Property, Str, WeakRef
 
 from ..layout.bounding_box import BoundingBox
@@ -51,7 +50,7 @@ class Component(CoordinateBox):
     container = WeakRef(CoordinateBox)
 
     # The top-level Window.
-    window = Property   # Instance("Window")
+    window = Property
 
     # Only gets set if this is the top-level enable component in a Window.
     _window = Any    # Instance("Window")
@@ -105,6 +104,8 @@ class Component(CoordinateBox):
     layout_needed = Property
 
     _layout_needed = Bool(True)
+
+    background = Instance('Component')
 
     #------------------------------------------------------------------------
     # Abstract methods
@@ -221,13 +222,8 @@ class Component(CoordinateBox):
     def _draw_background(self, gc, view_bounds=None):
         """ Draws the background layer of a component.
         """
-        if self.bgcolor not in ("clear", "transparent", "none"):
-            rect = tuple(self.origin) + (self.width-1, self.height-1)
-
-            with gc:
-                gc.set_antialias(False)
-                gc.set_fill_color(self.bgcolor_)
-                gc.draw_rect(rect, FILL)
+        if self.background is not None:
+            self.background.draw(gc)
 
     def _draw_overlay(self, gc, view_bounds=None):
         """ Draws the overlay layer of a component.
