@@ -124,16 +124,9 @@ class Container(Component):
         return self._components
 
     def _get_layout_needed(self):
-        # Override the parent implementation to take into account whether any
-        # of our contained components need layout.
-        if self._layout_needed:
-            return True
-        else:
-            for c in self.components:
-                if c.layout_needed:
-                    return True
-            else:
-                return False
+        # Override the parent implementation child components.
+        return (self._layout_needed
+                or any(c.layout_needed for c in self.components))
 
     #------------------------------------------------------------------------
     # Event handlers
