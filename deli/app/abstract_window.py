@@ -226,7 +226,7 @@ class AbstractWindow(HasStrictTraits):
         if hasattr(self.component, "do_layout"):
             self.component.do_layout()
         gc = self._gc
-        self.component.draw(gc, view_bounds=(0, 0, size[0], size[1]))
+        self.component.draw(gc, view_rect=(0, 0, size[0], size[1]))
 
         # Perform a paint of the GC to the window (only necessary on backends
         # that render to an off-screen buffer)

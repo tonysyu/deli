@@ -99,22 +99,22 @@ class Container(Component):
         if not event.handled:
             super(Container, self).dispatch(event, suffix)
 
-    def draw_layer(self, layer, gc, view_bounds):
+    def draw_layer(self, layer, gc, view_rect):
         """ Renders the named *layer* of this component.
         """
-        if view_bounds == empty_rectangle:
+        if view_rect == empty_rectangle:
             return
 
         draw_layer_ = super(Container, self).draw_layer
 
         if layer in ('background', 'underlay'):
-            draw_layer_(layer, gc, view_bounds)
+            draw_layer_(layer, gc, view_rect)
 
         if layer == 'plot':
-            self._draw_children(layer, gc, view_bounds)
+            self._draw_children(layer, gc, view_rect)
 
         if layer == 'overlay':
-            draw_layer_(layer, gc, view_bounds)
+            draw_layer_(layer, gc, view_rect)
 
     #------------------------------------------------------------------------
     # Property setters & getters
@@ -170,12 +170,12 @@ class Container(Component):
     # Private interface
     #--------------------------------------------------------------------------
 
-    def _draw_children(self, layer, gc, view_bounds):
+    def _draw_children(self, layer, gc, view_rect):
         # Draw children with coordinates relative to container.
         with gc:
             gc.translate_ctm(*self.origin)
-            for component in self._get_visible_components(view_bounds):
-                component.draw(gc, view_bounds)
+            for component in self._get_visible_components(view_rect):
+                component.draw(gc, view_rect)
 
     def _get_visible_components(self, bounds):
         """ Returns a list of this plot's children that are in the bounds. """

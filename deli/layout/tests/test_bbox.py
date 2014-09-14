@@ -40,13 +40,13 @@ def test_x_and_y_limits():
     assert_allclose(bbox.y_limits, (2, 4))
 
 
-def test_bounds():
+def test_rect():
     bbox = BoundingBox.from_extents(1, 2, 3, 4)
-    assert_allclose(bbox.bounds, (1, 2, 2, 2))
+    assert_allclose(bbox.rect, (1, 2, 2, 2))
 
 
 def test_width_and_height():
-    bbox = BoundingBox.from_bounds(1, 2, 10, 20)
+    bbox = BoundingBox.from_rect(1, 2, 10, 20)
     assert_allclose(bbox.width, 10)
     assert_allclose(bbox.height, 20)
 

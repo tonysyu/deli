@@ -88,7 +88,7 @@ class Component(CoordinateBox):
         self._update_bbox()
 
     def _update_bbox(self):
-        self.screen_bbox.bounds = (self.x, self.y, self.width, self.height)
+        self.screen_bbox.rect = (self.x, self.y, self.width, self.height)
 
     #------------------------------------------------------------------------
     # Basic appearance traits
@@ -121,14 +121,14 @@ class Component(CoordinateBox):
     # Public methods
     #------------------------------------------------------------------------
 
-    def draw(self, gc, view_bounds=None):
+    def draw(self, gc, view_rect=None):
         """ Draws the plot component.
 
         Parameters
         ----------
         gc : Kiva GraphicsContext
             The graphics context to draw the component on
-        view_bounds : 4-tuple of integers
+        view_rect : 4-tuple of integers
             (x, y, width, height) of the area to draw
         """
         if not self.visible:
@@ -139,7 +139,7 @@ class Component(CoordinateBox):
 
         # XXX: This causes underlays to draw once but overlays twice.
         for layer in self.draw_order:
-            self.draw_layer(layer, gc, view_bounds)
+            self.draw_layer(layer, gc, view_rect)
 
     def request_redraw(self):
         """
@@ -201,7 +201,7 @@ class Component(CoordinateBox):
     # Protected methods
     #------------------------------------------------------------------------
 
-    def draw_layer(self, layer, gc, view_bounds):
+    def draw_layer(self, layer, gc, view_rect):
         """ Renders the named *layer* of this component.
 
         This method can be used by container classes that group many components
@@ -213,33 +213,33 @@ class Component(CoordinateBox):
 
         handler = getattr(self, "_draw_" + layer, None)
         if handler:
-            handler(gc, view_bounds)
+            handler(gc, view_rect)
 
     #------------------------------------------------------------------------
     # Protected methods for subclasses to implement
     #------------------------------------------------------------------------
 
-    def _draw_background(self, gc, view_bounds=None):
+    def _draw_background(self, gc, view_rect=None):
         """ Draws the background layer of a component.
         """
         if self.background is not None:
             self.background.draw(gc)
 
-    def _draw_overlay(self, gc, view_bounds=None):
+    def _draw_overlay(self, gc, view_rect=None):
         """ Draws the overlay layer of a component.
         """
         for overlay in self.overlays:
             if overlay.visible:
-                overlay.draw(self, gc, view_bounds)
+                overlay.draw(self, gc, view_rect)
 
-    def _draw_underlay(self, gc, view_bounds=None):
+    def _draw_underlay(self, gc, view_rect=None):
         """ Draws the underlay layer of a component.
         """
         for underlay in self.underlays:
             # This method call looks funny but it's correct - underlays are
             # just overlays drawn at a different time in the rendering loop.
             if underlay.visible:
-                underlay.draw(self, gc, view_bounds)
+                underlay.draw(self, gc, view_rect)
 
     #------------------------------------------------------------------------
     # Tool-related methods and event dispatch

@@ -56,10 +56,10 @@ class DataCursorOverlay(AbstractOverlay):
     def data_point_to_string(self, point):
         return format_floats(point)
 
-    def draw(self, component, gc, view_bounds=None):
-        self._draw_overlay(gc, view_bounds)
+    def draw(self, component, gc, view_rect=None):
+        self._draw_overlay(gc, view_rect)
 
-    def _draw_overlay(self, gc, view_bounds=None):
+    def _draw_overlay(self, gc, view_rect=None):
         if len(self._text) == 0:
             return
 

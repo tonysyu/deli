@@ -36,7 +36,7 @@ class BarArtist(BasePointArtist):
     def _render(self, gc, points, selected_points=None):
         x0, y0 = self.data_to_screen.transform([0, 0])
         with gc:
-            gc.clip_to_rect(*self.screen_bbox.bounds)
+            gc.clip_to_rect(*self.screen_bbox.rect)
             # self.stylus.update_style(gc)
             width = 20
             for x, y in points:

@@ -11,7 +11,7 @@ class Demo(MockWindow):
         graph = Graph()
         graph.title.text = "Line Artist"
         # We don't have data, so we'll get warnings if we don't set bounds.
-        graph.canvas.data_bbox.bounds = (0, 0, 1, 1)
+        graph.canvas.data_bbox.rect = (0, 0, 1, 1)
         return graph
 
 

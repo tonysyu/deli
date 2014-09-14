@@ -65,16 +65,16 @@ class BaseGrid(AbstractOverlay):
         self._line_starts = np.array([])
         self._line_ends = np.array([])
 
-    def draw(self, other_component, gc, view_bounds=None):
+    def draw(self, other_component, gc, view_rect=None):
         """ Draws this component overlaid on another component.
 
         Overrides AbstractOverlay.
         """
         other_component = getattr(other_component, 'canvas', other_component)
         self._compute_ticks(other_component)
-        self._draw_component(gc, view_bounds)
+        self._draw_component(gc, view_rect)
 
-    def _draw_component(self, gc, view_bounds=None):
+    def _draw_component(self, gc, view_rect=None):
         """ Draws the component.
 
         This method is preserved for backwards compatibility. Overrides

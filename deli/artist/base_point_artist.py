@@ -37,7 +37,7 @@ class BasePointArtist(BaseArtist):
     # Component interface
     #------------------------------------------------------------------------
 
-    def _draw_plot(self, gc, view_bounds=None):
+    def _draw_plot(self, gc, view_rect=None):
         """ Draws the 'plot' layer.
         """
         pts = self.get_screen_points()

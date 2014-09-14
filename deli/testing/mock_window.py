@@ -49,4 +49,4 @@ class MockWindow(ABCHasStrictTraits):
     def show(self):
         self._setup()
         bounds = self.origin + self.size
-        self.graph.draw(self.context, view_bounds=bounds)
+        self.graph.draw(self.context, view_rect=bounds)

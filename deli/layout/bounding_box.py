@@ -50,8 +50,8 @@ class MPLBbox(Bbox):
         self.changed.fire()
 
     @classmethod
-    def from_bounds(cls, x0, y0, width, height):
-        """ Return bounding box from bounds given as (x0, y0, width, height).
+    def from_rect(cls, x0, y0, width, height):
+        """ Return bounding box from rect given as (x0, y0, width, height).
 
         Override this since matplotlib returns `Bbox`, not subclass, instance.
         """
@@ -107,8 +107,8 @@ class BoundingBox(HasStrictTraits):
     updated = Event
 
     @classmethod
-    def from_bounds(cls, x0, y0, width, height):
-        return cls.from_mpl_bbox(MPLBbox.from_bounds(x0, y0, width, height))
+    def from_rect(cls, x0, y0, width, height):
+        return cls.from_mpl_bbox(MPLBbox.from_rect(x0, y0, width, height))
 
     @classmethod
     def from_extents(cls, x0, y0, x1, y1):
@@ -121,7 +121,7 @@ class BoundingBox(HasStrictTraits):
         return instance
 
     def copy(self):
-        return self.__class__.from_bounds(*self.bounds)
+        return self.__class__.from_rect(*self.rect)
 
     def _bbox_updated(self):
         """Callback method for observer pattern."""
@@ -143,7 +143,7 @@ class BoundingBox(HasStrictTraits):
 
     y_limits = BboxProperty('intervaly')
 
-    bounds = BboxProperty('bounds')
+    rect = BboxProperty('bounds')
 
     width = BboxProperty('width', readonly=True)
 
@@ -164,4 +164,4 @@ class BoundingBox(HasStrictTraits):
         x1 = max(x_max, self.x_limits[1])
         y0 = min(y_min, self.y_limits[0])
         y1 = max(y_max, self.y_limits[1])
-        self.bounds = (x0, y0, x1 - x0, y1 - y0)
+        self.rect = (x0, y0, x1 - x0, y1 - y0)

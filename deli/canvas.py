@@ -33,8 +33,8 @@ class BackgroundArtist(BaseArtist):
     def _stylus_default(self):
         return RectangleStylus(edge_color='none')
 
-    def draw(self, gc, view_bounds=None):
-        self.stylus.draw(gc, self.screen_bbox.bounds)
+    def draw(self, gc, view_rect=None):
+        self.stylus.draw(gc, self.screen_bbox.rect)
 
 
 class Canvas(Container):
