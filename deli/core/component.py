@@ -220,26 +220,22 @@ class Component(CoordinateBox):
     #------------------------------------------------------------------------
 
     def _draw_background(self, gc, view_rect=None):
-        """ Draws the background layer of a component.
-        """
+        """ Draws the background layer of a component. """
         if self.background is not None:
             self.background.draw(gc)
 
     def _draw_overlay(self, gc, view_rect=None):
-        """ Draws the overlay layer of a component.
-        """
-        for overlay in self.overlays:
-            if overlay.visible:
-                overlay.draw(self, gc, view_rect)
+        """ Draws the overlay layer of a component. """
+        self._draw_layers(gc, self.overlays, view_rect=view_rect)
 
     def _draw_underlay(self, gc, view_rect=None):
-        """ Draws the underlay layer of a component.
-        """
-        for underlay in self.underlays:
-            # This method call looks funny but it's correct - underlays are
-            # just overlays drawn at a different time in the rendering loop.
-            if underlay.visible:
-                underlay.draw(self, gc, view_rect)
+        """ Draws the underlay layer of a component. """
+        self._draw_layers(gc, self.underlays, view_rect=view_rect)
+
+    def _draw_layers(self, gc, layers, view_rect=None):
+        for artist in layers:
+            if artist.visible:
+                artist.draw(self, gc, view_rect)
 
     #------------------------------------------------------------------------
     # Tool-related methods and event dispatch
