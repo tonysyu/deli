@@ -50,11 +50,12 @@ class MPLBbox(Bbox):
         self.changed.fire()
 
     @classmethod
-    def from_rect(cls, x0, y0, width, height):
+    def from_rect(cls, rect):
         """ Return bounding box from rect given as (x0, y0, width, height).
 
         Override this since matplotlib returns `Bbox`, not subclass, instance.
         """
+        x0, y0, width, height = rect
         return cls.from_extents(x0, y0, x0 + width, y0 + height)
 
     @classmethod
@@ -107,8 +108,8 @@ class BoundingBox(HasStrictTraits):
     updated = Event
 
     @classmethod
-    def from_rect(cls, x0, y0, width, height):
-        return cls.from_mpl_bbox(MPLBbox.from_rect(x0, y0, width, height))
+    def from_rect(cls, rect):
+        return cls.from_mpl_bbox(MPLBbox.from_rect(rect))
 
     @classmethod
     def from_extents(cls, x0, y0, x1, y1):
@@ -121,7 +122,7 @@ class BoundingBox(HasStrictTraits):
         return instance
 
     def copy(self):
-        return self.__class__.from_rect(*self.rect)
+        return self.__class__.from_rect(self.rect)
 
     def _bbox_updated(self):
         """Callback method for observer pattern."""

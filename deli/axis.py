@@ -62,16 +62,10 @@ class BaseAxis(AbstractOverlay):
     @on_trait_change('component.origin')
     def _update_locus(self):
         self.tick_stylus.locus = self.locus
+
     #------------------------------------------------------------------------
     # Public interface
     #------------------------------------------------------------------------
-
-    def __init__(self, component=None, **kwargs):
-        # Override init so that our component gets set last.  We want the
-        # _component_changed() event handler to get run last.
-        super(BaseAxis, self).__init__(**kwargs)
-        if component is not None:
-            self.component = component
 
     def data_offset_to_label(self, data_offset):
         return str(data_offset)
@@ -84,14 +78,6 @@ class BaseAxis(AbstractOverlay):
         """ Draws this component overlaid on another component.
 
         Overrides AbstractOverlay.
-        """
-        self._draw_component(gc, view_rect, component)
-
-    def _draw_component(self, gc, view_rect=None, component=None):
-        """ Draws the component.
-
-        This method is preserved for backwards compatibility. Overrides
-        Component.
         """
         with gc:
             self._draw_axis_line(gc)

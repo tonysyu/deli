@@ -75,7 +75,7 @@ class Component(CoordinateBox):
     screen_bbox = Instance(BoundingBox)
 
     def _screen_bbox_default(self):
-        return BoundingBox.from_extents(self.x, self.y, self.x2, self.y2)
+        return BoundingBox.from_rect(self.rect)
 
     def _size_changed(self):
         if self.container is not None:
@@ -88,7 +88,7 @@ class Component(CoordinateBox):
         self._update_bbox()
 
     def _update_bbox(self):
-        self.screen_bbox.rect = (self.x, self.y, self.width, self.height)
+        self.screen_bbox.rect = self.rect
 
     #------------------------------------------------------------------------
     # Basic appearance traits

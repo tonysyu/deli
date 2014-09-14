@@ -82,7 +82,7 @@ class BaseGrid(AbstractOverlay):
         """
         with gc:
             gc.set_antialias(False)
-            gc.clip_to_rect(*(self.component.origin + self.component.size))
+            gc.clip_to_rect(*self.component.rect)
             self.line_stylus.draw(gc, self._line_starts, self._line_ends)
 
     def _origin_changed_for_component(self):

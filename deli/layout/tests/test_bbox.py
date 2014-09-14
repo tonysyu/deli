@@ -46,7 +46,7 @@ def test_rect():
 
 
 def test_width_and_height():
-    bbox = BoundingBox.from_rect(1, 2, 10, 20)
+    bbox = BoundingBox.from_rect((1, 2, 10, 20))
     assert_allclose(bbox.width, 10)
     assert_allclose(bbox.height, 20)
 

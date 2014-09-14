@@ -4,7 +4,7 @@ from abc import abstractmethod
 
 from mock import MagicMock
 
-from traits.api import ABCHasStrictTraits, Instance, Str, Tuple
+from traits.api import ABCHasStrictTraits, Instance, Property, Str, Tuple
 
 from ..graph import Graph
 
@@ -23,10 +23,12 @@ def calculate_text_extent(text):
 class MockWindow(ABCHasStrictTraits):
 
     title = Str
-    size = Tuple((WIDTH, HEIGHT))
-    origin = Tuple((0, 0))
     graph = Instance(Graph)
     context = Instance(MagicMock)
+
+    size = Tuple((WIDTH, HEIGHT))
+    origin = Tuple((0, 0))
+    rect = Property
 
     @abstractmethod
     def setup_graph(self):
@@ -41,6 +43,9 @@ class MockWindow(ABCHasStrictTraits):
         context.get_full_text_extent.side_effect = calculate_text_extent
         return context
 
+    def _get_rect(self):
+        return self.origin + self.size
+
     def _setup(self):
         self.setup_graph()
         self.graph.origin = self.origin
@@ -48,5 +53,4 @@ class MockWindow(ABCHasStrictTraits):
 
     def show(self):
         self._setup()
-        bounds = self.origin + self.size
-        self.graph.draw(self.context, view_rect=bounds)
+        self.graph.draw(self.context, view_rect=self.rect)
