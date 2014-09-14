@@ -102,8 +102,7 @@ class Container(Component):
     def draw_layer(self, layer, gc, view_bounds):
         """ Renders the named *layer* of this component.
         """
-        new_bounds = self._local_bounds(view_bounds)
-        if new_bounds == empty_rectangle:
+        if view_bounds == empty_rectangle:
             return
 
         draw_layer_ = super(Container, self).draw_layer
@@ -112,7 +111,7 @@ class Container(Component):
             draw_layer_(layer, gc, view_bounds)
 
         if layer == 'plot':
-            self._draw_children(layer, gc, new_bounds)
+            self._draw_children(layer, gc, view_bounds)
 
         if layer == 'overlay':
             draw_layer_(layer, gc, view_bounds)
@@ -192,23 +191,11 @@ class Container(Component):
         if bounds is None:
             return [c for c in self.components if c.visible]
 
-        visible_components = []
-        for component in self.components:
-            if not component.visible:
+        components = []
+        for c in self.components:
+            if not c.visible:
                 continue
-            tmp = intersect_bounds(component.origin +
-                                   component.size, bounds)
+            tmp = intersect_bounds(c.origin + c.size, bounds)
             if tmp != empty_rectangle:
-                visible_components.append(component)
-        return visible_components
-
-    def _local_bounds(self, view_bounds):
-        """ Return bounds transformed to local space. """
-        # Check if we are visible
-        tmp = intersect_bounds(self.origin + self.size, view_bounds)
-        if tmp == empty_rectangle:
-            return empty_rectangle
-        # Transform view_bounds transformed into our coordinate space.
-        x, y, width, height = view_bounds
-        new_bounds = (x-self.x, y-self.y, width, height)
-        return new_bounds
+                components.append(c)
+        return components
