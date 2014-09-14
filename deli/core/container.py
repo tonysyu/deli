@@ -172,23 +172,15 @@ class Container(Component):
 
     def _draw_children(self, layer, gc, view_bounds):
         # Draw children with coordinates relative to container.
-        visible_components = self._get_visible_components(view_bounds)
-        if visible_components:
-            with gc:
-                gc.translate_ctm(*self.origin)
-                for component in visible_components:
-                    component.draw(gc, view_bounds)
+        with gc:
+            gc.translate_ctm(*self.origin)
+            for component in self._get_visible_components(view_bounds):
+                component.draw(gc, view_bounds)
 
     def _get_visible_components(self, bounds):
         """ Returns a list of this plot's children that are in the bounds. """
         if bounds is None:
             return [c for c in self.components if c.visible]
 
-        components = []
-        for c in self.components:
-            if not c.visible:
-                continue
-            tmp = intersect_bounds(c.origin + c.size, bounds)
-            if tmp != empty_rectangle:
-                components.append(c)
-        return components
+        return [c for c in self.components
+                if intersect_bounds(c.rect, bounds) != empty_rectangle]

@@ -54,6 +54,8 @@ class CoordinateBox(HasStrictTraits):
 
     height = Property
 
+    rect = Property
+
     #------------------------------------------------------------------------
     # Constraints-based layout
     #------------------------------------------------------------------------
@@ -159,6 +161,9 @@ class CoordinateBox(HasStrictTraits):
 
     def _set_y2(self, val):
         self.origin[1] = val - self.size[1] + 1
+
+    def _get_rect(self):
+        return self.origin + self.size
 
     def __constraints_vars_default(self):
         obj_name = self.id if hasattr(self, 'id') else ''
