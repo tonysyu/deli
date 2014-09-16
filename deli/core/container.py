@@ -105,16 +105,16 @@ class Container(Component):
         if view_rect == empty_rectangle:
             return
 
-        draw_layer_ = super(Container, self).draw_layer
+        if self.layout_needed:
+            self.do_layout()
 
-        if layer in ('background', 'underlay'):
-            draw_layer_(layer, gc, view_rect)
-
-        if layer == 'plot':
-            self._draw_children(layer, gc, view_rect)
-
-        if layer == 'overlay':
-            draw_layer_(layer, gc, view_rect)
+        layer_map = {
+            'background': [] if self.background is None else [self.background],
+            'underlay': self.underlays,
+            'plot': self._get_visible_components(view_rect),
+            'overlay': self.overlays,
+        }
+        self._draw_layers(gc, layer_map[layer], view_rect=view_rect)
 
     #------------------------------------------------------------------------
     # Property setters & getters

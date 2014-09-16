@@ -63,7 +63,7 @@ class Canvas(Container):
     calculate_layout = Callable
 
     def _background_default(self):
-        return BackgroundArtist(screen_bbox=self.screen_bbox,
+        return BackgroundArtist(screen_bbox=self.local_bbox,
                                 fill_color=self.bgcolor)
 
     #--------------------------------------------------------------------------

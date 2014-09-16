@@ -229,7 +229,7 @@ class Component(CoordinateBox):
     def _draw_background(self, gc, view_rect=None):
         """ Draws the background layer of a component. """
         if self.background is not None:
-            self.background.draw(gc)
+            self.background.draw(gc, view_rect=view_rect)
 
     def _draw_overlay(self, gc, view_rect=None):
         """ Draws the overlay layer of a component. """
