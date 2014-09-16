@@ -75,10 +75,7 @@ class BaseAxis(AbstractOverlay):
     #------------------------------------------------------------------------
 
     def draw(self, gc, view_rect=None):
-        """ Draws this component overlaid on another component.
-
-        Overrides AbstractOverlay.
-        """
+        """ Draws this component overlaid on another component. """
         with gc:
             self._draw_axis_line(gc)
             self._draw_ticks(gc)

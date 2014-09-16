@@ -44,8 +44,7 @@ class BaseGrid(AbstractOverlay):
 
     @on_trait_change("size,size_items,origin,origin_items")
     def invalidate(self):
-        """ Invalidate cached information about the grid.
-        """
+        """ Invalidate cached information about the grid. """
         self._reset_cache()
 
     #--------------------------------------------------------------------------
@@ -60,25 +59,13 @@ class BaseGrid(AbstractOverlay):
     #------------------------------------------------------------------------
 
     def _reset_cache(self):
-        """ Clears the cached tick positions.
-        """
+        """ Clears the cached tick positions. """
         self._line_starts = np.array([])
         self._line_ends = np.array([])
 
     def draw(self, gc, view_rect=None):
-        """ Draws this component overlaid on another component.
-
-        Overrides AbstractOverlay.
-        """
+        """ Draws this component overlaid on another component. """
         self._compute_ticks()
-        self._draw_component(gc, view_rect)
-
-    def _draw_component(self, gc, view_rect=None):
-        """ Draws the component.
-
-        This method is preserved for backwards compatibility. Overrides
-        Component.
-        """
         with gc:
             gc.set_antialias(False)
             gc.clip_to_rect(*([0, 0] + self.component.size))
@@ -96,9 +83,6 @@ class BaseGrid(AbstractOverlay):
 
     @on_trait_change("visible,line_color,line_style,line_width")
     def _visual_attr_changed(self):
-        """ Called when an attribute that affects the appearance of the grid
-        is changed.
-        """
         self.component.request_redraw()
 
     def _orientation_changed(self):
@@ -112,8 +96,7 @@ class XGrid(BaseGrid):
         return XGridLayout(data_bbox=self.component.data_bbox)
 
     def _compute_ticks(self):
-        """ Calculate the positions of grid lines in screen space.
-        """
+        """ Calculate the positions of grid lines in screen space. """
         offsets = self.tick_grid.axial_offsets
         y_lo, y_hi = self.component.local_bbox.y_limits
 
@@ -133,8 +116,7 @@ class YGrid(BaseGrid):
         return YGridLayout(data_bbox=self.component.data_bbox)
 
     def _compute_ticks(self):
-        """ Calculate the positions of grid lines in screen space.
-        """
+        """ Calculate the positions of grid lines in screen space. """
         offsets = self.tick_grid.axial_offsets
         x_lo, x_hi = self.component.local_bbox.x_limits
 

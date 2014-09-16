@@ -9,9 +9,7 @@ from .style import config
 
 
 class Graph(Container):
-    """ Represents a correlated set of data, plots, and axes in a single
-    screen region.
-    """
+    """ Container a plot canvas and surrounding decorations. """
 
     # The primary container for plot data.
     canvas = Instance(Canvas)
