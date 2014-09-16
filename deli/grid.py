@@ -52,7 +52,7 @@ class BaseGrid(AbstractOverlay):
     #  Protected interface
     #--------------------------------------------------------------------------
 
-    def _compute_ticks(self, component):
+    def _compute_ticks(self):
         raise NotImplementedError()
 
     #------------------------------------------------------------------------
@@ -65,13 +65,12 @@ class BaseGrid(AbstractOverlay):
         self._line_starts = np.array([])
         self._line_ends = np.array([])
 
-    def draw(self, other_component, gc, view_rect=None):
+    def draw(self, gc, view_rect=None):
         """ Draws this component overlaid on another component.
 
         Overrides AbstractOverlay.
         """
-        other_component = getattr(other_component, 'canvas', other_component)
-        self._compute_ticks(other_component)
+        self._compute_ticks()
         self._draw_component(gc, view_rect)
 
     def _draw_component(self, gc, view_rect=None):
@@ -112,15 +111,15 @@ class XGrid(BaseGrid):
     def _tick_grid_default(self):
         return XGridLayout(data_bbox=self.component.data_bbox)
 
-    def _compute_ticks(self, component):
+    def _compute_ticks(self):
         """ Calculate the positions of grid lines in screen space.
         """
         offsets = self.tick_grid.axial_offsets
-        y_lo, y_hi = component.local_bbox.y_limits
+        y_lo, y_hi = self.component.local_bbox.y_limits
 
         y = np.resize(y_lo, offsets.shape)
         points = np.transpose((offsets, y))
-        offsets = component.data_to_screen.transform(points)[:, 0]
+        offsets = self.component.data_to_screen.transform(points)[:, 0]
 
         starts, ends = vline_segments(offsets, y_lo, y_hi)
 
@@ -133,15 +132,15 @@ class YGrid(BaseGrid):
     def _tick_grid_default(self):
         return YGridLayout(data_bbox=self.component.data_bbox)
 
-    def _compute_ticks(self, component):
+    def _compute_ticks(self):
         """ Calculate the positions of grid lines in screen space.
         """
         offsets = self.tick_grid.axial_offsets
-        x_lo, x_hi = component.local_bbox.x_limits
+        x_lo, x_hi = self.component.local_bbox.x_limits
 
         x = np.resize(x_lo, offsets.shape)
         points = np.transpose((x, offsets))
-        offsets = component.data_to_screen.transform(points)[:, 1]
+        offsets = self.component.data_to_screen.transform(points)[:, 1]
 
         starts, ends = hline_segments(offsets, x_lo, x_hi)
 

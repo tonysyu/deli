@@ -244,7 +244,7 @@ class Component(CoordinateBox):
             gc.translate_ctm(*self.origin)
             for component in layers:
                 if component.visible:
-                    component.draw(self, gc, view_rect)
+                    component.draw(gc, view_rect)
 
     #------------------------------------------------------------------------
     # Tool-related methods and event dispatch

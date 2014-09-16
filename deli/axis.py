@@ -74,7 +74,7 @@ class BaseAxis(AbstractOverlay):
     # Component and AbstractOverlay interface
     #------------------------------------------------------------------------
 
-    def draw(self, component, gc, view_rect=None):
+    def draw(self, gc, view_rect=None):
         """ Draws this component overlaid on another component.
 
         Overrides AbstractOverlay.
