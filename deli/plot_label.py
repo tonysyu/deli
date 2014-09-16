@@ -60,8 +60,8 @@ class PlotLabel(AbstractOverlay):
         """ Lays out the label as an overlay on another component.
         """
         if self.component is not None:
-            self.x = self.component.x + (self.component.width / 2.0)
-            self.y = self.component.y2
+            self.x = (self.component.width / 2.0)
+            self.y = self.component.height
 
     def _text_changed(self, old, new):
         self._label.text = new
