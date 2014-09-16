@@ -226,18 +226,9 @@ class Component(CoordinateBox):
     # Protected methods for subclasses to implement
     #------------------------------------------------------------------------
 
-    def _draw_background(self, gc, view_rect=None):
-        """ Draws the background layer of a component. """
-        if self.background is not None:
-            self.background.draw(gc, view_rect=view_rect)
-
     def _draw_overlay(self, gc, view_rect=None):
         """ Draws the overlay layer of a component. """
         self._draw_layers(gc, self.overlays, view_rect=view_rect)
-
-    def _draw_underlay(self, gc, view_rect=None):
-        """ Draws the underlay layer of a component. """
-        self._draw_layers(gc, self.underlays, view_rect=view_rect)
 
     def _draw_layers(self, gc, layers, view_rect=None):
         with gc:
