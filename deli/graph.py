@@ -75,7 +75,7 @@ class Graph(Container):
         return title
 
     def _canvas_default(self):
-        return Canvas(screen_bbox=self.screen_bbox)
+        return Canvas()
 
     #--------------------------------------------------------------------------
     #  Protected interface

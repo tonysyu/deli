@@ -71,11 +71,17 @@ class Component(CoordinateBox):
     #  Bounding box
     #--------------------------------------------------------------------------
 
-    #: Bounding box in screen coordinates
+    #: Bounding box in absolute screen coordinates
     screen_bbox = Instance(BoundingBox)
+
+    #: Local bounding box in screen coordinates
+    local_bbox = Instance(BoundingBox)
 
     def _screen_bbox_default(self):
         return BoundingBox.from_rect(self.rect)
+
+    def _local_bbox_default(self):
+        return BoundingBox.from_size(self.size)
 
     def _size_changed(self):
         if self.container is not None:
@@ -89,6 +95,7 @@ class Component(CoordinateBox):
 
     def _update_bbox(self):
         self.screen_bbox.rect = self.rect
+        self.local_bbox.size = self.size
 
     #------------------------------------------------------------------------
     # Basic appearance traits
@@ -233,9 +240,11 @@ class Component(CoordinateBox):
         self._draw_layers(gc, self.underlays, view_rect=view_rect)
 
     def _draw_layers(self, gc, layers, view_rect=None):
-        for artist in layers:
-            if artist.visible:
-                artist.draw(self, gc, view_rect)
+        with gc:
+            gc.translate_ctm(*self.origin)
+            for component in layers:
+                if component.visible:
+                    component.draw(self, gc, view_rect)
 
     #------------------------------------------------------------------------
     # Tool-related methods and event dispatch

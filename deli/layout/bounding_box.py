@@ -112,6 +112,11 @@ class BoundingBox(HasStrictTraits):
         return cls.from_mpl_bbox(MPLBbox.from_rect(rect))
 
     @classmethod
+    def from_size(cls, size):
+        rect = [0, 0] + list(size)
+        return cls.from_mpl_bbox(MPLBbox.from_rect(rect))
+
+    @classmethod
     def from_extents(cls, x0, y0, x1, y1):
         return cls.from_mpl_bbox(MPLBbox.from_extents(x0, y0, x1, y1))
 
@@ -150,6 +155,8 @@ class BoundingBox(HasStrictTraits):
 
     height = BboxProperty('height', readonly=True)
 
+    size = Property
+
     def update_from_x_data(self, x_data):
         x_span = calc_bounds(x_data, self.x_limits)
         if x_span is not None:
@@ -166,3 +173,9 @@ class BoundingBox(HasStrictTraits):
         y0 = min(y_min, self.y_limits[0])
         y1 = max(y_max, self.y_limits[1])
         self.rect = (x0, y0, x1 - x0, y1 - y0)
+
+    def _get_size(self):
+        return (self.width, self.height)
+
+    def _set_size(self, size):
+        self.rect = (self.x0, self.y0) + tuple(size)

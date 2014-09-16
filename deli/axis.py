@@ -3,8 +3,8 @@
 import numpy as np
 from matplotlib.transforms import blended_transform_factory, IdentityTransform
 
-from traits.api import (Array, DelegatesTo, Instance, Property,
-                        cached_property, on_trait_change)
+from traits.api import (Array, Float, Instance, Property, cached_property,
+                        on_trait_change)
 
 from .abstract_overlay import AbstractOverlay
 from .stylus.label_stylus import LabelStylus
@@ -57,7 +57,7 @@ class BaseAxis(AbstractOverlay):
     #  Protected interface
     #--------------------------------------------------------------------------
 
-    locus = Array
+    locus = Float(0)
 
     @on_trait_change('component.origin')
     def _update_locus(self):
@@ -115,18 +115,16 @@ class BaseAxis(AbstractOverlay):
 
     def _compute_xy_end_points(self):
         end_xy_offset = self._get_end_xy_offset(self.component)
-        xy_axis_min = np.array([self.component.x, self.component.y])
+        xy_axis_min = np.array([0, 0])
         xy_axis_max = end_xy_offset + xy_axis_min
         return xy_axis_min, xy_axis_max
 
     def _data_to_screen_default(self):
         component = self.component
-        return BboxTransform(component.data_bbox, component.screen_bbox)
+        return BboxTransform(component.data_bbox, component.local_bbox)
 
 
 class XAxis(BaseAxis):
-
-    locus = DelegatesTo('component', 'y')
 
     def _line_stylus_default(self):
         return SegmentStylus(color=config.get('axis.line.color'))
@@ -149,7 +147,7 @@ class XAxis(BaseAxis):
                                          self.ortho_transform)
 
     def _get_end_xy_offset(self, component):
-        return np.array([component.screen_bbox.width, 0])
+        return np.array([component.local_bbox.width, 0])
 
     def _get_tick_positions(self):
         points = broadcast_points(self.tick_grid.axial_offsets, self.locus)
@@ -157,8 +155,6 @@ class XAxis(BaseAxis):
 
 
 class YAxis(BaseAxis):
-
-    locus = DelegatesTo('component', 'x')
 
     def _line_stylus_default(self):
         return SegmentStylus(color=config.get('axis.line.color'))
@@ -181,7 +177,7 @@ class YAxis(BaseAxis):
                                          self.data_to_screen)
 
     def _get_end_xy_offset(self, component):
-        return np.array([0, component.screen_bbox.height])
+        return np.array([0, component.local_bbox.height])
 
     def _get_tick_positions(self):
         points = broadcast_points(self.locus, self.tick_grid.axial_offsets)

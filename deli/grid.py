@@ -82,7 +82,7 @@ class BaseGrid(AbstractOverlay):
         """
         with gc:
             gc.set_antialias(False)
-            gc.clip_to_rect(*self.component.rect)
+            gc.clip_to_rect(*([0, 0] + self.component.size))
             self.line_stylus.draw(gc, self._line_starts, self._line_ends)
 
     def _origin_changed_for_component(self):
@@ -116,7 +116,7 @@ class XGrid(BaseGrid):
         """ Calculate the positions of grid lines in screen space.
         """
         offsets = self.tick_grid.axial_offsets
-        y_lo, y_hi = component.screen_bbox.y_limits
+        y_lo, y_hi = component.local_bbox.y_limits
 
         y = np.resize(y_lo, offsets.shape)
         points = np.transpose((offsets, y))
@@ -137,7 +137,7 @@ class YGrid(BaseGrid):
         """ Calculate the positions of grid lines in screen space.
         """
         offsets = self.tick_grid.axial_offsets
-        x_lo, x_hi = component.screen_bbox.x_limits
+        x_lo, x_hi = component.local_bbox.x_limits
 
         x = np.resize(x_lo, offsets.shape)
         points = np.transpose((x, offsets))
