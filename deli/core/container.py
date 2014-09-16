@@ -172,10 +172,8 @@ class Container(Component):
 
     def _draw_children(self, layer, gc, view_rect):
         # Draw children with coordinates relative to container.
-        with gc:
-            gc.translate_ctm(*self.origin)
-            for component in self._get_visible_components(view_rect):
-                component.draw(gc, view_rect)
+        children = self._get_visible_components(view_rect)
+        self._draw_layers(gc, children, view_rect=view_rect)
 
     def _get_visible_components(self, bounds):
         """ Returns a list of this plot's children that are in the bounds. """
