@@ -2,13 +2,13 @@ import numpy as np
 
 from traits.api import Callable, Dict, Instance, Property, Str
 
+from .artist.background_artist import BackgroundArtist
 from .artist.base_artist import BaseArtist
 from .core.container import Container
 from .layout.bbox_transform import BboxTransform
 from .layout.bounding_box import BoundingBox
 from .layout.box_layout import simple_container_do_layout
 from .style import config
-from .stylus.rect_stylus import RectangleStylus
 from .utils.misc import new_item_name
 
 
@@ -17,24 +17,6 @@ def replace_in_list(a_list, old, new):
         a_list.remove(old)
     if new is not None:
         a_list.append(new)
-
-
-class BackgroundArtist(BaseArtist):
-
-    screen_bbox = Instance(BoundingBox)
-
-    fill_color = Property
-
-    stylus = Instance(RectangleStylus)
-
-    def _set_fill_color(self, color):
-        self.stylus.fill_color = color
-
-    def _stylus_default(self):
-        return RectangleStylus(edge_color='none')
-
-    def draw(self, gc, view_rect=None):
-        self.stylus.draw(gc, self.screen_bbox.rect)
 
 
 class Canvas(Container):

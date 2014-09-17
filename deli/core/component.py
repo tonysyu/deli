@@ -115,6 +115,13 @@ class Component(CoordinateBox):
 
     background = Instance('Component')
 
+    def _bgcolor_changed(self):
+        # Late import to prevent circular import
+        from ..artist.background_artist import BackgroundArtist
+
+        self.background = BackgroundArtist(screen_bbox=self.local_bbox,
+                                           fill_color=self.bgcolor)
+
     #------------------------------------------------------------------------
     # Abstract methods
     #------------------------------------------------------------------------
