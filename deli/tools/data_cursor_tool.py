@@ -57,9 +57,6 @@ class DataCursorOverlay(AbstractOverlay):
         return format_floats(point)
 
     def draw(self, gc, view_rect=None):
-        self._draw_overlay(gc, view_rect)
-
-    def _draw_overlay(self, gc, view_rect=None):
         if len(self._text) == 0:
             return
 

@@ -53,4 +53,4 @@ class MockWindow(ABCHasStrictTraits):
 
     def show(self):
         self._setup()
-        self.graph.draw(self.context, view_rect=self.rect)
+        self.graph.render(self.context, view_rect=self.rect)

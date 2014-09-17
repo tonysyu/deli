@@ -33,18 +33,13 @@ class PlotLabel(AbstractOverlay):
         super(PlotLabel, self).__init__(*args, **kw)
         self.text = text
 
-    def draw(self, gc, view_rect=None):
-        """ Draws this label overlaid on another component. """
-        self._draw_overlay(gc, view_rect)
-
     def do_layout(self):
         """ Tells this component to do layout. """
         self._layout_as_overlay()
 
-    def _draw_overlay(self, gc, view_rect=None):
+    def draw(self, gc, view_rect=None):
         """ Draws the overlay layer of a component. """
         with gc:
-            gc.translate_ctm(self.x, self.y)
             self._label.draw(gc, self.text)
 
     def _layout_as_overlay(self, size=None, force=False):

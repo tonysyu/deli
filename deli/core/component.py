@@ -1,6 +1,7 @@
 """ Defines the Component class """
 from itertools import chain
 
+from enable.base import empty_rectangle
 from enable.colors import ColorTrait
 from traits.api import Any, Bool, Instance, List, Property, Str, WeakRef
 
@@ -128,8 +129,8 @@ class Component(CoordinateBox):
     # Public methods
     #------------------------------------------------------------------------
 
-    def draw(self, gc, view_rect=None):
-        """ Draws the plot component.
+    def render(self, gc, view_rect=None):
+        """ Renders this plot component.
 
         Parameters
         ----------
@@ -138,15 +139,17 @@ class Component(CoordinateBox):
         view_rect : 4-tuple of integers
             (x, y, width, height) of the area to draw
         """
-        if not self.visible:
+        if not self.visible or view_rect == empty_rectangle:
             return
 
         if self.layout_needed:
             self.do_layout()
 
-        # XXX: This causes underlays to draw once but overlays twice.
         for layer in self.draw_order:
             self.draw_layer(layer, gc, view_rect)
+
+    def draw(self, gc, view_rect=None):
+        pass
 
     def request_redraw(self):
         """
@@ -210,32 +213,35 @@ class Component(CoordinateBox):
 
     def draw_layer(self, layer, gc, view_rect):
         """ Renders the named *layer* of this component.
-
-        This method can be used by container classes that group many components
-        together and want them to draw cooperatively. The container iterates
-        through its components and asks them to draw only certain layers.
         """
+        if view_rect == empty_rectangle:
+            return
+
         if self.layout_needed:
             self.do_layout()
 
-        handler = getattr(self, "_draw_" + layer, None)
-        if handler:
-            handler(gc, view_rect)
+        layer_map = {
+            'background': [] if self.background is None else [self.background],
+            'underlay': self.underlays,
+            'overlay': self.overlays,
+        }
+        if layer == 'plot':
+            with gc:
+                gc.translate_ctm(*self.origin)
+                self.draw(gc, view_rect)
+        else:
+            self._draw_layers(gc, layer_map[layer], view_rect=view_rect)
 
     #------------------------------------------------------------------------
     # Protected methods for subclasses to implement
     #------------------------------------------------------------------------
-
-    def _draw_overlay(self, gc, view_rect=None):
-        """ Draws the overlay layer of a component. """
-        self._draw_layers(gc, self.overlays, view_rect=view_rect)
 
     def _draw_layers(self, gc, layers, view_rect=None):
         with gc:
             gc.translate_ctm(*self.origin)
             for component in layers:
                 if component.visible:
-                    component.draw(gc, view_rect)
+                    component.render(gc, view_rect)
 
     #------------------------------------------------------------------------
     # Tool-related methods and event dispatch

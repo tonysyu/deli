@@ -11,7 +11,7 @@ class ImageArtist(BaseArtist):
 
     image = Instance(ImageStylus, ())
 
-    def _draw_plot(self, gc, view_rect=None):
+    def draw(self, gc, view_rect=None):
         height, width = self.data.shape[:2]
         rect_corners = self.data_to_screen.transform([(0, 0), (width, height)])
         x0, y0, x1, y1 = rect_corners.flat
