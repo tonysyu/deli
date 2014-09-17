@@ -46,11 +46,11 @@ class MockWindow(ABCHasStrictTraits):
     def _get_rect(self):
         return self.origin + self.size
 
-    def _setup(self):
+    def do_layout(self):
         self.setup_graph()
         self.graph.origin = self.origin
         self.graph.size = self.size
 
     def show(self):
-        self._setup()
+        self.do_layout()
         self.graph.render(self.context, view_rect=self.rect)

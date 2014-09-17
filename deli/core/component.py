@@ -118,16 +118,6 @@ class Component(CoordinateBox):
                                            fill_color=self.bgcolor)
 
     #------------------------------------------------------------------------
-    # Abstract methods
-    #------------------------------------------------------------------------
-
-    def _do_layout(self):
-        """ Called by do_layout() to do an actual layout call; it bypasses some
-        additional logic to handle null size and setting **_layout_needed**.
-        """
-        pass
-
-    #------------------------------------------------------------------------
     # Public methods
     #------------------------------------------------------------------------
 
@@ -192,6 +182,12 @@ class Component(CoordinateBox):
     #--------------------------------------------------------------------------
     #  Protected interface
     #--------------------------------------------------------------------------
+
+    def _do_layout(self):
+        """ Called by do_layout() to do an actual layout call; it bypasses some
+        additional logic to handle null size and setting **_layout_needed**.
+        """
+        pass
 
     def _draw_self(self, gc, view_rect=None):
         # `_draw_layers` uses `_local_context` as well, but it calls the

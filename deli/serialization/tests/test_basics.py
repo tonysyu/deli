@@ -7,6 +7,10 @@ from deli.testing.mock_window import MockWindow
 
 class Demo(MockWindow):
 
+    def __init__(self, **kwargs):
+        super(Demo, self).__init__(**kwargs)
+        self.do_layout()
+
     def setup_graph(self):
         graph = Graph()
         graph.title.text = "Line Artist"
@@ -17,14 +21,12 @@ class Demo(MockWindow):
 
 def test_setup():
     demo = Demo()
-    demo.show()
     assert all(w > 0 for w in demo.graph.size)
     assert all(w > 0 for w in demo.graph.canvas.size)
 
 
 def test_serialization():
     demo = Demo()
-    demo.show()
     output = serialize(demo.graph)
 
     assert output['__protocol__'] == 'Graph'
