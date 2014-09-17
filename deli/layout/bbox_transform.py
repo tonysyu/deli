@@ -1,4 +1,4 @@
-from matplotlib.transforms import Transform as BaseTransform
+from matplotlib.transforms import Transform as BaseTransform  # noqa
 from matplotlib.transforms import BboxTransform as _MPLBboxTransform
 
 

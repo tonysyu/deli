@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (c) 2011, Enthought, Inc.
 # All rights reserved.
 #
@@ -7,7 +7,7 @@
 # under the conditions described in the aforementioned license.  The license
 # is also available online at http://www.enthought.com/licenses/BSD.txt
 # Thanks for using Enthought open source!
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 """ Pointer and Key names for enable. Note that when these lists change,
     corresponding lists in each of the toolkit backends need to be changed as
     well. A warning will be printed when the enable.window module is imported
@@ -121,4 +121,3 @@ key_names = [
     'Up',
     'Alt',
 ]
-

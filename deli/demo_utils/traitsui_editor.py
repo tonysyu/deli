@@ -10,9 +10,9 @@ from ..app.window import Window
 
 class _ComponentEditor(Editor):
 
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     #  Trait definitions:
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     # The plot editor is scrollable (overrides Traits UI Editor).
     scrollable = True
@@ -64,18 +64,18 @@ class _ComponentEditor(Editor):
 class ComponentEditor(BasicEditorFactory):
     """ Editor factory for deli components.
     """
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     #  Trait definitions:
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
-    # The class used to create all editor styles (overrides BasicEditorFactory).
+    # Class used to create all editor styles (overrides BasicEditorFactory).
     klass = _ComponentEditor
 
     # The background color for the window
     bgcolor = ColorTrait('sys_window')
 
     # The default size of the Window wrapping this component
-    size = Tuple((400,400))
+    size = Tuple((400, 400))
 
     # Convenience function for accessing the width
     width = Property

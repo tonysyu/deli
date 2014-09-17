@@ -16,6 +16,7 @@ def broadcast_points(x, y):
     """
     return np.transpose(np.broadcast_arrays(x, y))
 
+
 def hline_segments(y, x_lo, x_hi):
     """ Return start and end points for horizontal line segments.
 

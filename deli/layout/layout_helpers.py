@@ -13,9 +13,9 @@ from .linear_symbolic import LinearSymbolic
 from .utils import add_symbolic_constraints, STRENGTHS
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Default Spacing
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 class DefaultSpacing(HasTraits):
     """ A class which encapsulates the default spacing parameters for
     the various layout helper objects.
@@ -35,9 +35,9 @@ class DefaultSpacing(HasTraits):
 DefaultSpacing = DefaultSpacing()
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Helper Functions
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 def expand_constraints(component, constraints):
     """ A function which expands any DeferredConstraints in the provided
     list. This is a generator function which yields the flattened stream
@@ -77,9 +77,9 @@ def is_spacer(item):
     return isinstance(item, (Spacer, int))
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Deferred Constraints
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 class DeferredConstraints(object):
     """ Abstract base class for objects that will yield lists of
     constraints upon request.
@@ -169,9 +169,9 @@ class DeferredConstraints(object):
         raise NotImplementedError
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Deferred Constraints Implementations
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 class DeferredConstraintsFunction(DeferredConstraints):
     """ A concrete implementation of DeferredConstraints which will
     call a function to get the constraint list upon request.
@@ -738,9 +738,9 @@ class GridHelper(BoxHelper):
         return constraints
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Abstract Constraint Factory
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 class AbstractConstraintFactory(object):
     """ An abstract constraint factory class. Subclasses must implement
     the 'constraints' method implement which returns a LinearConstraint
@@ -804,9 +804,9 @@ class AbstractConstraintFactory(object):
         raise NotImplementedError
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Abstract Constraint Factory Implementations
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 class BaseConstraintFactory(AbstractConstraintFactory):
     """ A base constraint factory class that implements basic common
     logic. It is not meant to be used directly but should rather be
@@ -1063,9 +1063,9 @@ class AlignmentConstraintFactory(SequenceConstraintFactory):
         return cls._make_cns(items, anchor_name, anchor_name, spacing)
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Spacers
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 class Spacer(object):
     """ An abstract base class for spacers. Subclasses must implement
     the 'constrain' method.
@@ -1212,9 +1212,9 @@ class LayoutSpacer(Spacer):
         return FlexSpacer(self.amt, **kwargs)
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Layout Helper Functions and Objects
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 def horizontal(*items, **config):
     """ Create a DeferredConstraints object composed of horizontal
     abutments for the given sequence of items.

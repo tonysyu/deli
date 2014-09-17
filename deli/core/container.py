@@ -28,9 +28,9 @@ class Container(Component):
     # generate mouse_enter and mouse_leave events of our own.
     _prev_event_handlers = Instance(set, ())
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Public methods
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def add(self, *components):
         """ Adds components to this container """
@@ -46,7 +46,7 @@ class Container(Component):
         Input point is specified in parent container's coordinate space.
         """
         result = []
-        if self.is_in(x,y):
+        if self.is_in(x, y):
             for component in self._components[::-1]:
                 if component.is_in(x - self.x, y - self.y):
                     result.append(component)
@@ -99,9 +99,9 @@ class Container(Component):
         if not event.handled:
             super(Container, self).dispatch(event, suffix)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     #  Protected interface
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _draw_self(self, gc, view_rect=None):
         """ Draw this container.
@@ -111,9 +111,9 @@ class Container(Component):
         components = self._get_visible_components(view_rect)
         self._draw_layers(gc, components, view_rect=view_rect)
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Property setters & getters
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def _get_components(self):
         return self._components
@@ -123,9 +123,9 @@ class Container(Component):
         return (self._layout_needed
                 or any(c.layout_needed for c in self.components))
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Event handlers
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def _component_origin_changed(self):
         """Called by contained objects when their origins change"""
@@ -161,9 +161,9 @@ class Container(Component):
     def __components_items_changed(self, event):
         self._layout_needed = True
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Private interface
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _get_visible_components(self, bounds):
         """ Returns a list of this plot's children that are in the bounds. """

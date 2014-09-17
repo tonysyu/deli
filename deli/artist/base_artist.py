@@ -13,16 +13,17 @@ class BaseArtist(Component):
     """ Base class for all artists.
 
     Unlike styluses, artists may contain the data that they render. Artists are
-    simply specific types of artists: For example, line-artists, marker-artists, and
-    bar-artists, may all be the same data associated with different artists.  As
-    a result, artists may use a few different styluses to compose a plot; for
-    example, a box-and-whisker artist might have separate styluses to draw
-    rectangles, error-bars (whiskers), and points (outliers).
+    simply specific types of artists: For example, line-artists,
+    marker-artists, and bar-artists, may all be the same data associated with
+    different artists.  As a result, artists may use a few different styluses
+    to compose a plot; for example, a box-and-whisker artist might have
+    separate styluses to draw rectangles, error-bars (whiskers), and points
+    (outliers).
     """
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Data-related traits
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     #: The extents of the data (x_min, y_min, x_max, y_max)
     data_extents = Property(Tuple)
@@ -48,9 +49,9 @@ class BaseArtist(Component):
     def _get_screen_to_data(self):
         return self.data_to_screen.inverted()
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     #  BaseArtist interface
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _get_data_extents(self):
         msg = "`BaseArtist` subclasses must implement `_get_data_extents`"

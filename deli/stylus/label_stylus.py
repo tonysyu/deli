@@ -26,7 +26,7 @@ class LabelStylus(HasStrictTraits):
     #: The font of the label text.
     font = KivaFont(config.get('text.label.font'))
 
-    #: Number of pixels of margin around the label, for both X and Y dimensions.
+    #: Pixel margin around the label, for both X and Y dimensions.
     margin = Int(config.get('label.margin'))
 
     #: Offset value from the current graphics-context position.
@@ -91,9 +91,9 @@ class LabelStylus(HasStrictTraits):
         y_bbox_offset = self._y_origin_factor * height + self.y_offset
         return x_bbox_offset, y_bbox_offset
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Private methods
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def _set_rotation_angle(self, gc, text, width, height):
         # Rotate label about center of bounding box

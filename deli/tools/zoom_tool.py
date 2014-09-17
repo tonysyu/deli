@@ -9,7 +9,7 @@ def zoom_out_centered_rect(rect, size_scale, offset_scale=None):
     if offset_scale is None:
         offset_scale = size_scale / 4.0
     return (x - offset_scale*width, y - offset_scale*height,
-           size_scale*width, size_scale*height)
+            size_scale*width, size_scale*height)
 
 
 def zoom_in_centered_rect(rect, size_scale):

@@ -3,7 +3,7 @@
 import numpy as np
 from matplotlib.transforms import blended_transform_factory, IdentityTransform
 
-from traits.api import (Array, Float, Instance, Property, cached_property,
+from traits.api import (Float, Instance, Property, cached_property,
                         on_trait_change)
 
 from .abstract_overlay import AbstractOverlay
@@ -26,9 +26,9 @@ class BaseAxis(AbstractOverlay):
     #: Transform from data-space to screen-space.
     data_to_screen = Instance(BaseTransform)
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Appearance traits
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     #: Stylus responsible for drawing tick labels.
     tick_label_stylus = Instance(LabelStylus)
@@ -39,9 +39,9 @@ class BaseAxis(AbstractOverlay):
     #: Stylus responsible for drawing the axis line.
     line_stylus = Instance(SegmentStylus)
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Private Traits
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     #: XXX Maybe rename data-to-screen to axial transform?
     #: Transform from axial values to screen-space.
@@ -53,9 +53,9 @@ class BaseAxis(AbstractOverlay):
     #: Blended transform combining axial and orthogonal transforms.
     transform = Property(Instance(BaseTransform))
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     #  Protected interface
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     locus = Float(0)
 
@@ -63,16 +63,16 @@ class BaseAxis(AbstractOverlay):
     def _update_locus(self):
         self.tick_stylus.locus = self.locus
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Public interface
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def data_offset_to_label(self, data_offset):
         return str(data_offset)
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Component and AbstractOverlay interface
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def draw(self, gc, view_rect=None):
         """ Draws this component overlaid on another component. """
@@ -81,9 +81,9 @@ class BaseAxis(AbstractOverlay):
             self._draw_ticks(gc)
             self._draw_labels(gc)
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Private draw routines
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def _draw_axis_line(self, gc):
         """ Draws the line for the axis. """
@@ -106,9 +106,9 @@ class BaseAxis(AbstractOverlay):
             self.tick_label_stylus.draw(gc, label)
             gc.translate_ctm(*(-xy_screen))
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Private methods for computing positions and layout
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def _compute_xy_end_points(self):
         end_xy_offset = self._get_end_xy_offset(self.component)

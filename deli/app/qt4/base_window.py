@@ -41,9 +41,9 @@ class _QtWindowHandler(object):
         component.origin = [0, 0]
         component.size = [dx, dy]
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Qt Keyboard event handlers
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def keyPressEvent(self, event):
         if self._enable_window:
@@ -54,9 +54,9 @@ class _QtWindowHandler(object):
         if self._enable_window:
             self._enable_window._on_key_released(event)
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Qt Mouse event handlers
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def enterEvent(self, event):
         if self._enable_window:
@@ -190,9 +190,9 @@ class _Window(AbstractWindow):
         if size is not None:
             self.control.resize(*size)
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Implementations of abstract methods in AbstractWindow
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def _create_key_event(self, event_type, event):
         if self.component is None:
@@ -202,8 +202,8 @@ class _Window(AbstractWindow):
         if event_type == 'character':
             key = unicode(event.text())
         else:
-            # Convert the keypress to a standard enable key if possible, otherwise
-            # to text.
+            # Convert the keypress to a standard enable key if possible,
+            # otherwise to text.
             key_code = event.key()
             key = KEY_MAP.get(key_code)
             if key is None:
@@ -217,13 +217,17 @@ class _Window(AbstractWindow):
 
         modifiers = event.modifiers()
 
-        return KeyEvent(event_type=event_type, character=key, x=x,
-                        y=self._flip_y(y),
-                        alt_down=bool(modifiers & QtCore.Qt.AltModifier),
-                        shift_down=bool(modifiers & QtCore.Qt.ShiftModifier),
-                        control_down=bool(modifiers & QtCore.Qt.ControlModifier),
-                        event=event,
-                        window=self)
+        return KeyEvent(
+            event_type=event_type,
+            character=key,
+            x=x,
+            y=self._flip_y(y),
+            alt_down=bool(modifiers & QtCore.Qt.AltModifier),
+            shift_down=bool(modifiers & QtCore.Qt.ShiftModifier),
+            control_down=bool(modifiers & QtCore.Qt.ControlModifier),
+            event=event,
+            window=self
+        )
 
     def _create_mouse_event(self, event):
         # If the control no longer exists, don't send mouse event
@@ -254,14 +258,18 @@ class _Window(AbstractWindow):
         else:
             mouse_wheel = 0
 
-        return MouseEvent(x=x, y=self._flip_y(y), mouse_wheel=mouse_wheel,
-                alt_down=bool(modifiers & QtCore.Qt.AltModifier),
-                shift_down=bool(modifiers & QtCore.Qt.ShiftModifier),
-                control_down=bool(modifiers & QtCore.Qt.ControlModifier),
-                left_down=bool(buttons & QtCore.Qt.LeftButton),
-                middle_down=bool(buttons & QtCore.Qt.MidButton),
-                right_down=bool(buttons & QtCore.Qt.RightButton),
-                window=self)
+        return MouseEvent(
+            x=x,
+            y=self._flip_y(y),
+            mouse_wheel=mouse_wheel,
+            alt_down=bool(modifiers & QtCore.Qt.AltModifier),
+            shift_down=bool(modifiers & QtCore.Qt.ShiftModifier),
+            control_down=bool(modifiers & QtCore.Qt.ControlModifier),
+            left_down=bool(buttons & QtCore.Qt.LeftButton),
+            middle_down=bool(buttons & QtCore.Qt.MidButton),
+            right_down=bool(buttons & QtCore.Qt.RightButton),
+            window=self
+        )
 
     def _redraw(self, coordinates=None):
         if self.control:
@@ -302,9 +310,9 @@ class _Window(AbstractWindow):
     def _on_key_pressed(self, event):
         return self._handle_key_event('key_pressed', event)
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Private methods
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def _flip_y(self, y):
         "Converts between a Kiva and a Qt y coordinate"

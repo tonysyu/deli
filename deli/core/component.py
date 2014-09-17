@@ -41,9 +41,9 @@ class Component(CoordinateBox):
     # Name of the class or protocol for this component. Defaults to class name.
     label = Str
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Components and containers
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     # The parent container for this component.
     container = WeakRef(CoordinateBox)
@@ -52,20 +52,20 @@ class Component(CoordinateBox):
     window = Property
 
     # Only gets set if this is the top-level enable component in a Window.
-    _window = Any    # Instance("Window")
+    _window = Any
 
     # A list of underlays for this plot.
-    underlays = List  #[AbstractOverlay]
+    underlays = List
 
     # A list of overlays for the plot.
-    overlays = List   #[AbstractOverlay]
+    overlays = List
 
     # The tools that are registered as listeners.
     tools = List
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     #  Bounding box
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     #: Bounding box in absolute screen coordinates
     screen_bbox = Instance(BoundingBox)
@@ -93,9 +93,9 @@ class Component(CoordinateBox):
         self.screen_bbox.rect = self.rect
         self.local_bbox.size = self.size
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Basic appearance traits
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     # The background color of this component.
     bgcolor = ColorTrait('transparent')
@@ -117,9 +117,9 @@ class Component(CoordinateBox):
         self.background = BackgroundArtist(screen_bbox=self.local_bbox,
                                            fill_color=self.bgcolor)
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Public methods
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def render(self, gc, view_rect=None):
         """ Renders everything in this plot component.
@@ -179,9 +179,9 @@ class Component(CoordinateBox):
         delete any transient state it may have (such as backbuffers)."""
         pass
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     #  Protected interface
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _do_layout(self):
         """ Called by do_layout() to do an actual layout call; it bypasses some
@@ -195,9 +195,9 @@ class Component(CoordinateBox):
         with self._local_context(gc):
             self.draw(gc, view_rect=view_rect)
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Layout-related concrete methods
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def do_layout(self, size=None, force=False):
         """ Tells this component to do layout at a given size.
@@ -226,13 +226,13 @@ class Component(CoordinateBox):
         """ Return the preferred size (width, height) for this component. """
         return [0, 0]
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Protected methods
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Protected methods for subclasses to implement
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     @contextmanager
     def _local_context(self, gc):
@@ -246,9 +246,9 @@ class Component(CoordinateBox):
                 if component.visible:
                     component.render(gc, view_rect)
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Tool-related methods and event dispatch
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def dispatch(self, event, suffix):
         """ Dispatches a mouse event based on the current event state.
@@ -286,9 +286,9 @@ class Component(CoordinateBox):
     def _tools_items_changed(self):
         self.request_redraw()
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Traits methods
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def _size_items_changed(self, event):
         if self.container is not None:

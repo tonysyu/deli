@@ -71,7 +71,7 @@ class DataCursorTool(BaseTool):
 
     overlay = Instance(AbstractOverlay)
 
-    visible=True
+    visible = True
 
     def _overlay_default(self):
         return DataCursorOverlay(component=self.component)

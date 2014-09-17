@@ -39,9 +39,9 @@ class AbstractWindow(HasStrictTraits):
     # Integer size of the Window (width, height).
     _size = Trait(None, Tuple)
 
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     #  Abstract methods that must be implemented by concrete subclasses
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def _create_key_event(self, event):
         "Convert a GUI toolkit key event into a KeyEvent"
@@ -61,7 +61,7 @@ class AbstractWindow(HasStrictTraits):
         "Get the size of the underlying toolkit control"
         raise NotImplementedError
 
-    def _create_gc(self, size, pix_format = "bgr24"):
+    def _create_gc(self, size, pix_format="bgr24"):
         """ Create a Kiva graphics context of a specified size.  This method
         only gets called when the size of the window itself has changed.  To
         perform pre-draw initialization every time in the paint loop, use
@@ -96,9 +96,9 @@ class AbstractWindow(HasStrictTraits):
         "Returns local window coordinates for given global screen coordinates"
         raise NotImplementedError
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Public methods
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def __init__(self, **traits):
         self._gc = None
@@ -126,9 +126,9 @@ class AbstractWindow(HasStrictTraits):
             self.component.size = list(size)
         self.redraw()
 
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     #  Generic keyboard event handler:
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def _handle_key_event(self, event_type, event):
         """ **event** should be a toolkit-specific opaque object that will
@@ -155,9 +155,9 @@ class AbstractWindow(HasStrictTraits):
 
         return key_event.handled
 
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     #  Generic mouse event handler:
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def _handle_mouse_event(self, event_name, event, set_focus=False):
         """ **event** should be a toolkit-specific opaque object that will
@@ -171,16 +171,18 @@ class AbstractWindow(HasStrictTraits):
             return False
 
         mouse_event = self._create_mouse_event(event)
+        xy = (mouse_event.x, mouse_event.y)
 
         if (not mouse_event.handled) and (self.component is not None):
             # Test to see if we need to generate a mouse_leave event
             if self._prev_event_handler:
-                if not self._prev_event_handler.is_in(mouse_event.x, mouse_event.y):
+                if not self._prev_event_handler.is_in(*xy):
                     mouse_event.handled = False
-                    self._prev_event_handler.dispatch(mouse_event, "mouse_leave")
+                    self._prev_event_handler.dispatch(mouse_event,
+                                                      "mouse_leave")
                     self._prev_event_handler = None
 
-            if self.component.is_in(mouse_event.x, mouse_event.y):
+            if self.component.is_in(*xy):
                 # Test to see if we need to generate a mouse_enter event
                 if self._prev_event_handler != self.component:
                     self._prev_event_handler = self.component
@@ -232,12 +234,12 @@ class AbstractWindow(HasStrictTraits):
         # that render to an off-screen buffer)
         self._window_paint(event)
 
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Wire up the mouse event handlers
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def _on_left_down(self, event):
-        self._handle_mouse_event('left_down', event, set_focus = True)
+        self._handle_mouse_event('left_down', event, set_focus=True)
 
     def _on_left_up(self, event):
         self._handle_mouse_event('left_up', event)
@@ -246,7 +248,7 @@ class AbstractWindow(HasStrictTraits):
         self._handle_mouse_event('left_dclick', event)
 
     def _on_right_down(self, event):
-        self._handle_mouse_event('right_down', event, set_focus = True)
+        self._handle_mouse_event('right_down', event, set_focus=True)
 
     def _on_right_up(self, event):
         self._handle_mouse_event('right_up', event)
@@ -278,9 +280,9 @@ class AbstractWindow(HasStrictTraits):
     def _on_window_enter(self, event):
         pass
 
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Wire up the keyboard event handlers
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def _on_key_pressed(self, event):
         self._handle_key_event('key_pressed', event)
@@ -290,5 +292,3 @@ class AbstractWindow(HasStrictTraits):
 
     def _on_character(self, event):
         self._handle_key_event('character', event)
-
-

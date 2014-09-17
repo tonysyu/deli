@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (c) 2011, Enthought, Inc.
 # All rights reserved.
 #
@@ -7,7 +7,7 @@
 # under the conditions described in the aforementioned license.  The license
 # is also available online at http://www.enthought.com/licenses/BSD.txt
 # Thanks for using Enthought open source!
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 from __future__ import absolute_import
 
@@ -15,19 +15,21 @@ import warnings
 
 from pyface.qt import QtCore
 
-from ..toolkit_constants import key_names, pointer_names
+from ..toolkit_constants import pointer_names
 
-DRAG_RESULTS_MAP = { "error":   QtCore.Qt.IgnoreAction,
-                     "none":    QtCore.Qt.IgnoreAction,
-                     "copy":    QtCore.Qt.CopyAction,
-                     "move":    QtCore.Qt.MoveAction,
-                     "link":    QtCore.Qt.LinkAction,
-                     "cancel":  QtCore.Qt.IgnoreAction }
+DRAG_RESULTS_MAP = {
+    "error": QtCore.Qt.IgnoreAction,
+    "none": QtCore.Qt.IgnoreAction,
+    "copy": QtCore.Qt.CopyAction,
+    "move": QtCore.Qt.MoveAction,
+    "link": QtCore.Qt.LinkAction,
+    "cancel": QtCore.Qt.IgnoreAction
+}
 
 BUTTON_NAME_MAP = {
-    QtCore.Qt.LeftButton:   "left",
-    QtCore.Qt.RightButton:  "right",
-    QtCore.Qt.MidButton:    "middle",
+    QtCore.Qt.LeftButton: "left",
+    QtCore.Qt.RightButton: "right",
+    QtCore.Qt.MidButton: "middle",
 }
 
 # TODO: Create bitmap cursor for the following:
@@ -43,37 +45,37 @@ BUTTON_NAME_MAP = {
 #   spray can
 
 pointer_shapes = [
-   QtCore.Qt.ArrowCursor,
-   QtCore.Qt.BusyCursor,
-   QtCore.Qt.BlankCursor,
-   QtCore.Qt.CrossCursor,
-   QtCore.Qt.IBeamCursor,
-   QtCore.Qt.CrossCursor,
-   QtCore.Qt.PointingHandCursor,
-   QtCore.Qt.IBeamCursor,
-   QtCore.Qt.ArrowCursor,
-   QtCore.Qt.CrossCursor,
-   QtCore.Qt.ArrowCursor,
-   QtCore.Qt.ForbiddenCursor,
-   QtCore.Qt.ArrowCursor,
-   QtCore.Qt.CrossCursor,
-   QtCore.Qt.ArrowCursor,
-   QtCore.Qt.ArrowCursor,
-   QtCore.Qt.WhatsThisCursor,
-   QtCore.Qt.ArrowCursor,
-   QtCore.Qt.ArrowCursor,
-   QtCore.Qt.SizeVerCursor,
-   QtCore.Qt.SizeBDiagCursor,
-   QtCore.Qt.SizeFDiagCursor,
-   QtCore.Qt.SizeHorCursor,
-   QtCore.Qt.SizeHorCursor,
-   QtCore.Qt.SizeVerCursor,
-   QtCore.Qt.SizeFDiagCursor,
-   QtCore.Qt.SizeBDiagCursor,
-   QtCore.Qt.SizeAllCursor,
-   QtCore.Qt.CrossCursor,
-   QtCore.Qt.WaitCursor,
-   QtCore.Qt.BusyCursor,
+    QtCore.Qt.ArrowCursor,
+    QtCore.Qt.BusyCursor,
+    QtCore.Qt.BlankCursor,
+    QtCore.Qt.CrossCursor,
+    QtCore.Qt.IBeamCursor,
+    QtCore.Qt.CrossCursor,
+    QtCore.Qt.PointingHandCursor,
+    QtCore.Qt.IBeamCursor,
+    QtCore.Qt.ArrowCursor,
+    QtCore.Qt.CrossCursor,
+    QtCore.Qt.ArrowCursor,
+    QtCore.Qt.ForbiddenCursor,
+    QtCore.Qt.ArrowCursor,
+    QtCore.Qt.CrossCursor,
+    QtCore.Qt.ArrowCursor,
+    QtCore.Qt.ArrowCursor,
+    QtCore.Qt.WhatsThisCursor,
+    QtCore.Qt.ArrowCursor,
+    QtCore.Qt.ArrowCursor,
+    QtCore.Qt.SizeVerCursor,
+    QtCore.Qt.SizeBDiagCursor,
+    QtCore.Qt.SizeFDiagCursor,
+    QtCore.Qt.SizeHorCursor,
+    QtCore.Qt.SizeHorCursor,
+    QtCore.Qt.SizeVerCursor,
+    QtCore.Qt.SizeFDiagCursor,
+    QtCore.Qt.SizeBDiagCursor,
+    QtCore.Qt.SizeAllCursor,
+    QtCore.Qt.CrossCursor,
+    QtCore.Qt.WaitCursor,
+    QtCore.Qt.BusyCursor,
 ]
 
 if len(pointer_names) != len(pointer_shapes):

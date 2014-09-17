@@ -1,9 +1,6 @@
 import numpy as np
 
-from ..core.component import Component
-from ..canvas import Canvas
-from ..graph import Graph
-from .default_adapter import (DefaultAdapter, create_simple_adapter)
+from .default_adapter import DefaultAdapter
 
 
 class ValueAdapter(DefaultAdapter):

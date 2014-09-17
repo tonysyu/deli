@@ -56,9 +56,9 @@ class CoordinateBox(HasStrictTraits):
 
     rect = Property
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Constraints-based layout
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     # A read-only symbolic object that represents the left boundary of
     # the component
@@ -115,9 +115,9 @@ class CoordinateBox(HasStrictTraits):
 
     # The list of size constraints to apply to the object.
     _size_constraints = Property
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Property setters and getters
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
 
     def _get_x(self):
         return self.origin[0]
@@ -148,7 +148,8 @@ class CoordinateBox(HasStrictTraits):
         self.trait_property_changed('height', old_value, val)
 
     def _get_x2(self):
-        if self.size[0] == 0: return self.origin[0]
+        if self.size[0] == 0:
+            return self.origin[0]
         return self.origin[0] + self.size[0] - 1
 
     def _set_x2(self, val):

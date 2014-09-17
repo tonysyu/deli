@@ -1,6 +1,6 @@
 import numpy as np
 
-from traits.api import Any, DelegatesTo, Instance
+from traits.api import Any, Instance
 
 from deli.stylus.rect_stylus import RectangleStylus
 from deli.axis import XAxis
@@ -29,9 +29,9 @@ class BarArtist(BasePointArtist):
 
     stylus = Instance(RectangleStylus, ())
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     #  Private interface
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def draw(self, gc, view_rect=None):
         points = self.get_screen_points()

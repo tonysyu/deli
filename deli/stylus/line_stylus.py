@@ -1,5 +1,3 @@
-import numpy as np
-
 from enable.api import ColorTrait, LineStyle
 from traits.api import CFloat, Range
 
