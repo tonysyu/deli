@@ -18,8 +18,7 @@ class LineArtist(BasePointArtist):
 
     def draw(self, gc, view_rect=None):
         points = self.get_screen_points()
-        with gc:
-            gc.clip_to_rect(*self.screen_bbox.rect)
+        with self._clipped_context(gc):
             self.line.draw(gc, points)
 
     def _color_changed(self):

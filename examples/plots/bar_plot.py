@@ -36,9 +36,7 @@ class BarArtist(BasePointArtist):
     def draw(self, gc, view_rect=None):
         points = self.get_screen_points()
         x0, y0 = self.data_to_screen.transform([0, 0])
-        with gc:
-            gc.clip_to_rect(*self.screen_bbox.rect)
-            # self.stylus.update_style(gc)
+        with self._clipped_context(gc):
             width = 20
             for x, y in points:
                 rect = (x-width/2.0, y0, width, y - y0)

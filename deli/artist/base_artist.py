@@ -1,5 +1,7 @@
-""" Defines the base class for XY artists.
+""" Defines the base class for artists.
 """
+from contextlib import contextmanager
+
 from traits.api import Instance, Property, Tuple
 
 from ..core.component import Component
@@ -53,3 +55,9 @@ class BaseArtist(Component):
     def _get_data_extents(self):
         msg = "`BaseArtist` subclasses must implement `_get_data_extents`"
         raise NotImplementedError(msg)
+
+    @contextmanager
+    def _clipped_context(self, gc):
+        with gc:
+            gc.clip_to_rect(*self.screen_bbox.rect)
+            yield

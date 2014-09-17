@@ -16,8 +16,7 @@ class ImageArtist(BaseArtist):
         rect_corners = self.data_to_screen.transform([(0, 0), (width, height)])
         x0, y0, x1, y1 = rect_corners.flat
         rect = x0, y0, (x1 - x0), (y1 - y0)
-        with gc:
-            gc.clip_to_rect(*self.screen_bbox.rect)
+        with self._clipped_context(gc):
             self.image.draw(gc, self.data, rect)
 
     def _get_data_extents(self):
