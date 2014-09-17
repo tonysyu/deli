@@ -99,22 +99,17 @@ class Container(Component):
         if not event.handled:
             super(Container, self).dispatch(event, suffix)
 
-    def draw_layer(self, layer, gc, view_rect):
-        """ Renders the named *layer* of this component.
+    #--------------------------------------------------------------------------
+    #  Protected interface
+    #--------------------------------------------------------------------------
+
+    def _draw_self(self, gc, view_rect=None):
+        """ Draw this container.
+
+        Overrides `component` to skip `draw` on self and draw children instead.
         """
-        if view_rect == empty_rectangle:
-            return
-
-        if self.layout_needed:
-            self.do_layout()
-
-        layer_map = {
-            'background': [] if self.background is None else [self.background],
-            'underlay': self.underlays,
-            'plot': self._get_visible_components(view_rect),
-            'overlay': self.overlays,
-        }
-        self._draw_layers(gc, layer_map[layer], view_rect=view_rect)
+        components = self._get_visible_components(view_rect)
+        self._draw_layers(gc, components, view_rect=view_rect)
 
     #------------------------------------------------------------------------
     # Property setters & getters

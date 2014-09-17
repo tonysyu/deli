@@ -1,4 +1,5 @@
 """ Defines the Component class """
+from contextlib import contextmanager
 from itertools import chain
 
 from enable.base import empty_rectangle
@@ -7,9 +8,6 @@ from traits.api import Any, Bool, Instance, List, Property, Str, WeakRef
 
 from ..layout.bounding_box import BoundingBox
 from .coordinate_box import CoordinateBox
-
-
-DRAWING_ORDER = ['background', 'underlay', 'plot', 'overlay']
 
 
 class NullDispatch(object):
@@ -64,9 +62,6 @@ class Component(CoordinateBox):
 
     # The tools that are registered as listeners.
     tools = List
-
-    # The order in which various rendering classes on this component are drawn.
-    draw_order = Instance(list, args=(DRAWING_ORDER,))
 
     #--------------------------------------------------------------------------
     #  Bounding box
@@ -137,7 +132,10 @@ class Component(CoordinateBox):
     #------------------------------------------------------------------------
 
     def render(self, gc, view_rect=None):
-        """ Renders this plot component.
+        """ Renders everything in this plot component.
+
+        This method renders all underlays/overlays and calls the `draw` method
+        to draw the component itself.
 
         Parameters
         ----------
@@ -152,10 +150,18 @@ class Component(CoordinateBox):
         if self.layout_needed:
             self.do_layout()
 
-        for layer in self.draw_order:
-            self.draw_layer(layer, gc, view_rect)
+        if self.background is not None:
+            self._draw_layers(gc, [self.background], view_rect=view_rect)
+        self._draw_layers(gc, self.underlays, view_rect=view_rect)
+        self._draw_self(gc, view_rect=view_rect)
+        self._draw_layers(gc, self.overlays, view_rect=view_rect)
 
     def draw(self, gc, view_rect=None):
+        """ Draw this component
+
+        Subclasses can override this method to draw the component, itself. The
+        `render` method will take care of drawing child components.
+        """
         pass
 
     def request_redraw(self):
@@ -182,6 +188,16 @@ class Component(CoordinateBox):
         cleanup is called on the component to give it the opportunity to
         delete any transient state it may have (such as backbuffers)."""
         pass
+
+    #--------------------------------------------------------------------------
+    #  Protected interface
+    #--------------------------------------------------------------------------
+
+    def _draw_self(self, gc, view_rect=None):
+        # `_draw_layers` uses `_local_context` as well, but it calls the
+        # `render` method (instead of `draw`) on children, so we can't reuse.
+        with self._local_context(gc):
+            self.draw(gc, view_rect=view_rect)
 
     #------------------------------------------------------------------------
     # Layout-related concrete methods
@@ -218,34 +234,18 @@ class Component(CoordinateBox):
     # Protected methods
     #------------------------------------------------------------------------
 
-    def draw_layer(self, layer, gc, view_rect):
-        """ Renders the named *layer* of this component.
-        """
-        if view_rect == empty_rectangle:
-            return
-
-        if self.layout_needed:
-            self.do_layout()
-
-        layer_map = {
-            'background': [] if self.background is None else [self.background],
-            'underlay': self.underlays,
-            'overlay': self.overlays,
-        }
-        if layer == 'plot':
-            with gc:
-                gc.translate_ctm(*self.origin)
-                self.draw(gc, view_rect)
-        else:
-            self._draw_layers(gc, layer_map[layer], view_rect=view_rect)
-
     #------------------------------------------------------------------------
     # Protected methods for subclasses to implement
     #------------------------------------------------------------------------
 
-    def _draw_layers(self, gc, layers, view_rect=None):
+    @contextmanager
+    def _local_context(self, gc):
         with gc:
             gc.translate_ctm(*self.origin)
+            yield
+
+    def _draw_layers(self, gc, layers, view_rect=None):
+        with self._local_context(gc):
             for component in layers:
                 if component.visible:
                     component.render(gc, view_rect)
