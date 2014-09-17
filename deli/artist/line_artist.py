@@ -16,7 +16,8 @@ class LineArtist(BasePointArtist):
     #  Private interface
     #--------------------------------------------------------------------------
 
-    def _render(self, gc, points, selected_points=None):
+    def draw(self, gc, view_rect=None):
+        points = self.get_screen_points()
         with gc:
             gc.clip_to_rect(*self.screen_bbox.rect)
             self.line.draw(gc, points)

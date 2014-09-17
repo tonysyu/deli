@@ -237,9 +237,6 @@ class GraphicsContext(object):
     def clip_to_rect(self, *args):
         pass
 
-    def clip_to_rects(self, *args):
-        pass
-
     def clear_clip_path(self, *args):
         pass
 

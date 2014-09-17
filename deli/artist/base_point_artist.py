@@ -33,16 +33,6 @@ class BasePointArtist(BaseArtist):
     #: Overall alpha value of the image. Ranges from 0.0 for transparent to 1.0
     alpha = Range(0.0, 1.0, 1.0)
 
-    #------------------------------------------------------------------------
-    # Component interface
-    #------------------------------------------------------------------------
-
-    def draw(self, gc, view_rect=None):
-        """ Draws the 'plot' layer.
-        """
-        pts = self.get_screen_points()
-        self._render(gc, pts)
-
     #--------------------------------------------------------------------------
     #  BaseArtist interface
     #--------------------------------------------------------------------------

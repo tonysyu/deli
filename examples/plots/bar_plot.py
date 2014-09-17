@@ -33,7 +33,8 @@ class BarArtist(BasePointArtist):
     #  Private interface
     #--------------------------------------------------------------------------
 
-    def _render(self, gc, points, selected_points=None):
+    def draw(self, gc, view_rect=None):
+        points = self.get_screen_points()
         x0, y0 = self.data_to_screen.transform([0, 0])
         with gc:
             gc.clip_to_rect(*self.screen_bbox.rect)
