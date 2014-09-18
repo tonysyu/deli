@@ -273,10 +273,6 @@ class _Window(AbstractWindow):
 
     def _redraw(self, coordinates=None):
         if self.control:
-            if self.control.handler.in_paint_event:
-                # Code further up the stack is behaving badly and calling
-                # request_redraw() inside drawing code.
-                return
             if coordinates is None:
                 self.control.update()
             else:
