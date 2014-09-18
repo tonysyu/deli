@@ -3,6 +3,9 @@ Design overview
 ===============
 
 
+Core objects
+============
+
 .. digraph:: overview
 
    size="6,6";
@@ -81,3 +84,44 @@ Design overview
               data:
                  x: [1, 2, 3]
                  y: [10, 20, 30]
+
+
+Rendering cascade
+=================
+
+Rendering to the screen has a few moving parts. The lowest level that we'll
+discuss here is the `graphics context`. This is that part of the rendering
+code that provides an interface between the generic parts of the deli codebase
+and the underlying GUI toolkit. (Actually, it doesn't have to be a GUI toolkit
+if, for example, you only care about drawing to a document.) The graphics
+context abstracts out toolkit-specific details into simple line-drawing,
+text-drawing, etc. commands. If you've worked with HTML5 canvas, then you
+should be pretty familiar with graphics contexts.
+
+The top-level window (also GUI-toolkit specific) is in charge of creating the
+graphics context and passing it down to all the graphics components. Actually,
+all it does is pass it down to the top-most graphics component---typically,
+`Graph`---and that graphics component passes the graphics context down to its
+children. So that top-level window would just call:
+
+
+.. code-block:: python
+
+   graph.render(context)
+
+And `graph` will make sure all its child components have an opportunity to draw
+onto that graphics context. The `render` method for `graph` might look a little
+something like:
+
+.. code-block:: python
+
+   def render(self, context):
+       self.draw(context)
+       for child in self.children:
+           child.render(context)
+
+Note that this calls `render` on child components and it calls `draw` on
+itself. This `draw` method gives an opportunity for the component to actually
+draw something to the context (rather just passing along the context to its
+children). Think of `draw` as `draw_self` and `render` as
+`draw_self_and_children`.
