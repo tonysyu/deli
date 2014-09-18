@@ -248,20 +248,9 @@ class _Window(AbstractWindow):
             buttons = 0
 
         self.control.handler.last_mouse_pos = (x, y)
-
-        # A bit crap, because AbstractWindow was written with wx in mind, and
-        # we treat wheel events like mouse events.
-        if isinstance(event, QtGui.QWheelEvent):
-            delta = event.delta()
-            degrees_per_step = 15.0
-            mouse_wheel = delta / float(8 * degrees_per_step)
-        else:
-            mouse_wheel = 0
-
         return MouseEvent(
             x=x,
             y=self._flip_y(y),
-            mouse_wheel=mouse_wheel,
             alt_down=bool(modifiers & QtCore.Qt.AltModifier),
             shift_down=bool(modifiers & QtCore.Qt.ShiftModifier),
             control_down=bool(modifiers & QtCore.Qt.ControlModifier),
