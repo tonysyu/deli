@@ -8,6 +8,7 @@ from .constants import BUTTON_NAME_MAP, KEY_MAP, POINTER_MAP
 
 
 class _QtWindowHandler(object):
+
     def __init__(self, qt_window, enable_window):
         self._enable_window = enable_window
 
@@ -124,7 +125,7 @@ class _QtWindowHandler(object):
 
 
 class _QtWindow(QtGui.QWidget):
-    """ The Qt widget that implements the enable control. """
+    """ The Qt widget that implements the control layer. """
 
     def __init__(self, parent, enable_window):
         super(_QtWindow, self).__init__(parent)
@@ -173,7 +174,7 @@ class _QtWindow(QtGui.QWidget):
         return self.handler.sizeHint(qt_size_hint)
 
 
-class _Window(AbstractWindow):
+class BaseWindow(AbstractWindow):
 
     control = Instance(QtGui.QWidget)
 
@@ -189,6 +190,10 @@ class _Window(AbstractWindow):
 
         if size is not None:
             self.control.resize(*size)
+
+    def _create_control(self, parent, enable_window):
+        """ Create the toolkit control. """
+        return _QtWindow(parent, enable_window)
 
     # -----------------------------------------------------------------------
     # Implementations of abstract methods in AbstractWindow
@@ -260,12 +265,12 @@ class _Window(AbstractWindow):
             window=self
         )
 
-    def _redraw(self, coordinates=None):
+    def redraw(self, rect=None):
         if self.control:
-            if coordinates is None:
+            if rect is None:
                 self.control.update()
             else:
-                self.control.update(*coordinates)
+                self.control.update(*rect)
 
     def _get_control_size(self):
         if self.control:
@@ -281,10 +286,6 @@ class _Window(AbstractWindow):
 
     def set_pointer(self, pointer):
         self.control.setCursor(POINTER_MAP[pointer])
-
-    def _set_timer_interval(self, component, interval):
-        # FIXME
-        raise NotImplementedError
 
     def set_tooltip(self, tooltip):
         self.control.setToolTip(tooltip)
@@ -302,14 +303,3 @@ class _Window(AbstractWindow):
     def _flip_y(self, y):
         "Converts between a Kiva and a Qt y coordinate"
         return int(self._size[1] - y - 1)
-
-
-class BaseWindow(_Window):
-
-    # The toolkit control
-    control = Instance(_QtWindow)
-
-    def _create_control(self, parent, enable_window):
-        """ Create the toolkit control.
-        """
-        return _QtWindow(parent, enable_window)

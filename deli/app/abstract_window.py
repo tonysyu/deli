@@ -45,21 +45,15 @@ class AbstractWindow(HasStrictTraits):
 
     def _create_key_event(self, event):
         "Convert a GUI toolkit key event into a KeyEvent"
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def _create_mouse_event(self, event):
         "Convert a GUI toolkit mouse event into a MouseEvent"
-        raise NotImplementedError
-
-    def _redraw(self, coordinates=None):
-        """ Request a redraw of the window, within just the (x,y,w,h) coordinates
-        (if provided), or over the entire window if coordinates is None.
-        """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def _get_control_size(self):
         "Get the size of the underlying toolkit control"
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def _create_gc(self, size, pix_format="bgr24"):
         """ Create a Kiva graphics context of a specified size.  This method
@@ -67,7 +61,7 @@ class AbstractWindow(HasStrictTraits):
         perform pre-draw initialization every time in the paint loop, use
         _init_gc().
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def _init_gc(self):
         """ Gives a GC a chance to initialize itself before components perform
@@ -78,23 +72,15 @@ class AbstractWindow(HasStrictTraits):
 
     def _window_paint(self, event):
         "Do a GUI toolkit specific screen update"
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def set_pointer(self, pointer):
         "Sets the current cursor shape"
-        raise NotImplementedError
-
-    def set_timer_interval(self, component, interval):
-        "Set up or cancel a timer for a specified component"
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def _set_focus(self):
         "Sets this window to have keyboard focus"
-        raise NotImplementedError
-
-    def screen_to_window(self, x, y):
-        "Returns local window coordinates for given global screen coordinates"
-        raise NotImplementedError
+        raise NotImplementedError()
 
     # -----------------------------------------------------------------------
     # Public methods
@@ -194,9 +180,13 @@ class AbstractWindow(HasStrictTraits):
                 self.component.dispatch(mouse_event, event_name)
         return mouse_event.handled
 
-    def redraw(self):
-        """ Requests that the window be redrawn. """
-        self._redraw()
+    def redraw(self, rect=None):
+        """ Request a redraw of the window
+
+        If `rect` is provided, draw within just the (x, y, w, h) rectangle.
+        Otherwise, draw over the entire window.
+        """
+        raise NotImplementedError()
 
     def cleanup(self):
         """ Clean up after ourselves.
