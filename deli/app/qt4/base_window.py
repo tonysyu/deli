@@ -1,7 +1,7 @@
 from pyface.qt import QtCore, QtGui
 
 from enable.events import KeyEvent, MouseEvent
-from traits.api import Instance
+from traits.api import Instance, Tuple
 
 from ..abstract_window import AbstractWindow
 from .constants import BUTTON_NAME_MAP, KEY_MAP, POINTER_MAP
@@ -11,9 +11,6 @@ class _QtWindowHandler(object):
 
     def __init__(self, qt_window, enable_window):
         self._enable_window = enable_window
-
-        pos = qt_window.mapFromGlobal(QtGui.QCursor.pos())
-        self.last_mouse_pos = (pos.x(), pos.y())
 
         self.in_paint_event = False
 
@@ -177,13 +174,18 @@ class _QtWindow(QtGui.QWidget):
 class BaseWindow(AbstractWindow):
 
     control = Instance(QtGui.QWidget)
+    _last_mouse_position = Tuple
 
     def __init__(self, parent, wid=-1, pos=None, size=None, **traits):
         AbstractWindow.__init__(self, **traits)
 
         if isinstance(parent, QtGui.QLayout):
             parent = parent.parentWidget()
+
         self.control = self._create_control(parent, self)
+
+        point = self.control.mapFromGlobal(QtGui.QCursor.pos())
+        self._last_mouse_position = (point.x(), point.y())
 
         if pos is not None:
             self.control.move(*pos)
@@ -218,7 +220,7 @@ class BaseWindow(AbstractWindow):
             return None
 
         # Use the last-seen mouse position as the coordinates of this event.
-        x, y = self.control.handler.last_mouse_pos
+        x, y = self._last_mouse_position
 
         modifiers = event.modifiers()
 
@@ -252,7 +254,7 @@ class BaseWindow(AbstractWindow):
             modifiers = 0
             buttons = 0
 
-        self.control.handler.last_mouse_pos = (x, y)
+        self._last_mouse_position = (x, y)
         return MouseEvent(
             x=x,
             y=self._flip_y(y),
