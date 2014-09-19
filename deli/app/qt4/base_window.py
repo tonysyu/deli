@@ -9,25 +9,15 @@ from .constants import BUTTON_NAME_MAP, KEY_MAP, POINTER_MAP
 
 class _QtWindowHandler(object):
 
-    def __init__(self, qt_window, enable_window):
+    def __init__(self, enable_window):
         self._enable_window = enable_window
-
-        self.in_paint_event = False
-
-        qt_window.setAutoFillBackground(True)
-        qt_window.setFocusPolicy(QtCore.Qt.WheelFocus)
-        qt_window.setMouseTracking(True)
-        qt_window.setSizePolicy(QtGui.QSizePolicy.Expanding,
-                                QtGui.QSizePolicy.Expanding)
 
     def on_close(self, event):
         self._enable_window.cleanup()
         self._enable_window = None
 
     def on_paint(self, event):
-        self.in_paint_event = True
         self._enable_window._paint(event)
-        self.in_paint_event = False
 
     def on_resize(self, event):
         dx = event.size().width()
@@ -127,7 +117,13 @@ class _QtWindow(QtGui.QWidget):
     def __init__(self, parent, enable_window):
         super(_QtWindow, self).__init__(parent)
         self.setAcceptDrops(True)
-        self.handler = _QtWindowHandler(self, enable_window)
+        self.handler = _QtWindowHandler(enable_window)
+
+        self.setAutoFillBackground(True)
+        self.setFocusPolicy(QtCore.Qt.WheelFocus)
+        self.setMouseTracking(True)
+        self.setSizePolicy(QtGui.QSizePolicy.Expanding,
+                           QtGui.QSizePolicy.Expanding)
 
     def closeEvent(self, event):
         self.handler.on_close(event)
