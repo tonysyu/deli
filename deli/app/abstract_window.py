@@ -274,10 +274,10 @@ class AbstractWindow(HasStrictTraits):
     # Wire up the keyboard event handlers
     # --------------------------------------------------------------------------
 
-    def _on_key_pressed(self, event):
+    def on_key_pressed(self, event):
         self._handle_key_event('key_pressed', event)
 
-    def _on_key_released(self, event):
+    def on_key_released(self, event):
         self._handle_key_event('key_released', event)
 
     def _on_character(self, event):

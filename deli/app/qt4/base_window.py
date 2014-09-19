@@ -22,10 +22,10 @@ class _QtWindowHandler(object):
     def on_resize(self, event):
         dx = event.size().width()
         dy = event.size().height()
-        component = self._enable_window.component
 
         self._enable_window.resized = (dx, dy)
 
+        component = self._enable_window.component
         component.origin = [0, 0]
         component.size = [dx, dy]
 
@@ -34,48 +34,39 @@ class _QtWindowHandler(object):
     # -----------------------------------------------------------------------
 
     def on_key_press(self, event):
-        if self._enable_window:
-            if not self._enable_window._on_key_pressed(event):
-                self._enable_window._on_character(event)
+        if not self._enable_window.on_key_pressed(event):
+            self._enable_window._on_character(event)
 
     def on_key_release(self, event):
-        if self._enable_window:
-            self._enable_window._on_key_released(event)
+        self._enable_window.on_key_released(event)
 
     # -----------------------------------------------------------------------
     # Qt Mouse event handlers
     # -----------------------------------------------------------------------
 
     def on_mouse_enter(self, event):
-        if self._enable_window:
-            self._enable_window.handle_mouse_event("mouse_enter", event)
+        self._enable_window.handle_mouse_event("mouse_enter", event)
 
     def on_mouse_leave(self, event):
-        if self._enable_window:
-            self._enable_window.handle_mouse_event("mouse_leave", event)
+        self._enable_window.handle_mouse_event("mouse_leave", event)
 
     def on_mouse_double_click(self, event):
-        if self._enable_window:
-            name = BUTTON_NAME_MAP[event.button()]
-            self._enable_window.handle_mouse_event(name + "_dclick", event)
+        name = BUTTON_NAME_MAP[event.button()]
+        self._enable_window.handle_mouse_event(name + "_dclick", event)
 
     def on_mouse_move(self, event):
-        if self._enable_window:
-            self._enable_window.handle_mouse_event("mouse_move", event)
+        self._enable_window.handle_mouse_event("mouse_move", event)
 
     def on_mouse_press(self, event):
-        if self._enable_window:
-            name = BUTTON_NAME_MAP[event.button()]
-            self._enable_window.handle_mouse_event(name + "_down", event)
+        name = BUTTON_NAME_MAP[event.button()]
+        self._enable_window.handle_mouse_event(name + "_down", event)
 
     def on_mouse_release(self, event):
-        if self._enable_window:
-            name = BUTTON_NAME_MAP[event.button()]
-            self._enable_window.handle_mouse_event(name + "_up", event)
+        name = BUTTON_NAME_MAP[event.button()]
+        self._enable_window.handle_mouse_event(name + "_up", event)
 
     def on_mouse_wheel(self, event):
-        if self._enable_window:
-            self._enable_window.handle_mouse_event("mouse_wheel", event)
+        self._enable_window.handle_mouse_event("mouse_wheel", event)
 
     def get_size_hint(self, qt_size_hint):
         """ Combine the Qt and enable size hints.
@@ -291,7 +282,7 @@ class BaseWindow(AbstractWindow):
     def _set_focus(self):
         self.control.setFocus()
 
-    def _on_key_pressed(self, event):
+    def on_key_pressed(self, event):
         return self._handle_key_event('key_pressed', event)
 
     # -----------------------------------------------------------------------
