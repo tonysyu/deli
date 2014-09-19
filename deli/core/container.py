@@ -58,9 +58,6 @@ class Container(Component):
             for component in self._components:
                 component.cleanup(window)
 
-    def get_event_transform(self, event=None):
-        return affine.affine_from_translation(-self.x, -self.y)
-
     def dispatch(self, event, suffix):
         """ Dispatches mouse event to child components until it is handled.
 
@@ -139,25 +136,6 @@ class Container(Component):
         super(Container, self)._size_changed()
         self._layout_needed = True
 
-    @contextmanager
-    def _local_event_transform(self, event):
-        """ Translate event location to be relative to this container. """
-        try:
-            transform = self.get_event_transform(event)
-            event.push_transform(transform, caller=self)
-            yield
-        finally:
-            event.pop(caller=self)
-
-    def _notify_if_mouse_event(self, components, event, suffix):
-        if len(components) == 0:
-            return
-
-        if isinstance(event, MouseEvent):
-            for component in components:
-                component.dispatch(event, suffix)
-                event.handled = False
-
     def __components_items_changed(self, event):
         self._layout_needed = True
 
@@ -172,3 +150,25 @@ class Container(Component):
 
         return [c for c in self.components
                 if intersect_bounds(c.rect, bounds) != empty_rectangle]
+
+    def _get_event_transform(self, event=None):
+        return affine.affine_from_translation(-self.x, -self.y)
+
+    def _notify_if_mouse_event(self, components, event, suffix):
+        if len(components) == 0:
+            return
+
+        if isinstance(event, MouseEvent):
+            for component in components:
+                component.dispatch(event, suffix)
+                event.handled = False
+
+    @contextmanager
+    def _local_event_transform(self, event):
+        """ Translate event location to be relative to this container. """
+        try:
+            transform = self._get_event_transform(event)
+            event.push_transform(transform, caller=self)
+            yield
+        finally:
+            event.pop(caller=self)
