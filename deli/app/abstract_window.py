@@ -145,7 +145,7 @@ class AbstractWindow(HasStrictTraits):
     #  Generic mouse event handler:
     # --------------------------------------------------------------------------
 
-    def _handle_mouse_event(self, event_name, event, set_focus=False):
+    def handle_mouse_event(self, event_name, event, set_focus=False):
         """ **event** should be a toolkit-specific opaque object that will
         be passed in to the backend's _create_mouse_event() method.  It can
         be None if the the toolkit lacks a native "mouse event" object.
@@ -229,43 +229,43 @@ class AbstractWindow(HasStrictTraits):
     # --------------------------------------------------------------------------
 
     def _on_left_down(self, event):
-        self._handle_mouse_event('left_down', event, set_focus=True)
+        self.handle_mouse_event('left_down', event, set_focus=True)
 
     def _on_left_up(self, event):
-        self._handle_mouse_event('left_up', event)
+        self.handle_mouse_event('left_up', event)
 
     def _on_left_dclick(self, event):
-        self._handle_mouse_event('left_dclick', event)
+        self.handle_mouse_event('left_dclick', event)
 
     def _on_right_down(self, event):
-        self._handle_mouse_event('right_down', event, set_focus=True)
+        self.handle_mouse_event('right_down', event, set_focus=True)
 
     def _on_right_up(self, event):
-        self._handle_mouse_event('right_up', event)
+        self.handle_mouse_event('right_up', event)
 
     def _on_right_dclick(self, event):
-        self._handle_mouse_event('right_dclick', event)
+        self.handle_mouse_event('right_dclick', event)
 
     def _on_middle_down(self, event):
-        self._handle_mouse_event('middle_down', event)
+        self.handle_mouse_event('middle_down', event)
 
     def _on_middle_up(self, event):
-        self._handle_mouse_event('middle_up', event)
+        self.handle_mouse_event('middle_up', event)
 
     def _on_middle_dclick(self, event):
-        self._handle_mouse_event('middle_dclick', event)
+        self.handle_mouse_event('middle_dclick', event)
 
     def _on_mouse_move(self, event):
-        self._handle_mouse_event('mouse_move', event, set_focus=False)
+        self.handle_mouse_event('mouse_move', event, set_focus=False)
 
     def _on_mouse_wheel(self, event):
-        self._handle_mouse_event('mouse_wheel', event)
+        self.handle_mouse_event('mouse_wheel', event)
 
     def _on_mouse_enter(self, event):
-        self._handle_mouse_event('mouse_enter', event)
+        self.handle_mouse_event('mouse_enter', event)
 
     def _on_mouse_leave(self, event):
-        self._handle_mouse_event('mouse_leave', event, set_focus=False)
+        self.handle_mouse_event('mouse_leave', event, set_focus=False)
 
     def _on_window_enter(self, event):
         pass

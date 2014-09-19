@@ -58,34 +58,34 @@ class _QtWindowHandler(object):
 
     def enterEvent(self, event):
         if self._enable_window:
-            self._enable_window._handle_mouse_event("mouse_enter", event)
+            self._enable_window.handle_mouse_event("mouse_enter", event)
 
     def leaveEvent(self, event):
         if self._enable_window:
-            self._enable_window._handle_mouse_event("mouse_leave", event)
+            self._enable_window.handle_mouse_event("mouse_leave", event)
 
     def mouseDoubleClickEvent(self, event):
         if self._enable_window:
             name = BUTTON_NAME_MAP[event.button()]
-            self._enable_window._handle_mouse_event(name + "_dclick", event)
+            self._enable_window.handle_mouse_event(name + "_dclick", event)
 
     def mouseMoveEvent(self, event):
         if self._enable_window:
-            self._enable_window._handle_mouse_event("mouse_move", event)
+            self._enable_window.handle_mouse_event("mouse_move", event)
 
     def mousePressEvent(self, event):
         if self._enable_window:
             name = BUTTON_NAME_MAP[event.button()]
-            self._enable_window._handle_mouse_event(name + "_down", event)
+            self._enable_window.handle_mouse_event(name + "_down", event)
 
     def mouseReleaseEvent(self, event):
         if self._enable_window:
             name = BUTTON_NAME_MAP[event.button()]
-            self._enable_window._handle_mouse_event(name + "_up", event)
+            self._enable_window.handle_mouse_event(name + "_up", event)
 
     def wheelEvent(self, event):
         if self._enable_window:
-            self._enable_window._handle_mouse_event("mouse_wheel", event)
+            self._enable_window.handle_mouse_event("mouse_wheel", event)
 
     def sizeHint(self, qt_size_hint):
         """ Combine the Qt and enable size hints.
