@@ -1,16 +1,10 @@
 from abc import abstractmethod
 
 from enable.colors import ColorTrait
-from traits.api import (ABCHasStrictTraits, Any, Bool, Event, Instance,
-                        Property, Trait, Tuple)
+from traits.api import ABCHasStrictTraits, Any, Event, Instance, Trait, Tuple
 
 from ..core.component import Component
 from ..core.container import Container
-
-
-def Alias(name):
-    return Property(lambda obj: getattr(obj, name),
-                    lambda obj, val: setattr(obj, name, val))
 
 
 class AbstractWindow(ABCHasStrictTraits):
@@ -21,10 +15,6 @@ class AbstractWindow(ABCHasStrictTraits):
     # The background window of the window.  The entire window first gets
     # painted with this color before the component gets to draw.
     bgcolor = ColorTrait("sys_window")
-
-    alt_pressed = Bool(False)
-    control_pressed = Bool(False)
-    shift_pressed = Bool(False)
 
     # When the underlying toolkit control gets resized, this event gets set
     # to the new size of the window, expressed as a tuple (dx, dy).
@@ -144,10 +134,6 @@ class AbstractWindow(ABCHasStrictTraits):
         key_event = self._create_key_event(event_type, event)
         if key_event is None:
             return False
-
-        self.alt_pressed = key_event.alt_down
-        self.control_pressed = key_event.control_down
-        self.shift_pressed = key_event.shift_down
 
         # Normal event handling loop
         if (not key_event.handled) and (self.component is not None):
