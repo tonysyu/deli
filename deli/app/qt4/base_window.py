@@ -4,158 +4,9 @@ from enable.events import KeyEvent, MouseEvent
 from traits.api import Instance, Tuple
 
 from ..abstract_window import AbstractWindow
-from .constants import BUTTON_NAME_MAP, KEY_MAP, POINTER_MAP
-
-
-class _QtWindowHandler(object):
-
-    def __init__(self, enable_window):
-        self._enable_window = enable_window
-
-    def on_close(self, event):
-        self._enable_window.cleanup()
-        self._enable_window = None
-
-    def on_paint(self, event):
-        self._enable_window._paint(event)
-
-    def on_resize(self, event):
-        dx = event.size().width()
-        dy = event.size().height()
-
-        self._enable_window.resized = (dx, dy)
-
-        component = self._enable_window.component
-        component.origin = [0, 0]
-        component.size = [dx, dy]
-
-    # -----------------------------------------------------------------------
-    # Qt Keyboard event handlers
-    # -----------------------------------------------------------------------
-
-    def on_key_press(self, event):
-        if not self._enable_window.on_key_pressed(event):
-            self._enable_window.on_character(event)
-
-    def on_key_release(self, event):
-        self._enable_window.on_key_released(event)
-
-    # -----------------------------------------------------------------------
-    # Qt Mouse event handlers
-    # -----------------------------------------------------------------------
-
-    def on_mouse_enter(self, event):
-        self._enable_window.handle_mouse_event("mouse_enter", event)
-
-    def on_mouse_leave(self, event):
-        self._enable_window.handle_mouse_event("mouse_leave", event)
-
-    def on_mouse_double_click(self, event):
-        name = BUTTON_NAME_MAP[event.button()]
-        self._enable_window.handle_mouse_event(name + "_dclick", event)
-
-    def on_mouse_move(self, event):
-        self._enable_window.handle_mouse_event("mouse_move", event)
-
-    def on_mouse_press(self, event):
-        name = BUTTON_NAME_MAP[event.button()]
-        self._enable_window.handle_mouse_event(name + "_down", event)
-
-    def on_mouse_release(self, event):
-        name = BUTTON_NAME_MAP[event.button()]
-        self._enable_window.handle_mouse_event(name + "_up", event)
-
-    def on_mouse_wheel(self, event):
-        self._enable_window.handle_mouse_event("mouse_wheel", event)
-
-    def get_size_hint(self, qt_size_hint):
-        """ Combine the Qt and enable size hints.
-
-        Combine the size hint coming from the Qt component (usually -1, -1)
-        with the preferred size of the enable component and the size
-        of the enable window.
-
-        The combined size hint is
-        - the Qt size hint if larger than 0
-        - the maximum of the plot's preferred size and the window size
-          (component-wise)
-
-        E.g., if
-        qt size hint = (-1, -1)
-        component preferred size = (500, 200)
-        size of enable window = (400, 400)
-
-        the final size hint will be (500, 400)
-        """
-        preferred_size = self._enable_window.component.get_preferred_size()
-        q_size = self._enable_window.control.size()
-        window_size = (q_size.width(), q_size.height())
-
-        if qt_size_hint.width() < 0:
-            width = max(preferred_size[0], window_size[0])
-            qt_size_hint.setWidth(width)
-
-        if qt_size_hint.height() < 0:
-            height = max(preferred_size[1], window_size[1])
-            qt_size_hint.setHeight(height)
-
-        return qt_size_hint
-
-
-class _QtWindow(QtGui.QWidget):
-    """ The Qt widget that implements the control layer. """
-
-    def __init__(self, parent, enable_window):
-        super(_QtWindow, self).__init__(parent)
-        self.setAcceptDrops(True)
-        self.handler = _QtWindowHandler(enable_window)
-
-        self.setAutoFillBackground(True)
-        self.setFocusPolicy(QtCore.Qt.WheelFocus)
-        self.setMouseTracking(True)
-        self.setSizePolicy(QtGui.QSizePolicy.Expanding,
-                           QtGui.QSizePolicy.Expanding)
-
-    def closeEvent(self, event):
-        self.handler.on_close(event)
-        return super(_QtWindow, self).closeEvent(event)
-
-    def paintEvent(self, event):
-        self.handler.on_paint(event)
-
-    def resizeEvent(self, event):
-        self.handler.on_resize(event)
-
-    def keyPressEvent(self, event):
-        self.handler.on_key_press(event)
-
-    def keyReleaseEvent(self, event):
-        self.handler.on_key_release(event)
-
-    def enterEvent(self, event):
-        self.handler.on_mouse_enter(event)
-
-    def leaveEvent(self, event):
-        self.handler.on_mouse_leave(event)
-
-    def mouseDoubleClickEvent(self, event):
-        self.handler.on_mouse_double_click(event)
-
-    def mouseMoveEvent(self, event):
-        self.handler.on_mouse_move(event)
-
-    def mousePressEvent(self, event):
-        self.handler.on_mouse_press(event)
-
-    def mouseReleaseEvent(self, event):
-        self.handler.on_mouse_release(event)
-
-    def wheelEvent(self, event):
-        self.handler.on_mouse_wheel(event)
-
-    def sizeHint(self):
-        qt_size_hint = super(_QtWindow, self).sizeHint()
-        return self.handler.get_size_hint(qt_size_hint)
+from .constants import BUTTON_NAME_MAP, POINTER_MAP
+from .qt_window import QtWindow
+from .utils import key_from_event
 
 
 class BaseWindow(AbstractWindow):
@@ -164,7 +15,7 @@ class BaseWindow(AbstractWindow):
     _last_mouse_position = Tuple
 
     def __init__(self, parent, wid=-1, pos=None, size=None, **traits):
-        AbstractWindow.__init__(self, **traits)
+        super(AbstractWindow, self).__init__(**traits)
 
         if isinstance(parent, QtGui.QLayout):
             parent = parent.parentWidget()
@@ -182,10 +33,10 @@ class BaseWindow(AbstractWindow):
 
     def _create_control(self, parent, enable_window):
         """ Create the toolkit control. """
-        return _QtWindow(parent, enable_window)
+        return QtWindow(parent, enable_window)
 
     # -----------------------------------------------------------------------
-    # Implementations of abstract methods in AbstractWindow
+    #  AbstractWindow interface
     # -----------------------------------------------------------------------
 
     def _create_key_event(self, event_type, event):
@@ -193,22 +44,11 @@ class BaseWindow(AbstractWindow):
             event.ignore()
             return None
 
-        if event_type == 'character':
-            key = unicode(event.text())
-        else:
-            # Convert the keypress to a standard enable key if possible,
-            # otherwise to text.
-            key_code = event.key()
-            key = KEY_MAP.get(key_code)
-            if key is None:
-                key = unichr(key_code).lower()
-
+        key = key_from_event(event_type, event)
         if not key:
             return None
 
-        # Use the last-seen mouse position as the coordinates of this event.
         x, y = self._last_mouse_position
-
         modifiers = event.modifiers()
 
         return KeyEvent(
@@ -242,6 +82,7 @@ class BaseWindow(AbstractWindow):
             buttons = 0
 
         self._last_mouse_position = (x, y)
+
         return MouseEvent(
             x=x,
             y=self._flip_y(y),
@@ -264,14 +105,7 @@ class BaseWindow(AbstractWindow):
     def _get_control_size(self):
         if self.control:
             return (self.control.width(), self.control.height())
-
         return None
-
-    def _create_gc(self, size, pix_format="bgra32"):
-        raise NotImplementedError
-
-    def _window_paint(self, event):
-        raise NotImplementedError
 
     def set_pointer(self, pointer):
         self.control.setCursor(POINTER_MAP[pointer])
@@ -282,13 +116,51 @@ class BaseWindow(AbstractWindow):
     def _set_focus(self):
         self.control.setFocus()
 
-    def on_key_pressed(self, event):
-        return self._handle_key_event('key_pressed', event)
+    def _get_mouse_event_button(self, event):
+        return BUTTON_NAME_MAP[event.button()]
+
+    def _get_event_size(self, event):
+        """ Return width and height of event. """
+        size = event.size()
+        return size.width(), size.height()
 
     # -----------------------------------------------------------------------
-    # Private methods
+    #  Private methods
     # -----------------------------------------------------------------------
 
     def _flip_y(self, y):
         "Converts between a Kiva and a Qt y coordinate"
         return int(self._size[1] - y - 1)
+
+    def get_size_hint(self, qt_size_hint):
+        """ Combine the Qt and enable size hints.
+
+        Combine the size hint coming from the Qt component (usually -1, -1)
+        with the preferred size of the enable component and the size
+        of the enable window.
+
+        The combined size hint is
+        - the Qt size hint if larger than 0
+        - the maximum of the plot's preferred size and the window size
+          (component-wise)
+
+        E.g., if
+        qt size hint = (-1, -1)
+        component preferred size = (500, 200)
+        size of enable window = (400, 400)
+
+        the final size hint will be (500, 400)
+        """
+        preferred_size = self.component.get_preferred_size()
+        q_size = self.control.size()
+        window_size = (q_size.width(), q_size.height())
+
+        if qt_size_hint.width() < 0:
+            width = max(preferred_size[0], window_size[0])
+            qt_size_hint.setWidth(width)
+
+        if qt_size_hint.height() < 0:
+            height = max(preferred_size[1], window_size[1])
+            qt_size_hint.setHeight(height)
+
+        return qt_size_hint

@@ -20,7 +20,7 @@ class PrintTool(BaseTool):
     def _state_handlers_default(self):
         return {'print': PrintOnMove(self, enabling_key=self.print_key)}
 
-    def on_key_pressed(self, event):
+    def on_key_press(self, event):
         if self.print_key.match(event):
             self.state_change(event, new_state='print')
 
@@ -37,7 +37,7 @@ class PrintOnMove(BaseToolState):
     def on_mouse_move(self, event):
         print "Mouse at ({}, {})".format(event.x, event.y)
 
-    def on_key_released(self, event):
+    def on_key_release(self, event):
         if self.enabling_key.match(event):
             self.exit_state(event)
 

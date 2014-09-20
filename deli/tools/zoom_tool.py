@@ -25,7 +25,7 @@ class ZoomTool(BaseTool):
 
     zoom_factor = Float(2)
 
-    def on_key_pressed(self, event):
+    def on_key_press(self, event):
         rect = self.component.data_bbox.rect
         if self.key_zoom_in.match(event):
             new_rect = zoom_in_centered_rect(rect, self.zoom_factor)

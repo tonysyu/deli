@@ -1,6 +1,8 @@
+from abc import abstractmethod
+
 from enable.colors import ColorTrait
-from traits.api import (Any, Bool, Event, HasStrictTraits, Instance, Property,
-                        Trait, Tuple)
+from traits.api import (ABCHasStrictTraits, Any, Bool, Event, Instance,
+                        Property, Trait, Tuple)
 
 from ..core.component import Component
 from ..core.container import Container
@@ -11,7 +13,7 @@ def Alias(name):
                     lambda obj, val: setattr(obj, name, val))
 
 
-class AbstractWindow(HasStrictTraits):
+class AbstractWindow(ABCHasStrictTraits):
 
     # The top-level component that this window houses
     component = Instance(Component)
@@ -40,47 +42,61 @@ class AbstractWindow(HasStrictTraits):
     _size = Trait(None, Tuple)
 
     # --------------------------------------------------------------------------
-    #  Abstract methods that must be implemented by concrete subclasses
+    #  Abstract methods
     # --------------------------------------------------------------------------
 
+    @abstractmethod
     def _create_key_event(self, event):
-        "Convert a GUI toolkit key event into a KeyEvent"
-        raise NotImplementedError()
+        """ Convert a GUI toolkit key event into a KeyEvent. """
 
+    @abstractmethod
     def _create_mouse_event(self, event):
-        "Convert a GUI toolkit mouse event into a MouseEvent"
-        raise NotImplementedError()
+        """ Convert a GUI toolkit mouse event into a MouseEvent. """
 
+    @abstractmethod
     def _get_control_size(self):
-        "Get the size of the underlying toolkit control"
-        raise NotImplementedError()
+        """ Get the size of the underlying toolkit control. """
 
-    def _create_gc(self, size, pix_format="bgr24"):
-        """ Create a Kiva graphics context of a specified size.  This method
-        only gets called when the size of the window itself has changed.  To
-        perform pre-draw initialization every time in the paint loop, use
-        _init_gc().
+    @abstractmethod
+    def _create_gc(self, size, pix_format="bgra32"):
+        """ Create a Kiva graphics context of a specified size.
+
+        This method only gets called when the size of the window itself has
+        changed. To perform pre-draw initialization every time in the paint
+        loop, use `_init_gc()`.
         """
-        raise NotImplementedError()
 
-    def _init_gc(self):
-        """ Gives a GC a chance to initialize itself before components perform
-        layout and draw.  This is called every time through the paint loop.
-        """
-        gc = self._gc
-        gc.clear(self.bgcolor_)
-
+    @abstractmethod
     def _window_paint(self, event):
-        "Do a GUI toolkit specific screen update"
-        raise NotImplementedError()
+        """ Do a GUI toolkit specific screen update. """
 
+    @abstractmethod
     def set_pointer(self, pointer):
-        "Sets the current cursor shape"
-        raise NotImplementedError()
+        """ Sets the current cursor shape. """
 
+    @abstractmethod
+    def set_tooltip(self, tooltip):
+        """ Sets the current tooltip. """
+
+    @abstractmethod
     def _set_focus(self):
-        "Sets this window to have keyboard focus"
-        raise NotImplementedError()
+        """ Sets this window to have keyboard focus. """
+
+    @abstractmethod
+    def _get_mouse_event_button(self, event):
+        """ Return the name of the mouse button for the toolkit event. """
+
+    @abstractmethod
+    def _get_event_size(self, event):
+        """ Return width and height of event. """
+
+    @abstractmethod
+    def redraw(self, rect=None):
+        """ Request a redraw of the window.
+
+        If `rect` is provided, draw within just the (x, y, w, h) rectangle.
+        Otherwise, draw over the entire window.
+        """
 
     # -----------------------------------------------------------------------
     # Public methods
@@ -88,7 +104,7 @@ class AbstractWindow(HasStrictTraits):
 
     def __init__(self, **traits):
         self._gc = None
-        super(HasStrictTraits, self).__init__(**traits)
+        super(ABCHasStrictTraits, self).__init__(**traits)
 
         # Create a default component (if necessary):
         if self.component is None:
@@ -145,7 +161,7 @@ class AbstractWindow(HasStrictTraits):
     #  Generic mouse event handler:
     # --------------------------------------------------------------------------
 
-    def handle_mouse_event(self, event_name, event, set_focus=False):
+    def _handle_mouse_event(self, event_type, event, set_focus=False):
         """ **event** should be a toolkit-specific opaque object that will
         be passed in to the backend's _create_mouse_event() method.  It can
         be None if the the toolkit lacks a native "mouse event" object.
@@ -177,16 +193,8 @@ class AbstractWindow(HasStrictTraits):
 
                 # Fire the actual event
                 mouse_event.handled = False
-                self.component.dispatch(mouse_event, event_name)
+                self.component.dispatch(mouse_event, event_type)
         return mouse_event.handled
-
-    def redraw(self, rect=None):
-        """ Request a redraw of the window
-
-        If `rect` is provided, draw within just the (x, y, w, h) rectangle.
-        Otherwise, draw over the entire window.
-        """
-        raise NotImplementedError()
 
     def cleanup(self):
         """ Clean up after ourselves.
@@ -201,7 +209,7 @@ class AbstractWindow(HasStrictTraits):
             self._gc.window = None
             self._gc = None
 
-    def _paint(self, event=None):
+    def on_paint(self, event=None):
         """ This method is called directly by the UI toolkit's callback
         mechanism on the paint event.
         """
@@ -224,15 +232,65 @@ class AbstractWindow(HasStrictTraits):
         # that render to an off-screen buffer)
         self._window_paint(event)
 
+    def on_close(self, event):
+        self.cleanup()
+
+    def on_resize(self, event):
+        width, height = self._get_event_size(event)
+        self.resized = (width, height)
+
+        component = self.component
+        component.origin = [0, 0]
+        component.size = [width, height]
+
     # --------------------------------------------------------------------------
     # Wire up the keyboard event handlers
     # --------------------------------------------------------------------------
 
-    def on_key_pressed(self, event):
-        self._handle_key_event('key_pressed', event)
+    def on_key_press(self, event):
+        self._handle_key_event('key_press', event)
 
-    def on_key_released(self, event):
-        self._handle_key_event('key_released', event)
+    def on_key_release(self, event):
+        self._handle_key_event('key_release', event)
 
     def on_character(self, event):
         self._handle_key_event('character', event)
+
+    # -----------------------------------------------------------------------
+    #  Mouse event handlers
+    # -----------------------------------------------------------------------
+
+    def on_mouse_enter(self, event):
+        self._handle_mouse_event("mouse_enter", event)
+
+    def on_mouse_leave(self, event):
+        self._handle_mouse_event("mouse_leave", event)
+
+    def on_mouse_move(self, event):
+        self._handle_mouse_event("mouse_move", event)
+
+    def on_mouse_wheel(self, event):
+        self._handle_mouse_event("mouse_wheel", event)
+
+    def on_mouse_double_click(self, event):
+        name = self._get_mouse_event_button(event)
+        self._handle_mouse_event(name + "_dclick", event)
+
+    def on_mouse_press(self, event):
+        name = self._get_mouse_event_button(event)
+        self._handle_mouse_event(name + "_down", event)
+
+    def on_mouse_release(self, event):
+        name = self._get_mouse_event_button(event)
+        self._handle_mouse_event(name + "_up", event)
+
+    # -------------------------------------------------------------------------
+    #  Private interface
+    # -------------------------------------------------------------------------
+
+    def _init_gc(self):
+        """ Gives a GC a chance to initialize itself before components perform
+        layout and draw.  This is called every time through the paint loop.
+        """
+        gc = self._gc
+        gc.clear(self.bgcolor_)
