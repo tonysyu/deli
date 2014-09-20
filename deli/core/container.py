@@ -19,7 +19,7 @@ class Container(Component):
     """
 
     # The list of components within this frame
-    components = Property    # List(Component)
+    components = Property(List(Component))
 
     # Shadow trait for self.components
     _components = List(Component)
@@ -76,14 +76,13 @@ class Container(Component):
         components = self.components_at(event.x, event.y)
         with self._local_event_transform(event):
             component_set = set(components)
-
             components_left = self._prev_event_handlers - component_set
-            self._notify_if_mouse_event(components_left, event, 'mouse_leave')
+            components_entered = component_set - self._prev_event_handlers
 
+            dispatch_mouse_event = self._dispatch_if_mouse_event
+            dispatch_mouse_event(components_left, event, 'mouse_leave')
             if suffix != 'mouse_leave':
-                components_entered = component_set - self._prev_event_handlers
-                self._notify_if_mouse_event(components_entered,
-                                            event, 'mouse_enter')
+                dispatch_mouse_event(components_entered, event, 'mouse_enter')
 
             self._prev_event_handlers = set()
             for component in components:
@@ -149,14 +148,12 @@ class Container(Component):
     def _get_event_transform(self, event=None):
         return affine.affine_from_translation(-self.x, -self.y)
 
-    def _notify_if_mouse_event(self, components, event, suffix):
-        if len(components) == 0:
+    def _dispatch_if_mouse_event(self, components, event, suffix):
+        if not isinstance(event, MouseEvent):
             return
-
-        if isinstance(event, MouseEvent):
-            for component in components:
-                component.dispatch(event, suffix)
-                event.handled = False
+        for component in components:
+            component.dispatch(event, suffix)
+            event.handled = False
 
     @contextmanager
     def _local_event_transform(self, event):
