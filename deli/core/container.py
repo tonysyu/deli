@@ -100,13 +100,8 @@ class Container(Component):
     #  Protected interface
     # -------------------------------------------------------------------------
 
-    def _draw_self(self, gc, view_rect=None):
-        """ Draw this container.
-
-        Overrides `component` to skip `draw` on self and draw children instead.
-        """
-        components = self._get_visible_components(view_rect)
-        self._draw_layers(gc, components, view_rect=view_rect)
+    def _main_layers(self, view_rect):
+        return self._get_visible_components(view_rect)
 
     # -----------------------------------------------------------------------
     # Property setters & getters

@@ -17,6 +17,21 @@ class NullDispatch(object):
         pass
 
 
+class RenderWrapper(object):
+    """ A thin wrapper around a component so that it renders itself.
+
+    A component's `render` method renders its child layers. This wrapper allows
+    the component itself to be added to a list of rendered layers.
+    """
+
+    def __init__(self, component):
+        self._component = component
+        self.visible = component.visible
+
+    def render(self, *args, **kwargs):
+        return self._component.draw(*args, **kwargs)
+
+
 class Component(CoordinateBox):
     """ Component is the base class for most objects.
 
@@ -136,15 +151,10 @@ class Component(CoordinateBox):
         """
         if not self.visible or view_rect == empty_rectangle:
             return
-
         if self.layout_needed:
             self.do_layout()
 
-        if self.background is not None:
-            self._draw_layers(gc, [self.background], view_rect=view_rect)
-        self._draw_layers(gc, self.underlays, view_rect=view_rect)
-        self._draw_self(gc, view_rect=view_rect)
-        self._draw_layers(gc, self.overlays, view_rect=view_rect)
+        self._draw_layers(gc, view_rect=view_rect)
 
     def draw(self, gc, view_rect=None):
         """ Draw this component
@@ -178,22 +188,6 @@ class Component(CoordinateBox):
         cleanup is called on the component to give it the opportunity to
         delete any transient state it may have (such as backbuffers)."""
         pass
-
-    # -------------------------------------------------------------------------
-    #  Protected interface
-    # -------------------------------------------------------------------------
-
-    def _do_layout(self):
-        """ Called by do_layout() to do an actual layout call; it bypasses some
-        additional logic to handle null size and setting **_layout_needed**.
-        """
-        pass
-
-    def _draw_self(self, gc, view_rect=None):
-        # `_draw_layers` uses `_local_context` as well, but it calls the
-        # `render` method (instead of `draw`) on children, so we can't reuse.
-        with self._local_context(gc):
-            self.draw(gc, view_rect=view_rect)
 
     # -----------------------------------------------------------------------
     # Layout-related concrete methods
@@ -230,9 +224,17 @@ class Component(CoordinateBox):
     # Protected methods
     # -----------------------------------------------------------------------
 
-    # -----------------------------------------------------------------------
-    # Protected methods for subclasses to implement
-    # -----------------------------------------------------------------------
+    def _do_layout(self):
+        """ Called by do_layout() to do an actual layout call; it bypasses some
+        additional logic to handle null size and setting **_layout_needed**.
+        """
+        pass
+
+    def _draw_layers(self, gc, view_rect=None):
+        with self._local_context(gc):
+            for component in self._iter_layers(view_rect):
+                if component.visible:
+                    component.render(gc, view_rect)
 
     @contextmanager
     def _local_context(self, gc):
@@ -240,11 +242,16 @@ class Component(CoordinateBox):
             gc.translate_ctm(*self.origin)
             yield
 
-    def _draw_layers(self, gc, layers, view_rect=None):
-        with self._local_context(gc):
-            for component in layers:
-                if component.visible:
-                    component.render(gc, view_rect)
+    def _iter_layers(self, view_rect):
+        if self.background is not None:
+            yield self.background
+
+        main_layers = self._main_layers(view_rect)
+        for layer in chain(self.underlays, main_layers, self.overlays):
+            yield layer
+
+    def _main_layers(self, view_rect):
+        return [RenderWrapper(self)]
 
     # -----------------------------------------------------------------------
     # Tool-related methods and event dispatch
