@@ -35,7 +35,7 @@ class _QtWindowHandler(object):
 
     def on_key_press(self, event):
         if not self._enable_window.on_key_pressed(event):
-            self._enable_window._on_character(event)
+            self._enable_window.on_character(event)
 
     def on_key_release(self, event):
         self._enable_window.on_key_released(event)

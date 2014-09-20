@@ -225,52 +225,6 @@ class AbstractWindow(HasStrictTraits):
         self._window_paint(event)
 
     # --------------------------------------------------------------------------
-    # Wire up the mouse event handlers
-    # --------------------------------------------------------------------------
-
-    def _on_left_down(self, event):
-        self.handle_mouse_event('left_down', event, set_focus=True)
-
-    def _on_left_up(self, event):
-        self.handle_mouse_event('left_up', event)
-
-    def _on_left_dclick(self, event):
-        self.handle_mouse_event('left_dclick', event)
-
-    def _on_right_down(self, event):
-        self.handle_mouse_event('right_down', event, set_focus=True)
-
-    def _on_right_up(self, event):
-        self.handle_mouse_event('right_up', event)
-
-    def _on_right_dclick(self, event):
-        self.handle_mouse_event('right_dclick', event)
-
-    def _on_middle_down(self, event):
-        self.handle_mouse_event('middle_down', event)
-
-    def _on_middle_up(self, event):
-        self.handle_mouse_event('middle_up', event)
-
-    def _on_middle_dclick(self, event):
-        self.handle_mouse_event('middle_dclick', event)
-
-    def _on_mouse_move(self, event):
-        self.handle_mouse_event('mouse_move', event, set_focus=False)
-
-    def _on_mouse_wheel(self, event):
-        self.handle_mouse_event('mouse_wheel', event)
-
-    def _on_mouse_enter(self, event):
-        self.handle_mouse_event('mouse_enter', event)
-
-    def _on_mouse_leave(self, event):
-        self.handle_mouse_event('mouse_leave', event, set_focus=False)
-
-    def _on_window_enter(self, event):
-        pass
-
-    # --------------------------------------------------------------------------
     # Wire up the keyboard event handlers
     # --------------------------------------------------------------------------
 
@@ -280,5 +234,5 @@ class AbstractWindow(HasStrictTraits):
     def on_key_released(self, event):
         self._handle_key_event('key_released', event)
 
-    def _on_character(self, event):
+    def on_character(self, event):
         self._handle_key_event('character', event)
