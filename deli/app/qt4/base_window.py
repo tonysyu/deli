@@ -52,8 +52,7 @@ class BaseWindow(AbstractWindow):
         y = self._flip_y(y)
         kwargs = get_modifier_state(event.modifiers())
 
-        return KeyEvent(event_type=event_type, character=key, x=x, y=y,
-                        event=event, window=self, **kwargs)
+        return KeyEvent(character=key, x=x, y=y, window=self, **kwargs)
 
     def _create_mouse_event(self, event):
         # If the control no longer exists, don't send mouse event
