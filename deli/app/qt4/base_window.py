@@ -4,7 +4,7 @@ from enable.events import KeyEvent, MouseEvent
 from traits.api import Instance, Tuple
 
 from ..abstract_window import AbstractWindow
-from .constants import BUTTON_NAME_MAP, POINTER_MAP
+from .constants import POINTER_MAP
 from .qt_window import QtWindow
 from .utils import key_from_event
 
@@ -115,9 +115,6 @@ class BaseWindow(AbstractWindow):
 
     def _set_focus(self):
         self.control.setFocus()
-
-    def _get_mouse_event_button(self, event):
-        return BUTTON_NAME_MAP[event.button()]
 
     def _get_event_size(self, event):
         """ Return width and height of event. """

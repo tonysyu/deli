@@ -73,10 +73,6 @@ class AbstractWindow(ABCHasStrictTraits):
         """ Sets this window to have keyboard focus. """
 
     @abstractmethod
-    def _get_mouse_event_button(self, event):
-        """ Return the name of the mouse button for the toolkit event. """
-
-    @abstractmethod
     def _get_event_size(self, event):
         """ Return width and height of event. """
 
@@ -122,7 +118,7 @@ class AbstractWindow(ABCHasStrictTraits):
     #  Generic keyboard event handler:
     # --------------------------------------------------------------------------
 
-    def _handle_key_event(self, event_type, event):
+    def handle_key_event(self, event_type, event):
         """ **event** should be a toolkit-specific opaque object that will
         be passed in to the backend's _create_key_event() method. It can
         be None if the the toolkit lacks a native "key event" object.
@@ -147,7 +143,7 @@ class AbstractWindow(ABCHasStrictTraits):
     #  Generic mouse event handler:
     # --------------------------------------------------------------------------
 
-    def _handle_mouse_event(self, event_type, event, set_focus=False):
+    def handle_mouse_event(self, event_type, event, set_focus=False):
         """ **event** should be a toolkit-specific opaque object that will
         be passed in to the backend's _create_mouse_event() method.  It can
         be None if the the toolkit lacks a native "mouse event" object.
@@ -228,47 +224,6 @@ class AbstractWindow(ABCHasStrictTraits):
         component = self.component
         component.origin = [0, 0]
         component.size = [width, height]
-
-    # --------------------------------------------------------------------------
-    # Wire up the keyboard event handlers
-    # --------------------------------------------------------------------------
-
-    def on_key_press(self, event):
-        self._handle_key_event('key_press', event)
-
-    def on_key_release(self, event):
-        self._handle_key_event('key_release', event)
-
-    def on_character(self, event):
-        self._handle_key_event('character', event)
-
-    # -----------------------------------------------------------------------
-    #  Mouse event handlers
-    # -----------------------------------------------------------------------
-
-    def on_mouse_enter(self, event):
-        self._handle_mouse_event("mouse_enter", event)
-
-    def on_mouse_leave(self, event):
-        self._handle_mouse_event("mouse_leave", event)
-
-    def on_mouse_move(self, event):
-        self._handle_mouse_event("mouse_move", event)
-
-    def on_mouse_wheel(self, event):
-        self._handle_mouse_event("mouse_wheel", event)
-
-    def on_mouse_double_click(self, event):
-        name = self._get_mouse_event_button(event)
-        self._handle_mouse_event(name + "_dclick", event)
-
-    def on_mouse_press(self, event):
-        name = self._get_mouse_event_button(event)
-        self._handle_mouse_event(name + "_down", event)
-
-    def on_mouse_release(self, event):
-        name = self._get_mouse_event_button(event)
-        self._handle_mouse_event(name + "_up", event)
 
     # -------------------------------------------------------------------------
     #  Private interface

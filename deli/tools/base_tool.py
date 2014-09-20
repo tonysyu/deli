@@ -19,8 +19,6 @@ of interest:
 - on_mouse_leave
 - on_key_press
 - on_key_release
-- on_character
-- on_dropped_on
 
 """
 from traits.api import Dict, HasStrictTraits, Instance, Str, WeakRef

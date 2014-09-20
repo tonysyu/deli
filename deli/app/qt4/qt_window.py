@@ -1,5 +1,11 @@
 from pyface.qt import QtCore, QtGui
 
+from .constants import BUTTON_NAME_MAP
+
+
+def button_from_event(event):
+    return BUTTON_NAME_MAP[event.button()]
+
 
 class QtWindow(QtGui.QWidget):
     """ The Qt widget that implements the control layer. """
@@ -27,31 +33,34 @@ class QtWindow(QtGui.QWidget):
         self.handler.on_resize(event)
 
     def keyPressEvent(self, event):
-        self.handler.on_key_press(event)
+        self.handler.handle_key_event('key_press', event)
 
     def keyReleaseEvent(self, event):
-        self.handler.on_key_release(event)
+        self.handler.handle_key_event('key_release', event)
 
     def enterEvent(self, event):
-        self.handler.on_mouse_enter(event)
+        self.handler.handle_mouse_event("mouse_enter", event)
 
     def leaveEvent(self, event):
-        self.handler.on_mouse_leave(event)
-
-    def mouseDoubleClickEvent(self, event):
-        self.handler.on_mouse_double_click(event)
+        self.handler.handle_mouse_event("mouse_leave", event)
 
     def mouseMoveEvent(self, event):
-        self.handler.on_mouse_move(event)
+        self.handler.handle_mouse_event("mouse_move", event)
+
+    def mouseDoubleClickEvent(self, event):
+        action_name = button_from_event(event) + '_dclick'
+        self.handler.handle_mouse_event(action_name, event)
 
     def mousePressEvent(self, event):
-        self.handler.on_mouse_press(event)
+        action_name = button_from_event(event) + '_down'
+        self.handler.handle_mouse_event(action_name, event)
 
     def mouseReleaseEvent(self, event):
-        self.handler.on_mouse_release(event)
+        action_name = button_from_event(event) + '_up'
+        self.handler.handle_mouse_event(action_name, event)
 
     def wheelEvent(self, event):
-        self.handler.on_mouse_wheel(event)
+        self.handler.handle_mouse_event("mouse_wheel", event)
 
     def sizeHint(self):
         qt_size_hint = super(QtWindow, self).sizeHint()
