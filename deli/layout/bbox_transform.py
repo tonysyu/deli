@@ -1,5 +1,8 @@
-from matplotlib.transforms import Transform as BaseTransform  # noqa
-from matplotlib.transforms import BboxTransform as _MPLBboxTransform
+from matplotlib.transforms import ( # noqa
+    blended_transform_factory, IdentityTransform,
+    Transform as BaseTransform,
+    BboxTransform as _MPLBboxTransform,
+)
 
 
 class BboxTransform(_MPLBboxTransform):
@@ -11,3 +14,7 @@ class BboxTransform(_MPLBboxTransform):
 
     def __init__(self, bbox0, bbox1):
         super(BboxTransform, self).__init__(bbox0._bbox, bbox1._bbox)
+
+
+def blend_xy_transforms(x_transform, y_transform):
+    return blended_transform_factory(x_transform, y_transform)

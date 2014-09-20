@@ -1,7 +1,6 @@
 """ Defines the XAxis and YAxis classes.
 """
 import numpy as np
-from matplotlib.transforms import blended_transform_factory, IdentityTransform
 
 from traits.api import (Float, Instance, Property, cached_property,
                         on_trait_change)
@@ -12,7 +11,9 @@ from .stylus.tick_stylus import XTickStylus, YTickStylus
 from .stylus.tick_label_stylus import XTickLabelStylus, YTickLabelStylus
 from .stylus.line_stylus import LineStylus
 from .stylus.segment_stylus import SegmentStylus
-from .layout.bbox_transform import BaseTransform, BboxTransform
+from .layout.bbox_transform import (
+    BaseTransform, BboxTransform, IdentityTransform, blend_xy_transforms
+)
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
 from .style import config
 from .utils.drawing import broadcast_points
@@ -140,8 +141,7 @@ class XAxis(BaseAxis):
 
     @cached_property
     def _get_transform(self):
-        return blended_transform_factory(self.data_to_screen,
-                                         self.ortho_transform)
+        return blend_xy_transforms(self.data_to_screen, self.ortho_transform)
 
     def _get_end_xy_offset(self, component):
         return np.array([component.local_bbox.width, 0])
@@ -170,8 +170,7 @@ class YAxis(BaseAxis):
 
     @cached_property
     def _get_transform(self):
-        return blended_transform_factory(self.ortho_transform,
-                                         self.data_to_screen)
+        return blend_xy_transforms(self.ortho_transform, self.data_to_screen)
 
     def _get_end_xy_offset(self, component):
         return np.array([0, component.local_bbox.height])

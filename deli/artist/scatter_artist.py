@@ -12,10 +12,6 @@ class ScatterArtist(BasePointArtist):
 
     marker = Instance(MarkerStylus, ())
 
-    # -------------------------------------------------------------------------
-    #  Private interface
-    # -------------------------------------------------------------------------
-
     def draw(self, gc, view_rect=None):
         points = self.get_screen_points()
         with self._clipped_context(gc):
