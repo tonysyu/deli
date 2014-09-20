@@ -7,6 +7,7 @@ from traits.api import Array, Instance, on_trait_change
 from .abstract_overlay import AbstractOverlay
 from .stylus.segment_stylus import SegmentStylus
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
+from .layout.bbox_transform import BaseTransform, BboxTransform
 from .utils.drawing import hline_segments, vline_segments
 
 
@@ -20,6 +21,9 @@ class BaseGrid(AbstractOverlay):
 
     # A tick grid that controls tick positioning
     tick_grid = Instance(BaseGridLayout)
+
+    #: Transform from data-space to screen-space.
+    data_to_screen = Instance(BaseTransform)
 
     # -----------------------------------------------------------------------
     # Appearance traits
@@ -89,6 +93,10 @@ class BaseGrid(AbstractOverlay):
         self.invalidate()
         self._visual_attr_changed()
 
+    def _data_to_screen_default(self):
+        component = self.component
+        return BboxTransform(component.data_bbox, component.local_bbox)
+
 
 class XGrid(BaseGrid):
 
@@ -102,7 +110,7 @@ class XGrid(BaseGrid):
 
         y = np.resize(y_lo, offsets.shape)
         points = np.transpose((offsets, y))
-        offsets = self.component.data_to_screen.transform(points)[:, 0]
+        offsets = self.data_to_screen.transform(points)[:, 0]
 
         starts, ends = vline_segments(offsets, y_lo, y_hi)
 
@@ -122,7 +130,7 @@ class YGrid(BaseGrid):
 
         x = np.resize(x_lo, offsets.shape)
         points = np.transpose((x, offsets))
-        offsets = self.component.data_to_screen.transform(points)[:, 1]
+        offsets = self.data_to_screen.transform(points)[:, 1]
 
         starts, ends = hline_segments(offsets, x_lo, x_hi)
 
