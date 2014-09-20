@@ -1,4 +1,4 @@
-from pyface.qt import QtCore, QtGui
+from pyface.qt import QtGui
 
 from enable.events import KeyEvent, MouseEvent
 from traits.api import Instance, Tuple
@@ -6,7 +6,7 @@ from traits.api import Instance, Tuple
 from ..abstract_window import AbstractWindow
 from .constants import POINTER_MAP
 from .qt_window import QtWindow
-from .utils import key_from_event
+from .utils import get_button_state, get_modifier_state, key_from_event
 
 
 class BaseWindow(AbstractWindow):
@@ -49,19 +49,11 @@ class BaseWindow(AbstractWindow):
             return None
 
         x, y = self._last_mouse_position
-        modifiers = event.modifiers()
+        y = self._flip_y(y)
+        kwargs = get_modifier_state(event.modifiers())
 
-        return KeyEvent(
-            event_type=event_type,
-            character=key,
-            x=x,
-            y=self._flip_y(y),
-            alt_down=bool(modifiers & QtCore.Qt.AltModifier),
-            shift_down=bool(modifiers & QtCore.Qt.ShiftModifier),
-            control_down=bool(modifiers & QtCore.Qt.ControlModifier),
-            event=event,
-            window=self
-        )
+        return KeyEvent(event_type=event_type, character=key, x=x, y=y,
+                        event=event, window=self, **kwargs)
 
     def _create_mouse_event(self, event):
         # If the control no longer exists, don't send mouse event
@@ -83,17 +75,9 @@ class BaseWindow(AbstractWindow):
 
         self._last_mouse_position = (x, y)
 
-        return MouseEvent(
-            x=x,
-            y=self._flip_y(y),
-            alt_down=bool(modifiers & QtCore.Qt.AltModifier),
-            shift_down=bool(modifiers & QtCore.Qt.ShiftModifier),
-            control_down=bool(modifiers & QtCore.Qt.ControlModifier),
-            left_down=bool(buttons & QtCore.Qt.LeftButton),
-            middle_down=bool(buttons & QtCore.Qt.MidButton),
-            right_down=bool(buttons & QtCore.Qt.RightButton),
-            window=self
-        )
+        kwargs = get_modifier_state(modifiers)
+        kwargs.update(get_button_state(buttons))
+        return MouseEvent(x=x, y=self._flip_y(y), window=self, **kwargs)
 
     def redraw(self, rect=None):
         if self.control:
