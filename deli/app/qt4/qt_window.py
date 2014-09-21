@@ -27,7 +27,7 @@ class QtWindow(QtGui.QWidget):
         return super(QtWindow, self).closeEvent(event)
 
     def paintEvent(self, event):
-        self.handler.on_paint(event)
+        self.handler.render(event)
 
     def resizeEvent(self, event):
         self.handler.on_resize(event)

@@ -57,7 +57,7 @@ class AbstractWindow(ABCHasStrictTraits):
         """
 
     @abstractmethod
-    def _window_paint(self, event):
+    def _render(self, event):
         """ Do a GUI toolkit specific screen update. """
 
     @abstractmethod
@@ -191,7 +191,7 @@ class AbstractWindow(ABCHasStrictTraits):
             self._gc.window = None
             self._gc = None
 
-    def on_paint(self, event=None):
+    def render(self, event=None):
         """ This method is called directly by the UI toolkit's callback
         mechanism on the paint event.
         """
@@ -212,7 +212,7 @@ class AbstractWindow(ABCHasStrictTraits):
 
         # Perform a paint of the GC to the window (only necessary on backends
         # that render to an off-screen buffer)
-        self._window_paint(event)
+        self._render(event)
 
     def on_close(self, event):
         self.cleanup()

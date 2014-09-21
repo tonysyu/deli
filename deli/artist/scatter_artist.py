@@ -5,8 +5,7 @@ from .base_point_artist import BasePointArtist
 
 
 class ScatterArtist(BasePointArtist):
-    """ An artist for data points that should display as markers
-    """
+    """ An artist for data points that should display as markers. """
     # The color of the markers.
     color = DelegatesTo('marker')
 

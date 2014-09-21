@@ -14,11 +14,10 @@ class Window(BaseWindow):
         gc.translate_ctm(0.5, 0.5)
         return gc
 
-    def _window_paint(self, event):
+    def _render(self, event):
         if self.control is None:
             return
 
-        # self._gc is an image context
         w = self._gc.width()
         h = self._gc.height()
         data = self._gc.pixel_map.convert_to_argb32string()
