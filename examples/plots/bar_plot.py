@@ -1,20 +1,31 @@
 import numpy as np
 
-from traits.api import Any, Instance
+from traits.api import Any, Instance, cached_property
 
-from deli.stylus.rect_stylus import RectangleStylus
+from deli.artist.base_point_artist import BasePointArtist
 from deli.axis import XAxis
 from deli.demo_utils.traitsui import TraitsWindow
 from deli.graph import Graph
-from deli.artist.base_point_artist import BasePointArtist
+from deli.layout.grid_layout import XGridLayout
+from deli.stylus.rect_stylus import RectangleStylus
 from deli.utils.drawing import broadcast_points
 
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 
+class TickLayout(XGridLayout):
+
+    @cached_property
+    def _get_axial_offsets(self):
+        return np.arange(*np.ceil(self.axial_limits))
+
+
 class OrdinalAxis(XAxis):
 
     labels = Any
+
+    def _tick_grid_default(self):
+        return TickLayout(data_bbox=self.component.data_bbox)
 
     def data_offset_to_label(self, data_offset):
         index = int(data_offset)
@@ -23,35 +34,38 @@ class OrdinalAxis(XAxis):
         return ''
 
 
+def line_to_rect_corners(x, y0, y1, width):
+    half_width = width / 2.0
+    corner0 = broadcast_points(x - half_width, y0)
+    corner1 = broadcast_points(x + half_width, y1)
+    return corner0, corner1
+
+
+def bars_from_points(x, y, data_to_screen, y0=0, width=None):
+    if width is None:
+        width = np.min(np.diff(x))
+
+    corner0, corner1 = line_to_rect_corners(x, y0, y, width)
+
+    origins = data_to_screen.transform(corner0)
+    sizes = data_to_screen.transform(corner1) - origins
+    return np.hstack([origins, sizes])
+
+
 class BarArtist(BasePointArtist):
     """ An artist for bar plot data. """
 
     stylus = Instance(RectangleStylus, ())
 
     def draw(self, gc, view_rect=None):
-        bars = self._bars_from_points(width=0.5)
+        bars = self.get_bar_data()
         with self._clipped_context(gc):
             for rect in bars:
                 self.stylus.draw(gc, rect)
 
-    # -------------------------------------------------------------------------
-    #  Private interface
-    # -------------------------------------------------------------------------
-
-    def _bars_from_points(self, width=None, y0=0):
-        x = self.x_data
-        y = self.y_data
-
-        if width is None:
-            width = np.min(np.diff(x))
-
-        corner0 = broadcast_points(x - (width / 2.0), y0)
-        corner1 = broadcast_points(x + (width / 2.0), y)
-
-        origins = self.data_to_screen.transform(corner0)
-        sizes = self.data_to_screen.transform(corner1) - origins
-        return np.hstack([origins, sizes])
-
+    def get_bar_data(self):
+        x, y = self.x_data, self.y_data
+        return bars_from_points(x, y, self.data_to_screen, width=0.5)
 
 class Demo(TraitsWindow):
 
