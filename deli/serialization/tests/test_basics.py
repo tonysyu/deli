@@ -2,10 +2,10 @@ from numpy.testing import assert_allclose
 
 from deli.graph import Graph
 from deli.serialization.api import serialize
-from deli.testing.mock_window import MockWindow
+from deli.testing.mock_view import MockView
 
 
-class Demo(MockWindow):
+class Demo(MockView):
 
     def __init__(self, **kwargs):
         super(Demo, self).__init__(**kwargs)

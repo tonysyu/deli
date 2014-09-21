@@ -3,14 +3,14 @@ import numpy as np
 from deli.graph import Graph
 from deli.artist.line_artist import LineArtist
 from deli.serialization.api import serialize
-from deli.testing.mock_window import MockWindow
+from deli.testing.mock_view import MockView
 
 
 x = np.linspace(0, 10)
 y = np.sin(x)
 
 
-class Demo(MockWindow):
+class Demo(MockView):
 
     def setup_graph(self):
         graph = Graph()

@@ -1,13 +1,13 @@
 from numpy import linspace
 from scipy.special import jn
 
-from deli.demo_utils.traitsui import TraitsWindow
+from deli.demo_utils.traits_view import TraitsView
 from deli.graph import Graph
 from deli.artist.line_artist import LineArtist
 from deli.style.colors import default_cycle
 
 
-class Demo(TraitsWindow):
+class Demo(TraitsView):
 
     def setup_graph(self):
         graph = Graph()

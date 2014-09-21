@@ -1,11 +1,11 @@
 import numpy as np
 
-from deli.demo_utils.js_widget import JSWindow
+from deli.demo_utils.js_view import JSView
 from deli.graph import Graph
 from deli.artist.line_artist import LineArtist
 
 
-class Demo(JSWindow):
+class Demo(JSView):
 
     def setup_graph(self):
         graph = Graph()

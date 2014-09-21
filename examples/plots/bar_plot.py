@@ -4,7 +4,7 @@ from traits.api import Any, Instance, cached_property
 
 from deli.artist.base_point_artist import BasePointArtist
 from deli.axis import XAxis
-from deli.demo_utils.traitsui import TraitsWindow
+from deli.demo_utils.traits_view import TraitsView
 from deli.graph import Graph
 from deli.layout.grid_layout import XGridLayout
 from deli.stylus.rect_stylus import RectangleStylus
@@ -67,7 +67,7 @@ class BarArtist(BasePointArtist):
         x, y = self.x_data, self.y_data
         return bars_from_points(x, y, self.data_to_screen, width=0.5)
 
-class Demo(TraitsWindow):
+class Demo(TraitsView):
 
     def setup_graph(self):
         graph = Graph()

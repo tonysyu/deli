@@ -20,7 +20,7 @@ def calculate_text_extent(text):
     return width, height, descent, leading
 
 
-class MockWindow(ABCHasStrictTraits):
+class MockView(ABCHasStrictTraits):
 
     title = Str
     graph = Instance(Graph)

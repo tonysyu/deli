@@ -1,11 +1,11 @@
 from skimage import data
 
-from deli.demo_utils.traitsui import TraitsWindow
+from deli.demo_utils.traits_view import TraitsView
 from deli.graph import Graph
 from deli.artist.image_artist import ImageArtist
 
 
-class Demo(TraitsWindow):
+class Demo(TraitsView):
 
     def setup_graph(self):
         graph = Graph()
