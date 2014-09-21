@@ -11,8 +11,7 @@ from ..style import config
 
 
 class LabelStylus(HasStrictTraits):
-    """ A Flyweight object for drawing text labels.
-    """
+    """ A Flyweight object for drawing text labels. """
 
     #: The label text.
     text = Str

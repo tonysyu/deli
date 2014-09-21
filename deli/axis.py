@@ -98,10 +98,10 @@ class BaseAxis(AbstractOverlay):
         axial_offsets = self.tick_grid.axial_offsets
         xy_tick = self._get_tick_positions()
         for xy_screen, data_offset in zip(xy_tick, axial_offsets):
-            gc.translate_ctm(*xy_screen)
             label = self.data_offset_to_label(data_offset)
-            self.tick_label_stylus.draw(gc, label)
-            gc.translate_ctm(*(-xy_screen))
+            with gc:
+                gc.translate_ctm(*xy_screen)
+                self.tick_label_stylus.draw(gc, label)
 
     # -----------------------------------------------------------------------
     # Private methods for computing positions and layout
