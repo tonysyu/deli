@@ -10,7 +10,6 @@ from .stylus.label_stylus import LabelStylus
 from .stylus.tick_stylus import XTickStylus, YTickStylus
 from .stylus.tick_label_stylus import XTickLabelStylus, YTickLabelStylus
 from .stylus.line_stylus import LineStylus
-from .stylus.segment_stylus import SegmentStylus
 from .layout.bbox_transform import (
     BaseTransform, BboxTransform, IdentityTransform, blend_xy_transforms
 )
@@ -38,7 +37,7 @@ class BaseAxis(AbstractOverlay):
     tick_stylus = Instance(LineStylus)
 
     #: Stylus responsible for drawing the axis line.
-    line_stylus = Instance(SegmentStylus)
+    line_stylus = Instance(LineStylus)
 
     # -----------------------------------------------------------------------
     # Private Traits
@@ -88,17 +87,14 @@ class BaseAxis(AbstractOverlay):
 
     def _draw_axis_line(self, gc):
         """ Draws the line for the axis. """
-        xy_axis_min, xy_axis_max = self._compute_xy_end_points()
-        self.line_stylus.draw(gc, xy_axis_min, xy_axis_max)
+        self.line_stylus.draw(gc, self._compute_xy_end_points())
 
     def _draw_ticks(self, gc):
-        """ Draws the tick marks for the axis.
-        """
+        """ Draws the tick marks for the axis. """
         self.tick_stylus.draw(gc, self.tick_grid.axial_offsets)
 
     def _draw_labels(self, gc):
-        """ Draws the tick labels for the axis.
-        """
+        """ Draws the tick labels for the axis. """
         axial_offsets = self.tick_grid.axial_offsets
         xy_tick = self._get_tick_positions()
         for xy_screen, data_offset in zip(xy_tick, axial_offsets):
@@ -112,10 +108,7 @@ class BaseAxis(AbstractOverlay):
     # -----------------------------------------------------------------------
 
     def _compute_xy_end_points(self):
-        end_xy_offset = self._get_end_xy_offset(self.component)
-        xy_axis_min = np.array([0, 0])
-        xy_axis_max = end_xy_offset + xy_axis_min
-        return xy_axis_min, xy_axis_max
+        raise NotImplementedError()
 
     def _data_to_screen_default(self):
         component = self.component
@@ -125,7 +118,7 @@ class BaseAxis(AbstractOverlay):
 class XAxis(BaseAxis):
 
     def _line_stylus_default(self):
-        return SegmentStylus(color=config.get('axis.line.color'))
+        return LineStylus(color=config.get('axis.line.color'))
 
     def _tick_stylus_default(self):
         return XTickStylus(color=config.get('axis.tick.color'),
@@ -143,8 +136,8 @@ class XAxis(BaseAxis):
     def _get_transform(self):
         return blend_xy_transforms(self.data_to_screen, self.ortho_transform)
 
-    def _get_end_xy_offset(self, component):
-        return np.array([component.local_bbox.width, 0])
+    def _compute_xy_end_points(self):
+        return np.transpose([self.component.local_bbox.x_limits, [0, 0]])
 
     def _get_tick_positions(self):
         points = broadcast_points(self.tick_grid.axial_offsets, self.locus)
@@ -154,7 +147,7 @@ class XAxis(BaseAxis):
 class YAxis(BaseAxis):
 
     def _line_stylus_default(self):
-        return SegmentStylus(color=config.get('axis.line.color'))
+        return LineStylus(color=config.get('axis.line.color'))
 
     def _tick_stylus_default(self):
         return YTickStylus(color=config.get('axis.tick.color'),
@@ -172,8 +165,8 @@ class YAxis(BaseAxis):
     def _get_transform(self):
         return blend_xy_transforms(self.ortho_transform, self.data_to_screen)
 
-    def _get_end_xy_offset(self, component):
-        return np.array([0, component.local_bbox.height])
+    def _compute_xy_end_points(self):
+        return np.transpose([[0, 0], self.component.local_bbox.y_limits])
 
     def _get_tick_positions(self):
         points = broadcast_points(self.locus, self.tick_grid.axial_offsets)
