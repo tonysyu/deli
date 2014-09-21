@@ -95,10 +95,8 @@ class BaseAxis(AbstractOverlay):
 
     def _draw_labels(self, gc):
         """ Draws the tick labels for the axis. """
-        axial_offsets = self.tick_grid.axial_offsets
         xy_tick = self._get_tick_positions()
-        for xy_screen, data_offset in zip(xy_tick, axial_offsets):
-            label = self.data_offset_to_label(data_offset)
+        for xy_screen, label in zip(xy_tick, self._get_labels()):
             with gc:
                 gc.translate_ctm(*xy_screen)
                 self.tick_label_stylus.draw(gc, label)
@@ -106,6 +104,10 @@ class BaseAxis(AbstractOverlay):
     # -----------------------------------------------------------------------
     # Private methods for computing positions and layout
     # -----------------------------------------------------------------------
+
+    def _get_labels(self):
+        return [self.data_offset_to_label(z)
+                for z in self.tick_grid.axial_offsets]
 
     def _compute_xy_end_points(self):
         raise NotImplementedError()
@@ -137,7 +139,8 @@ class XAxis(BaseAxis):
         return blend_xy_transforms(self.data_to_screen, self.ortho_transform)
 
     def _compute_xy_end_points(self):
-        return np.transpose([self.component.local_bbox.x_limits, [0, 0]])
+        y_points = [self.locus] * 2
+        return np.transpose([self.component.local_bbox.x_limits, y_points])
 
     def _get_tick_positions(self):
         points = broadcast_points(self.tick_grid.axial_offsets, self.locus)
@@ -166,7 +169,8 @@ class YAxis(BaseAxis):
         return blend_xy_transforms(self.ortho_transform, self.data_to_screen)
 
     def _compute_xy_end_points(self):
-        return np.transpose([[0, 0], self.component.local_bbox.y_limits])
+        x_points = [self.locus] * 2
+        return np.transpose([x_points, self.component.local_bbox.y_limits])
 
     def _get_tick_positions(self):
         points = broadcast_points(self.locus, self.tick_grid.axial_offsets)
