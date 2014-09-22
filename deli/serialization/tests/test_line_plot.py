@@ -21,14 +21,6 @@ class Demo(MockView):
         return graph
 
 
-def test_draw():
-    demo = Demo()
-    demo.show()
-    demo.context.begin_path.assert_called_with()
-    demo.context.stroke_path.assert_called_with()
-    demo.context.show_text.assert_called_with(demo.graph.title.text)
-
-
 def test_serialization():
     demo = Demo()
     output = serialize(demo.graph.canvas)

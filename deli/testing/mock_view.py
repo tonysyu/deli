@@ -4,9 +4,11 @@ from abc import abstractmethod
 
 from mock import MagicMock
 
-from traits.api import ABCHasStrictTraits, Instance, Property, Str, Tuple
+from traits.api import (ABCHasStrictTraits, DelegatesTo, Instance, Property,
+                        Str, Tuple)
 
 from ..graph import Graph
+from ..app.testing.mock_window import MockWindow
 
 
 WIDTH = 700
@@ -24,11 +26,14 @@ class MockView(ABCHasStrictTraits):
 
     title = Str
     graph = Instance(Graph)
-    context = Instance(MagicMock)
+    context = Property
 
     size = Tuple((WIDTH, HEIGHT))
     origin = Tuple((0, 0))
     rect = Property
+
+    _window = Instance(MockWindow)
+    control = DelegatesTo('_window')
 
     @abstractmethod
     def setup_graph(self):
@@ -37,11 +42,11 @@ class MockView(ABCHasStrictTraits):
     def _graph_default(self):
         return self.setup_graph()
 
-    def _context_default(self):
-        context = MagicMock()
+    def __window_default(self):
+        return MockWindow(component=self.graph)
 
-        context.get_full_text_extent.side_effect = calculate_text_extent
-        return context
+    def _get_context(self):
+        return self._window._gc
 
     def _get_rect(self):
         return self.origin + self.size
@@ -53,4 +58,4 @@ class MockView(ABCHasStrictTraits):
 
     def show(self):
         self.do_layout()
-        self.graph.render(self.context, view_rect=self.rect)
+        self._window.render()

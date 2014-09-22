@@ -15,7 +15,7 @@ class BaseWindow(AbstractWindow):
     _last_mouse_position = Tuple
 
     def __init__(self, parent, wid=-1, pos=None, size=None, **traits):
-        super(AbstractWindow, self).__init__(**traits)
+        super(BaseWindow, self).__init__(**traits)
 
         if isinstance(parent, QtGui.QLayout):
             parent = parent.parentWidget()
