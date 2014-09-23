@@ -1,7 +1,5 @@
 from numpy.testing import assert_allclose
 
-from traits.api import Property
-
 from deli.testing.line_demo import LineDemo
 from deli.tools.pan_tool import PanTool
 
@@ -18,18 +16,8 @@ class Demo(LineDemo):
     init_x_limits = (0, X_MAX)
     init_y_limits = (0, Y_MAX)
 
-    x_limits = Property
-    y_limits = Property
-
-    def _get_x_limits(self):
-        return self.graph.canvas.data_bbox.x_limits
-
-    def _get_y_limits(self):
-        return self.graph.canvas.data_bbox.y_limits
-
     def _graph_default(self):
         graph = self.setup_graph()
-        graph.margin = 0
 
         PanTool.attach_to(graph.canvas)
         return graph

@@ -24,6 +24,18 @@ class MockContext(MagicMock):
     def __exit__(self, *args):
         pass
 
+
+class MockKeyEvent(Bunch):
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault('x', 0)
+        kwargs.setdefault('y', 0)
+        kwargs.setdefault('alt_down', False)
+        kwargs.setdefault('control_down', False)
+        kwargs.setdefault('shift_down', False)
+        super(MockKeyEvent, self).__init__(**kwargs)
+
+
 class MockControl(ABCHasStrictTraits):
 
     width = Int(WIDTH)
@@ -45,10 +57,14 @@ class MockControl(ABCHasStrictTraits):
         self.handler.on_resize(new_size)
 
     def press_key(self, **kwargs):
-        self.handler.handle_key_event('key_press', Bunch(**kwargs))
+        self.handler.handle_key_event('key_press', MockKeyEvent(**kwargs))
 
     def release_key(self, **kwargs):
-        self.handler.handle_key_event('key_release', Bunch(**kwargs))
+        self.handler.handle_key_event('key_release', MockKeyEvent(**kwargs))
+
+    def press_release_key(self, **kwargs):
+        self.press_key(**kwargs)
+        self.release_key(**kwargs)
 
     def fire_enter_event(self, **kwargs):
         self.handler.handle_mouse_event("mouse_enter", Bunch(**kwargs))
@@ -111,9 +127,9 @@ class MockWindow(AbstractWindow):
         if self.component is None:
             return None
 
-        if not event.key:
+        if not event.character:
             return None
-        return KeyEvent(window=self, **event.to_dict())
+        return KeyEvent(window=self, event_type=event_type, **event.to_dict())
 
     def _create_mouse_event(self, event):
         # If the control no longer exists, don't send mouse event
