@@ -3,6 +3,8 @@ from mock import MagicMock
 from enable.events import KeyEvent, MouseEvent
 from traits.api import ABCHasStrictTraits, Any, Instance, Int, Tuple
 
+from deli.testing.helpers import Bunch
+from deli.utils.drawing import broadcast_points
 from ..abstract_window import AbstractWindow
 
 
@@ -43,34 +45,46 @@ class MockControl(ABCHasStrictTraits):
         self.handler.on_resize(new_size)
 
     def press_key(self, **kwargs):
-        self.handler.handle_key_event('key_press', **kwargs)
+        self.handler.handle_key_event('key_press', Bunch(**kwargs))
 
     def release_key(self, **kwargs):
-        self.handler.handle_key_event('key_release', **kwargs)
+        self.handler.handle_key_event('key_release', Bunch(**kwargs))
 
     def fire_enter_event(self, **kwargs):
-        self.handler.handle_mouse_event("mouse_enter", **kwargs)
+        self.handler.handle_mouse_event("mouse_enter", Bunch(**kwargs))
 
     def fire_leave_event(self, **kwargs):
-        self.handler.handle_mouse_event("mouse_leave", **kwargs)
+        self.handler.handle_mouse_event("mouse_leave", Bunch(**kwargs))
 
     def move_mouse(self, **kwargs):
-        self.handler.handle_mouse_event("mouse_move", **kwargs)
+        self.handler.handle_mouse_event("mouse_move", Bunch(**kwargs))
 
     def double_click_mouse(self, button='left', **kwargs):
         action_name = '{}_dclick'.format(button)
-        self.handler.handle_mouse_event(action_name, **kwargs)
+        self.handler.handle_mouse_event(action_name, Bunch(**kwargs))
 
     def press_mouse_button(self, button='left', **kwargs):
         action_name = '{}_down'.format(button)
-        self.handler.handle_mouse_event(action_name, **kwargs)
+        self.handler.handle_mouse_event(action_name, Bunch(**kwargs))
 
     def release_mouse_button(self, button='left', **kwargs):
         action_name = '{}_up'.format(button)
-        self.handler.handle_mouse_event(action_name, **kwargs)
+        self.handler.handle_mouse_event(action_name, Bunch(**kwargs))
 
     def scroll_mouse_wheel(self, **kwargs):
-        self.handler.handle_mouse_event("mouse_wheel", **kwargs)
+        self.handler.handle_mouse_event("mouse_wheel", Bunch(**kwargs))
+
+    def press_move_release(self, x, y, button='left'):
+        points = broadcast_points(x, y)
+        assert len(points) in (2, 3)
+
+        pt_press, pt_move = points[:2]
+        pt_release = pt_move if len(points) == 2 else points[2]
+        to_kwargs = lambda pt: {'x': pt[0], 'y': pt[1]}
+
+        self.press_mouse_button(button=button, **to_kwargs(pt_press))
+        self.move_mouse(button=button, **to_kwargs(pt_move))
+        self.release_mouse_button(button=button, **to_kwargs(pt_release))
 
 
 class MockWindow(AbstractWindow):
@@ -99,14 +113,14 @@ class MockWindow(AbstractWindow):
 
         if not event.key:
             return None
-        return KeyEvent(window=self, **event.get_kwargs())
+        return KeyEvent(window=self, **event.to_dict())
 
     def _create_mouse_event(self, event):
         # If the control no longer exists, don't send mouse event
         if self.control is None:
             return None
         self._last_mouse_position = (event.x, event.y)
-        return MouseEvent(window=self, **event.get_kwargs())
+        return MouseEvent(window=self, **event.to_dict())
 
     def redraw(self, rect=None):
         pass

@@ -2,8 +2,6 @@ from __future__ import absolute_import
 
 from abc import abstractmethod
 
-from mock import MagicMock
-
 from traits.api import (ABCHasStrictTraits, DelegatesTo, Instance, Property,
                         Str, Tuple)
 
