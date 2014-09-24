@@ -4,15 +4,15 @@ import numpy as np
 
 from traits.api import Array, Instance, on_trait_change
 
-from .abstract_overlay import AbstractOverlay
+from .artist.base_artist import BaseArtist
 from .stylus.segment_stylus import SegmentStylus
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
-from .layout.bbox_transform import BaseTransform, BboxTransform
+from .layout.bbox_transform import BboxTransform
 from .utils.drawing import hline_segments, vline_segments
 
 
-class BaseGrid(AbstractOverlay):
-    """ An overlay that represents a grid.
+class BaseGrid(BaseArtist):
+    """ An artist that draws a grid.
 
     A grid is a set of parallel lines, horizontal or vertical. You can use
     multiple grids with different settings for the horizontal and vertical
@@ -21,9 +21,6 @@ class BaseGrid(AbstractOverlay):
 
     # A tick grid that controls tick positioning
     tick_grid = Instance(BaseGridLayout)
-
-    #: Transform from data-space to screen-space.
-    data_to_screen = Instance(BaseTransform)
 
     # -----------------------------------------------------------------------
     # Appearance traits
@@ -72,7 +69,7 @@ class BaseGrid(AbstractOverlay):
         self._compute_ticks()
         with gc:
             gc.set_antialias(False)
-            gc.clip_to_rect(*([0, 0] + self.component.size))
+            gc.clip_to_rect(*([0, 0] + self.parent.size))
             self.line_stylus.draw(gc, self._line_starts, self._line_ends)
 
     def _origin_changed_for_component(self):
@@ -87,26 +84,25 @@ class BaseGrid(AbstractOverlay):
 
     @on_trait_change("visible,line_color,line_style,line_width")
     def _visual_attr_changed(self):
-        self.component.request_redraw()
+        self.parent.request_redraw()
 
     def _orientation_changed(self):
         self.invalidate()
         self._visual_attr_changed()
 
     def _data_to_screen_default(self):
-        component = self.component
-        return BboxTransform(component.data_bbox, component.local_bbox)
+        return BboxTransform(self.data_bbox, self.screen_bbox)
 
 
 class XGrid(BaseGrid):
 
     def _tick_grid_default(self):
-        return XGridLayout(data_bbox=self.component.data_bbox)
+        return XGridLayout(data_bbox=self.data_bbox)
 
     def _compute_ticks(self):
         """ Calculate the positions of grid lines in screen space. """
         offsets = self.tick_grid.axial_offsets
-        y_lo, y_hi = self.component.local_bbox.y_limits
+        y_lo, y_hi = self.screen_bbox.y_limits
 
         y = np.resize(y_lo, offsets.shape)
         points = np.transpose((offsets, y))
@@ -121,12 +117,12 @@ class XGrid(BaseGrid):
 class YGrid(BaseGrid):
 
     def _tick_grid_default(self):
-        return YGridLayout(data_bbox=self.component.data_bbox)
+        return YGridLayout(data_bbox=self.data_bbox)
 
     def _compute_ticks(self):
         """ Calculate the positions of grid lines in screen space. """
         offsets = self.tick_grid.axial_offsets
-        x_lo, x_hi = self.component.local_bbox.x_limits
+        x_lo, x_hi = self.screen_bbox.x_limits
 
         x = np.resize(x_lo, offsets.shape)
         points = np.transpose((x, offsets))

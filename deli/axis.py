@@ -5,26 +5,24 @@ import numpy as np
 from traits.api import (Float, Instance, Property, cached_property,
                         on_trait_change)
 
-from .abstract_overlay import AbstractOverlay
-from .stylus.label_stylus import LabelStylus
-from .stylus.tick_stylus import XTickStylus, YTickStylus
-from .stylus.tick_label_stylus import XTickLabelStylus, YTickLabelStylus
-from .stylus.line_stylus import LineStylus
+from .artist.base_artist import BaseArtist
 from .layout.bbox_transform import (
     BaseTransform, BboxTransform, IdentityTransform, blend_xy_transforms
 )
 from .layout.grid_layout import BaseGridLayout, XGridLayout, YGridLayout
 from .style import config
+from .stylus.label_stylus import LabelStylus
+from .stylus.tick_stylus import XTickStylus, YTickStylus
+from .stylus.tick_label_stylus import XTickLabelStylus, YTickLabelStylus
+from .stylus.line_stylus import LineStylus
 from .utils.drawing import broadcast_points
 
 
-class BaseAxis(AbstractOverlay):
+class BaseAxis(BaseArtist):
+    """ An artist that draws axis lines, ticks, and labels. """
 
     # A tick grid that controls tick positioning
     tick_grid = Instance(BaseGridLayout)
-
-    #: Transform from data-space to screen-space.
-    data_to_screen = Instance(BaseTransform)
 
     # -----------------------------------------------------------------------
     # Appearance traits
@@ -113,8 +111,7 @@ class BaseAxis(AbstractOverlay):
         raise NotImplementedError()
 
     def _data_to_screen_default(self):
-        component = self.component
-        return BboxTransform(component.data_bbox, component.local_bbox)
+        return BboxTransform(self.data_bbox, self.screen_bbox)
 
 
 class XAxis(BaseAxis):
@@ -132,7 +129,7 @@ class XAxis(BaseAxis):
                                 color=config.get('axis.tick_label.color'))
 
     def _tick_grid_default(self):
-        return XGridLayout(data_bbox=self.component.data_bbox)
+        return XGridLayout(data_bbox=self.data_bbox)
 
     @cached_property
     def _get_transform(self):
@@ -140,7 +137,7 @@ class XAxis(BaseAxis):
 
     def _compute_xy_end_points(self):
         y_points = [self.locus] * 2
-        return np.transpose([self.component.local_bbox.x_limits, y_points])
+        return np.transpose([self.screen_bbox.x_limits, y_points])
 
     def _get_tick_positions(self):
         points = broadcast_points(self.tick_grid.axial_offsets, self.locus)
@@ -162,7 +159,7 @@ class YAxis(BaseAxis):
                                 color=config.get('axis.tick_label.color'))
 
     def _tick_grid_default(self):
-        return YGridLayout(data_bbox=self.component.data_bbox)
+        return YGridLayout(data_bbox=self.data_bbox)
 
     @cached_property
     def _get_transform(self):
@@ -170,7 +167,7 @@ class YAxis(BaseAxis):
 
     def _compute_xy_end_points(self):
         x_points = [self.locus] * 2
-        return np.transpose([x_points, self.component.local_bbox.y_limits])
+        return np.transpose([x_points, self.screen_bbox.y_limits])
 
     def _get_tick_positions(self):
         points = broadcast_points(self.locus, self.tick_grid.axial_offsets)
