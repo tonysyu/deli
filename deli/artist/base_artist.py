@@ -12,13 +12,14 @@ from ..layout.bbox_transform import BboxTransform
 class BaseArtist(Component):
     """ Base class for all artists.
 
-    Unlike styluses, artists may contain the data that they render. Artists are
-    simply specific types of artists: For example, line-artists,
-    marker-artists, and bar-artists, may all be the same data associated with
-    different artists.  As a result, artists may use a few different styluses
-    to compose a plot; for example, a box-and-whisker artist might have
-    separate styluses to draw rectangles, error-bars (whiskers), and points
-    (outliers).
+    Unlike styluses, artists contain the data that they render. Artists are
+    simply specific types of plots: For example, line artists, marker artists,
+    and bar artists, all operate on the same type of data, but those artist
+    will render the data differently.
+
+    Artists may use a few different styluses to compose a plot; for example,
+    a box-and-whisker artist might have separate styluses to draw rectangles,
+    error-bars (whiskers), and points (outliers).
     """
 
     parent = Instance(Component)
