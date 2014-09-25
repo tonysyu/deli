@@ -69,7 +69,7 @@ class BaseGrid(BaseArtist):
         self._compute_ticks()
         with gc:
             gc.set_antialias(False)
-            gc.clip_to_rect(*([0, 0] + self.parent.size))
+            gc.clip_to_rect(*([0, 0] + self.size))
             self.line_stylus.draw(gc, self._line_starts, self._line_ends)
 
     def _origin_changed_for_component(self):
@@ -84,7 +84,7 @@ class BaseGrid(BaseArtist):
 
     @on_trait_change("visible,line_color,line_style,line_width")
     def _visual_attr_changed(self):
-        self.parent.request_redraw()
+        self.container.request_redraw()
 
     def _orientation_changed(self):
         self.invalidate()

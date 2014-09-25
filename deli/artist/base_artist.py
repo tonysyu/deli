@@ -22,8 +22,6 @@ class BaseArtist(Component):
     error-bars (whiskers), and points (outliers).
     """
 
-    parent = Instance(Component)
-
     # -----------------------------------------------------------------------
     # Data-related traits
     # -----------------------------------------------------------------------

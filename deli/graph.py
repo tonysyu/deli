@@ -94,8 +94,7 @@ class Graph(Container):
     # -----------------------------------------------------------------------
 
     def _init_components(self):
-        artist_kwargs = {'parent': self.canvas,
-                         'data_bbox': self.canvas.data_bbox,
+        artist_kwargs = {'data_bbox': self.canvas.data_bbox,
                          'screen_bbox': self.canvas.local_bbox}
 
         if not self.x_grid:
@@ -106,3 +105,5 @@ class Graph(Container):
             self.x_axis = XAxis(**artist_kwargs)
         if not self.y_axis:
             self.y_axis = YAxis(**artist_kwargs)
+
+        self.canvas.add(self.x_grid, self.y_grid, self.x_axis, self.y_axis)
