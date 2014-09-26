@@ -139,7 +139,7 @@ class MockWindow(AbstractWindow):
         return MouseEvent(window=self, **event.to_dict())
 
     def redraw(self, rect=None):
-        pass
+        self.render()
 
     def _get_control_size(self):
         if self.control:

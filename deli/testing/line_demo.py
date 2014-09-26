@@ -1,6 +1,6 @@
 import numpy as np
 
-from traits.api import Tuple, Property
+from traits.api import Any, Instance, Property
 
 from deli.graph import Graph
 from deli.artist.line_artist import LineArtist
@@ -16,11 +16,15 @@ class LineDemo(MockView):
     conversion between screen and data coordinates.
     """
 
-    init_x_limits = Tuple((1, 2))
-    init_y_limits = Tuple((10, 20))
+    # XXX: `x`/`y` fail weirdly if defined as an Array trait and subclass sets
+    # directly to numpy arrays.
+    x = Any(np.linspace(1, 2))
+    y = Any(np.linspace(10, 20))
 
     x_limits = Property
     y_limits = Property
+
+    line_artist = Instance(LineArtist)
 
     def _get_x_limits(self):
         return self.graph.canvas.data_bbox.x_limits
@@ -32,10 +36,8 @@ class LineDemo(MockView):
         graph = Graph()
         graph.title.text = "Line Artist"
 
-        x = np.linspace(*self.init_x_limits)
-        y = np.linspace(*self.init_y_limits)
-        artist = LineArtist(x_data=x, y_data=y)
-        graph.add_artist(artist)
+        self.line_artist = LineArtist(x_data=self.x, y_data=self.y)
+        graph.add_artist(self.line_artist)
 
         graph.margin = 0
         return graph

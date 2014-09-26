@@ -1,3 +1,5 @@
+import numpy as np
+
 from numpy.testing import assert_allclose
 
 from deli.testing.line_demo import LineDemo
@@ -13,8 +15,8 @@ Y_MAX = 20
 class Demo(LineDemo):
 
     size = (WIDTH, HEIGHT)
-    init_x_limits = (0, X_MAX)
-    init_y_limits = (0, Y_MAX)
+    x = np.linspace(0, X_MAX)
+    y = np.linspace(0, Y_MAX)
 
     def _graph_default(self):
         graph = self.setup_graph()
