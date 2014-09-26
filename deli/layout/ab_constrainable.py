@@ -11,4 +11,3 @@ class ABConstrainable(object):
 
     """
     __metaclass__ = ABCMeta
-

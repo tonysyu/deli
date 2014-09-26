@@ -117,9 +117,9 @@ def auto_interval(data_low, data_high):
     # KLUDGE: 'np.argsort' doesn't preserve the order of equal values,
     # so we subtract a small, index dependent amount from each difference
     # to force correct ordering.
-    sh    = np.shape(differences)
+    sh = np.shape(differences)
     small = 2.2e-16 * np.arange(sh[1]) * np.arange(sh[0])[:, np.newaxis]
-    small = small[::-1,::-1] #reverse the order
+    small = small[::-1, ::-1]  # reverse the order
     differences = differences - small
 
     best_mantissa = np.minimum.reduce(differences, axis=0)

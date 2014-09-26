@@ -1,6 +1,7 @@
 """Helper functions for a simple layout algorithm.
 """
 
+
 def simple_container_do_layout(container, components=None):
     """ Adjust layout so container stretches to window size.
     """

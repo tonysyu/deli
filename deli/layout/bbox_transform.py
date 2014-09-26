@@ -1,4 +1,4 @@
-from matplotlib.transforms import ( # noqa
+from matplotlib.transforms import (  # noqa
     blended_transform_factory, IdentityTransform,
     Transform as BaseTransform,
     BboxTransform as _MPLBboxTransform,

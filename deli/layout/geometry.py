@@ -326,4 +326,3 @@ class SizeF(BaseSize):
     @staticmethod
     def coerce_type(item):
         return 0.0 if item is None else float(item)
-
