@@ -58,6 +58,11 @@ class BaseArtist(Component):
         msg = "`BaseArtist` subclasses must implement `_get_data_extents`"
         raise NotImplementedError(msg)
 
+    def _container_changed(self):
+        if self.container is not None:
+            self.data_bbox = self.container.data_bbox
+            self.screen_bbox = self.container.local_bbox
+
     @contextmanager
     def _clipped_context(self, gc):
         with gc:

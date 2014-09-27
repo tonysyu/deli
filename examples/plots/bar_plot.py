@@ -72,11 +72,7 @@ class Demo(TraitsView):
     def setup_graph(self):
         graph = Graph()
         graph.title.text = "Bar Artist"
-
-        artist_kwargs = {'data_bbox': graph.canvas.data_bbox,
-                         'screen_bbox': graph.canvas.local_bbox,
-                         'labels': ALPHA[:10]}
-        graph.x_axis = OrdinalAxis(**artist_kwargs)
+        graph.x_axis = OrdinalAxis(labels=ALPHA[:10])
 
         x = np.arange(10)
         artist = BarArtist(x_data=x, y_data=np.cos(x))
