@@ -1,6 +1,6 @@
 import numpy as np
 
-from traits.api import Any, Instance
+from traits.api import Any, Instance, cached_property
 
 from deli.artist.base_point_artist import BasePointArtist
 from deli.axis import XAxis
@@ -15,16 +15,20 @@ ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 class FixedTickLayout(XGridLayout):
 
-    axial_offsets = Any
+    ticks = Any
 
+    @cached_property
+    def _get_axial_offsets(self):
+        x_min, x_max = self.axial_limits
+        return self.ticks[(self.ticks >= x_min) & (self.ticks <= x_max)]
 
 class OrdinalAxis(XAxis):
 
     labels = Any
 
     def _tick_grid_default(self):
-        offsets = np.arange(len(self.labels))
-        return FixedTickLayout(axial_offsets=offsets)
+        ticks = np.arange(len(self.labels))
+        return FixedTickLayout(data_bbox=self.data_bbox, ticks=ticks)
 
     def data_offset_to_label(self, data_offset):
         index = int(data_offset)
