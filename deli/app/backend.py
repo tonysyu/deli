@@ -1,4 +1,4 @@
-backend_path = 'qt4.image'
+backend_path = 'qt.image'
 
 
 def use(name):
