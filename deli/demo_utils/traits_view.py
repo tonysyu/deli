@@ -5,10 +5,12 @@ from abc import abstractmethod
 from traits.api import ABCHasStrictTraits, Bool, Instance, Str, Tuple
 from traitsui.api import UItem, View
 
-from .traitsui_editor import ComponentEditor
+from ..core.constraints_container import ConstraintsContainer
 from ..graph import Graph
+from ..layout.api import align, vbox
 from ..tools.pan_tool import PanTool
 from ..tools.zoom_tool import ZoomTool
+from .traitsui_editor import ComponentEditor
 
 
 WIDTH = 700
@@ -27,7 +29,7 @@ class TraitsView(ABCHasStrictTraits):
     def default_traits_view(self):
         view = View(
             UItem('graph', editor=ComponentEditor(size=self.size)),
-            resizable=True, title=self.title
+            resizable=True, title=self.title,
         )
         return view
 
@@ -44,4 +46,41 @@ class TraitsView(ABCHasStrictTraits):
         return graph
 
     def show(self):
+        self.configure_traits()
+
+
+class FigureView(ABCHasStrictTraits):
+    """ A TraitsUI window displaying multiple Graphs objects. """
+
+    title = Str
+    size = Tuple((WIDTH, HEIGHT))
+    figure = Instance(ConstraintsContainer)
+    zoom_and_pan = Bool(True)
+
+    def default_traits_view(self):
+        view = View(
+            UItem('figure', editor=ComponentEditor(size=self.size)),
+            resizable=True, title=self.title,
+        )
+        return view
+
+    @abstractmethod
+    def create_graphs(self):
+        """ Create and return `Graph` objects for plotting. """
+
+    def show(self):
+        graphs = self.create_graphs()
+
+        if self.zoom_and_pan:
+            for g in graphs:
+                ZoomTool.attach_to(g.canvas)
+                PanTool.attach_to(g.canvas)
+
+        self.figure = ConstraintsContainer(size=(500, 500))
+        self.figure.add(*graphs)
+        self.figure.layout_constraints = [
+            vbox(*graphs),
+            align('layout_height', *graphs),
+        ]
+
         self.configure_traits()

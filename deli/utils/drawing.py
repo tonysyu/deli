@@ -60,3 +60,16 @@ def vline_to_rect_corners(x, y0, y1, width, x_origin='center'):
     corner0 = broadcast_points(x + left_offset, y0)
     corner1 = broadcast_points(x + right_offset, y1)
     return corner0, corner1
+
+
+def hline_to_rect_corners(y, x0, x1, height, y_origin='center'):
+    """ Return rectangle corners that surround a horizontal line.
+    """
+    possible_offsets = {'top': (-height, 0),
+                        'center': (-height / 2.0, height / 2.0),
+                        'bottom': (0, height)}
+    bottom_offset, top_offset = possible_offsets[y_origin]
+
+    corner0 = broadcast_points(x0, y + bottom_offset)
+    corner1 = broadcast_points(x1, y + top_offset)
+    return corner0, corner1

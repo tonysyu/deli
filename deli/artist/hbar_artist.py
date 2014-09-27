@@ -4,22 +4,22 @@ from traits.api import Instance
 
 from deli.artist.base_point_artist import BasePointArtist
 from deli.stylus.rect_stylus import RectangleStylus
-from deli.utils.drawing import vline_to_rect_corners
+from deli.utils.drawing import hline_to_rect_corners
 
 
-def bars_from_points(x, y, data_to_screen, y0=0, width=None):
+def bars_from_points(x, y, data_to_screen, x0=0, height=None):
     """ Return rectangles in screen-space for x/y points in data-space. """
-    if width is None:
-        width = np.min(np.diff(x))
+    if height is None:
+        height = np.min(np.diff(y))
 
-    corner0, corner1 = vline_to_rect_corners(x, y0, y, width)
+    corner0, corner1 = hline_to_rect_corners(y, x0, x, height)
 
     origins = data_to_screen.transform(corner0)
     sizes = data_to_screen.transform(corner1) - origins
     return np.hstack([origins, sizes])
 
 
-class VBarArtist(BasePointArtist):
+class HBarArtist(BasePointArtist):
     """ An artist for bar plot data. """
 
     stylus = Instance(RectangleStylus, ())
@@ -32,4 +32,4 @@ class VBarArtist(BasePointArtist):
 
     def _get_bar_data(self):
         x, y = self.x_data, self.y_data
-        return bars_from_points(x, y, self.data_to_screen, width=0.5)
+        return bars_from_points(x, y, self.data_to_screen, height=0.5)
