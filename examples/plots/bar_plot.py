@@ -1,6 +1,6 @@
 import numpy as np
 
-from traits.api import Any, Instance, cached_property
+from traits.api import Any, Instance
 
 from deli.artist.base_point_artist import BasePointArtist
 from deli.axis import XAxis
@@ -13,11 +13,9 @@ from deli.utils.drawing import broadcast_points
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 
-class TickLayout(XGridLayout):
+class FixedTickLayout(XGridLayout):
 
-    @cached_property
-    def _get_axial_offsets(self):
-        return np.arange(*np.ceil(self.axial_limits))
+    axial_offsets = Any
 
 
 class OrdinalAxis(XAxis):
@@ -25,7 +23,8 @@ class OrdinalAxis(XAxis):
     labels = Any
 
     def _tick_grid_default(self):
-        return TickLayout(data_bbox=self.data_bbox)
+        offsets = np.arange(len(self.labels))
+        return FixedTickLayout(axial_offsets=offsets)
 
     def data_offset_to_label(self, data_offset):
         index = int(data_offset)
@@ -66,6 +65,7 @@ class BarArtist(BasePointArtist):
     def get_bar_data(self):
         x, y = self.x_data, self.y_data
         return bars_from_points(x, y, self.data_to_screen, width=0.5)
+
 
 class Demo(TraitsView):
 
