@@ -47,3 +47,16 @@ def vline_segments(x, y_lo, y_hi):
     starts = np.column_stack((x, y_lo))
     ends = np.column_stack((x, y_hi))
     return starts, ends
+
+
+def vline_to_rect_corners(x, y0, y1, width, x_origin='center'):
+    """ Return rectangle corners that surround a vertical line.
+    """
+    possible_offsets = {'left': (0, width),
+                        'center': (-width / 2.0, width / 2.0),
+                        'right': (-width, 0)}
+    left_offset, right_offset = possible_offsets[x_origin]
+
+    corner0 = broadcast_points(x + left_offset, y0)
+    corner1 = broadcast_points(x + right_offset, y1)
+    return corner0, corner1
