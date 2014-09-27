@@ -40,6 +40,13 @@ class Container(Component):
             component.container = self
         self._components.extend(components)
 
+    def remove(self, *components):
+        for component in components:
+            if component is not None:
+                assert component.container == self
+                self._components.remove(component)
+                component.container == None
+
     def components_at(self, x, y):
         """ Returns components underneath the given point.
 

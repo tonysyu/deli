@@ -25,7 +25,7 @@ class OrdinalAxis(XAxis):
     labels = Any
 
     def _tick_grid_default(self):
-        return TickLayout(data_bbox=self.component.data_bbox)
+        return TickLayout(data_bbox=self.data_bbox)
 
     def data_offset_to_label(self, data_offset):
         index = int(data_offset)
@@ -72,7 +72,11 @@ class Demo(TraitsView):
     def setup_graph(self):
         graph = Graph()
         graph.title.text = "Bar Artist"
-        graph.x_axis = OrdinalAxis(component=graph.canvas, labels=ALPHA[:10])
+
+        artist_kwargs = {'data_bbox': graph.canvas.data_bbox,
+                         'screen_bbox': graph.canvas.local_bbox,
+                         'labels': ALPHA[:10]}
+        graph.x_axis = OrdinalAxis(**artist_kwargs)
 
         x = np.arange(10)
         artist = BarArtist(x_data=x, y_data=np.cos(x))

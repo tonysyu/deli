@@ -61,11 +61,9 @@ class Canvas(Container):
         self.artists[name] = artist
         self.add(artist)
 
-    def replace_underlay(self, old, new):
-        replace_in_list(self.underlays, old, new)
-
-    def replace_overlay(self, old, new):
-        replace_in_list(self.overlays, old, new)
+    def replace_component(self, old, new):
+        self.remove(old)
+        self.add(new)
 
     # -------------------------------------------------------------------------
     # Serialization interface

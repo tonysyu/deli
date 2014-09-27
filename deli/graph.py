@@ -52,16 +52,16 @@ class Graph(Container):
     # ------------------------------------------------------------------------
 
     def _x_grid_changed(self, old, new):
-        self.canvas.replace_underlay(old, new)
+        self.canvas.replace_component(old, new)
 
     def _y_grid_changed(self, old, new):
-        self.canvas.replace_underlay(old, new)
+        self.canvas.replace_component(old, new)
 
     def _x_axis_changed(self, old, new):
-        self.canvas.replace_underlay(old, new)
+        self.canvas.replace_component(old, new)
 
     def _y_axis_changed(self, old, new):
-        self.canvas.replace_underlay(old, new)
+        self.canvas.replace_component(old, new)
 
     # -----------------------------------------------------------------------
     # Traits defaults
@@ -105,5 +105,3 @@ class Graph(Container):
             self.x_axis = XAxis(**artist_kwargs)
         if not self.y_axis:
             self.y_axis = YAxis(**artist_kwargs)
-
-        self.canvas.add(self.x_grid, self.y_grid, self.x_axis, self.y_axis)
