@@ -14,7 +14,7 @@ class BaseWindow(AbstractWindow):
     control = Instance(QtGui.QWidget)
     _last_mouse_position = Tuple
 
-    def __init__(self, parent, wid=-1, pos=None, size=None, **traits):
+    def __init__(self, parent, position=None, size=None, **traits):
         super(BaseWindow, self).__init__(**traits)
 
         if isinstance(parent, QtGui.QLayout):
@@ -25,8 +25,8 @@ class BaseWindow(AbstractWindow):
         point = self.control.mapFromGlobal(QtGui.QCursor.pos())
         self._last_mouse_position = (point.x(), point.y())
 
-        if pos is not None:
-            self.control.move(*pos)
+        if position is not None:
+            self.control.move(*position)
 
         if size is not None:
             self.control.resize(*size)
@@ -66,9 +66,9 @@ class BaseWindow(AbstractWindow):
             modifiers = event.modifiers()
             buttons = event.buttons()
         except AttributeError:
-            pos = self.control.mapFromGlobal(QtGui.QCursor.pos())
-            x = pos.x()
-            y = pos.y()
+            position = self.control.mapFromGlobal(QtGui.QCursor.pos())
+            x = position.x()
+            y = position.y()
             modifiers = 0
             buttons = 0
 
