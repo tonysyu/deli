@@ -28,7 +28,6 @@ class CoordinateBox(HasStrictTraits):
 
     Secondary attributes (properties):
         x, y   : coordinates of the lower-left pixel of the box
-        x2, y2 : coordinates of the upper-right pixel of the box
         width  : the number of horizontal pixels in the box; equal to x2-x+1
         height : the number of vertical pixels in the box; equal to y2-y+1
 
@@ -45,10 +44,6 @@ class CoordinateBox(HasStrictTraits):
     x = Property
 
     y = Property
-
-    x2 = Property
-
-    y2 = Property
 
     width = Property
 
@@ -115,6 +110,7 @@ class CoordinateBox(HasStrictTraits):
 
     # The list of size constraints to apply to the object.
     _size_constraints = Property
+
     # -----------------------------------------------------------------------
     # Property setters and getters
     # -----------------------------------------------------------------------
@@ -146,22 +142,6 @@ class CoordinateBox(HasStrictTraits):
         old_value = self.size[1]
         self.size[1] = val
         self.trait_property_changed('height', old_value, val)
-
-    def _get_x2(self):
-        if self.size[0] == 0:
-            return self.origin[0]
-        return self.origin[0] + self.size[0] - 1
-
-    def _set_x2(self, val):
-        self.origin[0] = val - self.size[0] + 1
-
-    def _get_y2(self):
-        if self.size[1] == 0:
-            return self.origin[1]
-        return self.origin[1] + self.size[1] - 1
-
-    def _set_y2(self, val):
-        self.origin[1] = val - self.size[1] + 1
 
     def _get_rect(self):
         return self.origin + self.size
