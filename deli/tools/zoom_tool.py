@@ -1,5 +1,6 @@
 from traits.api import Float
 
+from ..utils.traits import Alias
 from .base_tool import BaseTool
 from .key_spec import KeySpec
 
@@ -20,13 +21,15 @@ def zoom_in_centered_rect(rect, size_scale):
 
 class ZoomTool(BaseTool):
 
+    graph = Alias('component')
+
     key_zoom_in = KeySpec(['+', '='], ignore='shift')
     key_zoom_out = KeySpec('-')
 
     zoom_factor = Float(2)
 
     def on_key_press(self, event):
-        rect = self.component.data_bbox.rect
+        rect = self.graph.canvas.data_bbox.rect
         if self.key_zoom_in.match(event):
             new_rect = zoom_in_centered_rect(rect, self.zoom_factor)
         elif self.key_zoom_out.match(event):
@@ -34,5 +37,5 @@ class ZoomTool(BaseTool):
         else:
             return
 
-        self.component.data_bbox.rect = new_rect
-        self.component.request_redraw()
+        self.graph.canvas.data_bbox.rect = new_rect
+        self.graph.request_redraw()

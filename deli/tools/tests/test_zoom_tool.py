@@ -20,7 +20,7 @@ class Demo(LineDemo):
     def _graph_default(self):
         graph = self.setup_graph()
 
-        ZoomTool.attach_to(graph.canvas)
+        ZoomTool.attach_to(graph)
         return graph
 
 
