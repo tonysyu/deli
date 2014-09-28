@@ -41,8 +41,8 @@ class TraitsView(ABCHasStrictTraits):
         graph = self.setup_graph()
 
         if self.zoom_and_pan:
+            PanTool.attach_to(graph)
             ZoomTool.attach_to(graph)
-            PanTool.attach_to(graph.canvas)
         return graph
 
     def show(self):
@@ -73,8 +73,8 @@ class FigureView(ABCHasStrictTraits):
 
         if self.zoom_and_pan:
             for g in graphs:
+                PanTool.attach_to(g)
                 ZoomTool.attach_to(g)
-                PanTool.attach_to(g.canvas)
 
         self.figure = ConstraintsContainer(size=(500, 500))
         self.figure.add(*graphs)

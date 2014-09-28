@@ -21,7 +21,7 @@ class Demo(LineDemo):
     def _graph_default(self):
         graph = self.setup_graph()
 
-        PanTool.attach_to(graph.canvas)
+        PanTool.attach_to(graph)
         return graph
 
 
