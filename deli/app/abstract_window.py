@@ -7,6 +7,7 @@ from ..core.component import Component
 from ..core.container import Container
 
 
+# XXX: Rename to Window (and subclasses) to WindowCanvas?
 class AbstractWindow(ABCHasStrictTraits):
 
     # The top-level component that this window houses
