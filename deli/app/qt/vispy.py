@@ -70,6 +70,60 @@ class GraphicsContext(object):
     def translate_ctm(self, dx, dy):
         pass
 
+    def rotate_ctm(self, radian_angle):
+        pass
+
+    def set_font(self, font):
+        pass
+
+    def set_text_position(self, x, y):
+        pass
+
+    def get_full_text_extent(self, text):
+        return 1, 1, 0, 0
+
+    def show_text(self, text):
+        pass
+
+    def set_antialias(self, state):
+        pass
+
+    def set_alpha(self, alpha):
+        pass
+
+    def set_stroke_color(self, color):
+        pass
+
+    def set_fill_color(self, color):
+        pass
+
+    def set_line_width(self, width):
+        pass
+
+    def set_line_dash(self, style):
+        pass
+
+    def lines(self, points):
+        pass
+
+    def line_set(self, starts, ends):
+        pass
+
+    def begin_path(self):
+        pass
+
+    def stroke_path(self):
+        pass
+
+    def fill_path(self):
+        pass
+
+    def draw_rect(self, rect):
+        pass
+
+    def clip_to_rect(self, *rect):
+        pass
+
 
 class Window(BaseWindow):
 
@@ -90,5 +144,4 @@ class Window(BaseWindow):
         if self.control is None:
             return
         self._gc.render(event)
-        # self.control.show()
         self.control.swapBuffers()

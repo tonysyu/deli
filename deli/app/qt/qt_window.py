@@ -10,10 +10,10 @@ def button_from_event(event):
 class QtWindow(QtGui.QWidget):
     """ The Qt widget that implements the control layer. """
 
-    def __init__(self, parent, enable_window):
+    def __init__(self, parent, proxy_window):
         super(QtWindow, self).__init__(parent)
         self.setAcceptDrops(True)
-        self.handler = enable_window
+        self._window = proxy_window
 
         self.setAutoFillBackground(True)
         self.setFocusPolicy(QtCore.Qt.WheelFocus)
@@ -22,46 +22,46 @@ class QtWindow(QtGui.QWidget):
                            QtGui.QSizePolicy.Expanding)
 
     def closeEvent(self, event):
-        self.handler.on_close(event)
-        self.handler = None
+        self._window.on_close(event)
+        self._window = None
         return super(QtWindow, self).closeEvent(event)
 
     def paintEvent(self, event):
-        self.handler.render(event)
+        self._window.render(event)
 
     def resizeEvent(self, event):
-        self.handler.on_resize(event)
+        self._window.on_resize(event)
 
     def keyPressEvent(self, event):
-        self.handler.handle_key_event('key_press', event)
+        self._window.handle_key_event('key_press', event)
 
     def keyReleaseEvent(self, event):
-        self.handler.handle_key_event('key_release', event)
+        self._window.handle_key_event('key_release', event)
 
     def enterEvent(self, event):
-        self.handler.handle_mouse_event("mouse_enter", event)
+        self._window.handle_mouse_event("mouse_enter", event)
 
     def leaveEvent(self, event):
-        self.handler.handle_mouse_event("mouse_leave", event)
+        self._window.handle_mouse_event("mouse_leave", event)
 
     def mouseMoveEvent(self, event):
-        self.handler.handle_mouse_event("mouse_move", event)
+        self._window.handle_mouse_event("mouse_move", event)
 
     def mouseDoubleClickEvent(self, event):
         action_name = button_from_event(event) + '_dclick'
-        self.handler.handle_mouse_event(action_name, event)
+        self._window.handle_mouse_event(action_name, event)
 
     def mousePressEvent(self, event):
         action_name = button_from_event(event) + '_down'
-        self.handler.handle_mouse_event(action_name, event)
+        self._window.handle_mouse_event(action_name, event)
 
     def mouseReleaseEvent(self, event):
         action_name = button_from_event(event) + '_up'
-        self.handler.handle_mouse_event(action_name, event)
+        self._window.handle_mouse_event(action_name, event)
 
     def wheelEvent(self, event):
-        self.handler.handle_mouse_event("mouse_wheel", event)
+        self._window.handle_mouse_event("mouse_wheel", event)
 
     def sizeHint(self):
         qt_size_hint = super(QtWindow, self).sizeHint()
-        return self.handler.get_size_hint(qt_size_hint)
+        return self._window.get_size_hint(qt_size_hint)

@@ -9,9 +9,9 @@ from vispy import gloo
 class QGLBackend(QtOpenGL.QGLWidget):
     """ OpenGL backend for WindowCanvas abstract class. """
 
-    def __init__(self, parent, window):
+    def __init__(self, parent, proxy_window):
 
-        self._window = window
+        self._window = proxy_window
         self._window.control = self
 
         context = GLContext()
@@ -27,6 +27,9 @@ class QGLBackend(QtOpenGL.QGLWidget):
                                     share_widget, window_flags)
         self.setAutoBufferSwap(False)
         self.setMouseTracking(True)
+
+    def resizeEvent(self, event):
+        self._window.on_resize(event)
 
     def initializeGL(self):
         if self._window is None:
@@ -49,7 +52,6 @@ class QGLBackend(QtOpenGL.QGLWidget):
         self.context().reset()
 
     def sizeHint(self):
-        print 'size'
         return self.size()
 
 
