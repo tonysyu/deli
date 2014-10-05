@@ -30,7 +30,9 @@ def spiral():
     return xx, yy
 
 
-def gloo_program(vertex_buffer, fragments):
+def gloo_program(data, fragments):
+    vertex_buffer = gloo.VertexBuffer(data)
+
     view = np.eye(4, dtype=np.float32)
     model = np.eye(4, dtype=np.float32)
     projection = ortho(0, width, 0, height, -1, 1)
@@ -64,20 +66,26 @@ def marker_program(x, y, marker='disc', line_width=1, size=5,
     data['a_bg_color'] = bg_color
     data['a_linewidth'] = line_width
 
-    vertex_buffer = gloo.VertexBuffer(data)
     fragments = markers.frag + markers.MARKER[marker]
-    return vertex_buffer, fragments
+    return data, fragments
 
 
 class GraphicsContext(object):
 
     def __init__(self):
+        self._gloo_programs = []
         x, y = spiral()
-        vertex_buffer, fragments = marker_program(x, y)
-        self._gloo_program = gloo_program(vertex_buffer, fragments)
+
+        data, fragments = marker_program(x[:100], y[:100])
+        self._gloo_programs.append(gloo_program(data, fragments))
+
+        data, fragments = marker_program(x[100:], y[100:], marker='clobber',
+                                         bg_color=(1, 0, 0, 1))
+        self._gloo_programs.append(gloo_program(data, fragments))
 
     def render(self, event):
-        self._gloo_program.draw('points')
+        for program in self._gloo_programs:
+            program.draw('points')
 
     def clear(self, *args):
         pass
