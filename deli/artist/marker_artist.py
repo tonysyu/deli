@@ -4,7 +4,7 @@ from ..stylus.marker_stylus import MarkerStylus
 from .base_point_artist import BasePointArtist
 
 
-class ScatterArtist(BasePointArtist):
+class MarkerArtist(BasePointArtist):
     """ An artist for data points that should display as markers. """
     # The color of the markers.
     color = DelegatesTo('marker')
