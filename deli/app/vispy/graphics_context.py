@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import numpy as np
 
 from vispy.util.transforms import ortho
+from vispy.gloo.shader import FragmentShader
 from vispy import gloo
 
 from . import markers
@@ -10,48 +11,73 @@ from . import markers
 
 width = height = 512
 
-n = 500
-data = np.zeros(n, dtype=[('a_position', np.float32, 3),
-                          ('a_fg_color', np.float32, 4),
-                          ('a_bg_color', np.float32, 4),
-                          ('a_size', np.float32, 1),
-                          ('a_linewidth', np.float32, 1)])
-data['a_fg_color'] = 0, 0, 0, 1
-data['a_bg_color'] = 1, 1, 1, 1
-data['a_linewidth'] = 1
 
-radius, theta, dtheta = 255.0, 0.0, 5.5 / 180.0 * np.pi
-for i in range(n):
-    theta += dtheta
-    x = 256 + radius * np.cos(theta)
-    y = 256 + radius * np.sin(theta)
-    r = 10.1 - i * 0.02
-    radius -= 0.45
-    data['a_position'][i] = x, y, 0
-    data['a_size'][i] = 2 * r
+def spiral():
+    n = 500
+    x0 = width / 2.0
+    y0 = height / 2.0
+    # Create radius that's within the bounds
+    r = min(x0, y0) * 0.9
+    theta = 0.0
+    dtheta = 5.5 / 180.0 * np.pi
+
+    xx, yy = [], []
+    for i in range(n):
+        theta += dtheta
+        xx.append(x0 + r * np.cos(theta))
+        yy.append(y0 + r * np.sin(theta))
+        r -= 0.45
+    return xx, yy
+
+
+def gloo_program(vertex_buffer, fragments):
+    view = np.eye(4, dtype=np.float32)
+    model = np.eye(4, dtype=np.float32)
+    projection = ortho(0, width, 0, height, -1, 1)
+    program = gloo.Program(markers.vert, fragments)
+
+    program.bind(vertex_buffer)
+    program["u_antialias"] = 1
+    program["u_size"] = 1
+    program["u_model"] = model
+    program["u_view"] = view
+    program["u_projection"] = projection
+
+    return program
+
+
+def marker_program(x, y, marker='disc', line_width=1, size=5,
+                   fg_color=(0, 0, 0, 1), bg_color=(1, 1, 1, 1)):
+    assert len(x) == len(y)
+
+    positions = np.transpose([x, y, np.zeros_like(x)])
+
+    n = len(x)
+    data = np.zeros(n, dtype=[('a_position', np.float32, 3),
+                              ('a_fg_color', np.float32, 4),
+                              ('a_bg_color', np.float32, 4),
+                              ('a_size', np.float32, 1),
+                              ('a_linewidth', np.float32, 1)])
+    data['a_position'] = positions
+    data['a_size'] = size
+    data['a_fg_color'] = fg_color
+    data['a_bg_color'] = bg_color
+    data['a_linewidth'] = line_width
+
+    vertex_buffer = gloo.VertexBuffer(data)
+    fragments = markers.frag + markers.MARKER[marker]
+    return vertex_buffer, fragments
 
 
 class GraphicsContext(object):
 
     def __init__(self):
-        vbo = gloo.VertexBuffer(data)
-        view = np.eye(4, dtype=np.float32)
-        model = np.eye(4, dtype=np.float32)
-        projection = ortho(0, width, 0, height, -1, 1)
-        marker_fragments = markers.frag + markers.ring
-        program = gloo.Program(markers.vert, marker_fragments)
-
-        program.bind(vbo)
-        program["u_antialias"] = 1
-        program["u_size"] = 1
-        program["u_model"] = model
-        program["u_view"] = view
-        program["u_projection"] = projection
-
-        self._vispy_program = program
+        x, y = spiral()
+        vertex_buffer, fragments = marker_program(x, y)
+        self._gloo_program = gloo_program(vertex_buffer, fragments)
 
     def render(self, event):
-        self._vispy_program.draw('points')
+        self._gloo_program.draw('points')
 
     def clear(self, *args):
         pass
