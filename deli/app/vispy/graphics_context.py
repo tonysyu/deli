@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
 import numpy as np
+from kiva.basecore2d import GraphicsState
 
 from vispy.util.transforms import ortho
-from vispy.gloo.shader import FragmentShader
 from vispy import gloo
 
 from . import markers
@@ -74,14 +74,8 @@ class GraphicsContext(object):
 
     def __init__(self):
         self._gloo_programs = []
-        x, y = spiral()
-
-        data, fragments = marker_program(x[:100], y[:100])
-        self._gloo_programs.append(gloo_program(data, fragments))
-
-        data, fragments = marker_program(x[100:], y[100:], marker='clobber',
-                                         bg_color=(1, 0, 0, 1))
-        self._gloo_programs.append(gloo_program(data, fragments))
+        self._state = GraphicsState()
+        self._state_stack = [self._state]
 
     def render(self, event):
         for program in self._gloo_programs:
@@ -124,7 +118,7 @@ class GraphicsContext(object):
         pass
 
     def set_fill_color(self, color):
-        pass
+        self._state.fill_color = color
 
     def set_line_width(self, width):
         pass
@@ -147,10 +141,13 @@ class GraphicsContext(object):
     def fill_path(self):
         pass
 
+    def draw_marker_at_points(self, points, size=5, marker='disc'):
+        data, fragments = marker_program(*np.transpose(points), size=size,
+                                         bg_color=self._state.fill_color)
+        self._gloo_programs.append(gloo_program(data, fragments))
+
     def draw_rect(self, rect):
         pass
 
     def clip_to_rect(self, *rect):
         pass
-
-
