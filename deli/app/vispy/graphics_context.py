@@ -68,6 +68,7 @@ class GraphicsContext(object):
     def render(self, event):
         for program in self._gloo_programs:
             program.draw('points')
+        self._gloo_programs = []
 
     def clear(self, *args):
         pass
