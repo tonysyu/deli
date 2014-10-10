@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from pyface.qt import QtCore, QtOpenGL
+from pyface.qt import QtCore, QtGui, QtOpenGL
 
 from vispy.gloo.context import GLContext
 from vispy import gloo
@@ -27,8 +27,12 @@ class QGLBackend(QtOpenGL.QGLWidget):
                                     share_widget, window_flags)
         self.setAutoBufferSwap(False)
         self.setMouseTracking(True)
+        self.setSizePolicy(QtGui.QSizePolicy.Expanding,
+                           QtGui.QSizePolicy.Expanding)
 
     def resizeEvent(self, event):
+        size = event.size()
+        self.resizeGL(size.width(), size.height())
         self._window.on_resize(event)
 
     def initializeGL(self):
@@ -52,7 +56,8 @@ class QGLBackend(QtOpenGL.QGLWidget):
         self.context().reset()
 
     def sizeHint(self):
-        return self.size()
+        qt_size_hint = super(QGLBackend, self).sizeHint()
+        return self._window.get_size_hint(qt_size_hint)
 
 
 def _set_config(c):

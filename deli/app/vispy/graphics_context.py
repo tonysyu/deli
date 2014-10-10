@@ -9,33 +9,18 @@ from vispy import gloo
 from . import markers
 
 
-width = height = 512
+identity_transform = np.eye(4, dtype=np.float32)
 
 
-def spiral():
-    n = 500
-    x0 = width / 2.0
-    y0 = height / 2.0
-    # Create radius that's within the bounds
-    r = min(x0, y0) * 0.9
-    theta = 0.0
-    dtheta = 5.5 / 180.0 * np.pi
-
-    xx, yy = [], []
-    for i in range(n):
-        theta += dtheta
-        xx.append(x0 + r * np.cos(theta))
-        yy.append(y0 + r * np.sin(theta))
-        r -= 0.45
-    return xx, yy
-
-
-def gloo_program(data, fragments):
+def gloo_program(data, fragments, origin, size):
     vertex_buffer = gloo.VertexBuffer(data)
 
-    view = np.eye(4, dtype=np.float32)
-    model = np.eye(4, dtype=np.float32)
-    projection = ortho(0, width, 0, height, -1, 1)
+    view = model = identity_transform
+
+    x, y = origin
+    width, height = size
+    projection = ortho(-x, width, -y, height, -1, 1)
+
     program = gloo.Program(markers.vert, fragments)
 
     program.bind(vertex_buffer)
@@ -44,7 +29,6 @@ def gloo_program(data, fragments):
     program["u_model"] = model
     program["u_view"] = view
     program["u_projection"] = projection
-
     return program
 
 
@@ -72,9 +56,13 @@ def marker_program(x, y, marker='disc', line_width=1, size=5,
 
 class GraphicsContext(object):
 
-    def __init__(self):
+    def __init__(self, size):
+        gloo.set_viewport(0, 0, *size)
+
+        self._size = size
         self._gloo_programs = []
         self._state = GraphicsState()
+        self._state.ctm = (0, 0)
         self._state_stack = [self._state]
 
     def render(self, event):
@@ -85,13 +73,17 @@ class GraphicsContext(object):
         pass
 
     def __enter__(self):
-        pass
+        # Set new state to copy of present state (which can be modified.
+        self._state = self._state.copy()
+        self._state_stack.append(self._state)
 
     def __exit__(self, type, value, traceback):
-        pass
+        self._state = self._state_stack.pop()
 
     def translate_ctm(self, dx, dy):
-        pass
+        # XXX: This is just a hack to fake offsets
+        x, y = self._state.ctm
+        self._state.ctm = (x+dx, y+dy)
 
     def rotate_ctm(self, radian_angle):
         pass
@@ -142,9 +134,11 @@ class GraphicsContext(object):
         pass
 
     def draw_marker_at_points(self, points, size=5, marker='disc'):
+        origin = self._state.ctm
         data, fragments = marker_program(*np.transpose(points), size=size,
                                          bg_color=self._state.fill_color)
-        self._gloo_programs.append(gloo_program(data, fragments))
+        program = gloo_program(data, fragments, origin, self._size)
+        self._gloo_programs.append(program)
 
     def draw_rect(self, rect):
         pass

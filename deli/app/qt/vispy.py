@@ -20,7 +20,7 @@ class Window(BaseWindow):
         return QGLBackend(parent, proxy_window)
 
     def _create_gc(self, size, pix_format="bgra32"):
-        self._gc = GraphicsContext()
+        self._gc = GraphicsContext(size)
         return self._gc
 
     def _render(self, event):
