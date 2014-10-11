@@ -3,55 +3,29 @@ from __future__ import absolute_import
 import numpy as np
 from kiva.basecore2d import GraphicsState
 
-from vispy.util.transforms import ortho
 from vispy import gloo
+from vispy.util.transforms import ortho
 
+from . import lines
 from . import markers
 
 
 identity_transform = np.eye(4, dtype=np.float32)
 
 
-def gloo_program(data, fragments, origin, size):
+def create_program(data, vert_shader, fragments):
+
+    program = gloo.Program(vert_shader, fragments)
+
     vertex_buffer = gloo.VertexBuffer(data)
+    program.bind(vertex_buffer)
 
     view = model = identity_transform
-
-    x, y = origin
-    width, height = size
-    projection = ortho(-x, width, -y, height, -1, 1)
-
-    program = gloo.Program(markers.vert, fragments)
-
-    program.bind(vertex_buffer)
     program["u_antialias"] = 1
     program["u_size"] = 1
     program["u_model"] = model
     program["u_view"] = view
-    program["u_projection"] = projection
     return program
-
-
-def marker_program(x, y, marker='disc', line_width=1, size=5,
-                   fg_color=(0, 0, 0, 1), bg_color=(1, 1, 1, 1)):
-    assert len(x) == len(y)
-
-    positions = np.transpose([x, y, np.zeros_like(x)])
-
-    n = len(x)
-    data = np.zeros(n, dtype=[('a_position', np.float32, 3),
-                              ('a_fg_color', np.float32, 4),
-                              ('a_bg_color', np.float32, 4),
-                              ('a_size', np.float32, 1),
-                              ('a_linewidth', np.float32, 1)])
-    data['a_position'] = positions
-    data['a_size'] = size
-    data['a_fg_color'] = fg_color
-    data['a_bg_color'] = bg_color
-    data['a_linewidth'] = line_width
-
-    fragments = markers.frag + markers.MARKER[marker]
-    return data, fragments
 
 
 class GraphicsContext(object):
@@ -67,7 +41,9 @@ class GraphicsContext(object):
 
     def render(self, event):
         for program in self._gloo_programs:
+            # XXX: Define custom draw commands to remove having to call both.
             program.draw('points')
+            program.draw('line_strip')
         self._gloo_programs = []
 
     def clear(self, *args):
@@ -101,44 +77,54 @@ class GraphicsContext(object):
     def show_text(self, text):
         pass
 
-    def set_antialias(self, state):
-        pass
+    def set_antialias(self, antialias):
+        self._state.antialias = antialias
 
     def set_alpha(self, alpha):
-        pass
+        self._state.line_color = alpha
 
     def set_stroke_color(self, color):
-        pass
+        self._state.line_color = color
 
     def set_fill_color(self, color):
         self._state.fill_color = color
 
     def set_line_width(self, width):
-        pass
+        self._state.line_width = width
 
-    def set_line_dash(self, style):
-        pass
+    def set_line_dash(self, dash):
+        self._state.line_dash = dash
 
     def lines(self, points):
-        pass
+        self._points.append(points)
 
     def line_set(self, starts, ends):
+        # self._points.append(np.vstack([starts, ends]))
         pass
 
     def begin_path(self):
-        pass
+        self._points = []
 
     def stroke_path(self):
-        pass
+        if len(self._points) == 0:
+            return
+        points = np.vstack(self._points)
+        data, fragments = lines.data(points,
+                                     color=self._state.line_color,
+                                     line_width=self._state.line_width)
+        program = create_program(data, lines.vert_shader, fragments)
+        program['u_projection'] = self._get_projection()
+        self._gloo_programs.append(program)
+        self._points = []
 
     def fill_path(self):
         pass
 
     def draw_marker_at_points(self, points, size=5, marker='disc'):
-        origin = self._state.ctm
-        data, fragments = marker_program(*np.transpose(points), size=size,
-                                         bg_color=self._state.fill_color)
-        program = gloo_program(data, fragments, origin, self._size)
+        data, fragments = markers.data(points, size=size,
+                                       bg_color=self._state.fill_color)
+        program = create_program(data, markers.vert_shader, fragments)
+        program['u_projection'] = self._get_projection()
         self._gloo_programs.append(program)
 
     def draw_rect(self, rect):
@@ -146,3 +132,8 @@ class GraphicsContext(object):
 
     def clip_to_rect(self, *rect):
         pass
+
+    def _get_projection(self):
+        x, y = self._state.ctm
+        width, height = self._size
+        return ortho(-x, width, -y, height, -1, 1)

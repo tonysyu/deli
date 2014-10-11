@@ -8,9 +8,32 @@
 Marker shader definitions. You need to combine marker_frag with one of the
 available marker function (marker_disc, marker_diamond, ...)
 """
+import numpy as np
 
 
-vert = """
+def data(points, size=5, marker='disc', line_width=1,
+         fg_color=(0, 0, 0, 1), bg_color=(1, 1, 1, 1)):
+    """ Return data and fragment shader for markers. """
+    x, y = np.transpose(points)
+    positions = np.transpose([x, y, np.zeros_like(x)])
+
+    n = len(x)
+    data = np.zeros(n, dtype=[('a_position', np.float32, 3),
+                              ('a_fg_color', np.float32, 4),
+                              ('a_bg_color', np.float32, 4),
+                              ('a_size', np.float32, 1),
+                              ('a_linewidth', np.float32, 1)])
+    data['a_position'] = positions
+    data['a_size'] = size
+    data['a_fg_color'] = fg_color
+    data['a_bg_color'] = bg_color
+    data['a_linewidth'] = line_width
+
+    fragments = frag_shader + MARKER[marker]
+    return data, fragments
+
+
+vert_shader = """
 #version 120
 
 // Uniforms
@@ -50,7 +73,7 @@ void main (void) {
 """
 
 
-frag = """
+frag_shader = """
 #version 120
 
 // Constants
