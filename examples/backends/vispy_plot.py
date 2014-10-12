@@ -16,7 +16,9 @@ class Demo(TraitsView):
         graph.title.text = "Line Artist"
 
         x = np.linspace(-2.0, 10.0, 100)
-        artist = LineArtist(x_data=x, y_data=np.sin(x))
+        artist = LineArtist(x_data=x, y_data=np.sin(x), color='gray')
+        artist.line.width = 2
+
         graph.add_artist(artist)
         artist = MarkerArtist(x_data=x, y_data=np.sin(x))
         graph.add_artist(artist)

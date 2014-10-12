@@ -1,6 +1,42 @@
 import numpy as np
 
+import OpenGL.GL as GL
+
 from .element import GLElement, create_program
+
+
+class LineElement(GLElement):
+
+    def __init__(self, points, state, segments=False):
+        self._line_width =  state.line_width
+        data = create_data(np.vstack(points), color=state.line_color)
+        self._program = create_program(data, VERT_SHADER, FRAG_SHADER)
+
+        self._draw_as_segments = segments
+
+    def draw(self):
+        GL.glLineWidth(self._line_width)
+        GL.glEnable(GL.GL_LINE_SMOOTH)
+        if self._draw_as_segments:
+            self._program.draw('lines')
+        else:
+            self._program.draw('line_strip')
+        GL.glDisable(GL.GL_LINE_SMOOTH)
+
+
+def create_data(points, line_width=3, color=(0, 0, 0, 1)):
+    """ Return data and fragment shader for markers. """
+    x, y = np.transpose(points)
+    positions = np.transpose([x, y, np.zeros_like(x)])
+
+    n = len(x)
+    data = np.zeros(n, dtype=[('a_position', np.float32, 3),
+                              ('a_color', np.float32, 4),
+                              ('a_linewidth', np.float32, 1)])
+    data['a_position'] = positions
+    data['a_color'] = color
+    data['a_linewidth'] = line_width
+    return data
 
 
 VERT_SHADER = """
@@ -37,34 +73,3 @@ void main()
     gl_FragColor = v_color;
 }
 """
-
-
-class LineElement(GLElement):
-
-    def __init__(self, points, state, segments=False):
-        points = np.vstack(points)
-        data = create_data(points, color=state.line_color,
-                           line_width=state.line_width)
-        self._program = create_program(data, VERT_SHADER, FRAG_SHADER)
-        self._draw_as_segments = segments
-
-    def draw(self):
-        if self._draw_as_segments:
-            self._program.draw('lines')
-        else:
-            self._program.draw('line_strip')
-
-
-def create_data(points, line_width=1, color=(0, 0, 0, 1)):
-    """ Return data and fragment shader for markers. """
-    x, y = np.transpose(points)
-    positions = np.transpose([x, y, np.zeros_like(x)])
-
-    n = len(x)
-    data = np.zeros(n, dtype=[('a_position', np.float32, 3),
-                              ('a_color', np.float32, 4),
-                              ('a_linewidth', np.float32, 1)])
-    data['a_position'] = positions
-    data['a_color'] = color
-    data['a_linewidth'] = line_width
-    return data
