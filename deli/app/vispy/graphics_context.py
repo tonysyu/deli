@@ -6,26 +6,11 @@ from kiva.basecore2d import GraphicsState
 from vispy import gloo
 from vispy.util.transforms import ortho
 
-from . import lines
-from . import markers
+from .lines import LineElement
+from .markers import MarkerElement
 
 
 identity_transform = np.eye(4, dtype=np.float32)
-
-
-def create_program(data, vert_shader, fragments):
-
-    program = gloo.Program(vert_shader, fragments)
-
-    vertex_buffer = gloo.VertexBuffer(data)
-    program.bind(vertex_buffer)
-
-    view = model = identity_transform
-    program["u_antialias"] = 1
-    program["u_size"] = 1
-    program["u_model"] = model
-    program["u_view"] = view
-    return program
 
 
 class GraphicsContext(object):
@@ -34,17 +19,15 @@ class GraphicsContext(object):
         gloo.set_viewport(0, 0, *size)
 
         self._size = size
-        self._gloo_programs = []
+        self._gl_elements = []
         self._state = GraphicsState()
         self._state.ctm = (0, 0)
         self._state_stack = [self._state]
 
     def render(self, event):
-        for program in self._gloo_programs:
-            # XXX: Define custom draw commands to remove having to call both.
-            program.draw('points')
-            program.draw('line_strip')
-        self._gloo_programs = []
+        for element in self._gl_elements:
+            element.draw()
+        self._gl_elements = []
 
     def clear(self, *args):
         pass
@@ -99,8 +82,10 @@ class GraphicsContext(object):
         self._points.append(points)
 
     def line_set(self, starts, ends):
-        # self._points.append(np.vstack([starts, ends]))
-        pass
+        points = np.zeros((len(starts) * 2, 2), dtype=starts.dtype)
+        points[::2] = starts
+        points[1::2] = ends
+        self._add_element(LineElement(points, self._state, segments=True))
 
     def begin_path(self):
         self._points = []
@@ -108,24 +93,16 @@ class GraphicsContext(object):
     def stroke_path(self):
         if len(self._points) == 0:
             return
-        points = np.vstack(self._points)
-        data, fragments = lines.data(points,
-                                     color=self._state.line_color,
-                                     line_width=self._state.line_width)
-        program = create_program(data, lines.vert_shader, fragments)
-        program['u_projection'] = self._get_projection()
-        self._gloo_programs.append(program)
+        self._add_element(LineElement(self._points, self._state))
         self._points = []
 
     def fill_path(self):
         pass
 
     def draw_marker_at_points(self, points, size=5, marker='disc'):
-        data, fragments = markers.data(points, size=size,
-                                       bg_color=self._state.fill_color)
-        program = create_program(data, markers.vert_shader, fragments)
-        program['u_projection'] = self._get_projection()
-        self._gloo_programs.append(program)
+        # XXX: Pass marker shape to the element.
+        self._add_element(MarkerElement(points, self._state,
+                                        size=size, marker='disc'))
 
     def draw_rect(self, rect):
         pass
@@ -133,7 +110,12 @@ class GraphicsContext(object):
     def clip_to_rect(self, *rect):
         pass
 
-    def _get_projection(self):
+    def _add_element(self, element):
         x, y = self._state.ctm
         width, height = self._size
-        return ortho(-x, width, -y, height, -1, 1)
+        element['u_projection'] = ortho(-x, width, -y, height, -1, 1)
+        element["u_view"] = identity_transform
+        element["u_model"] = identity_transform
+        element["u_antialias"] = 1
+        element["u_size"] = 1
+        self._gl_elements.append(element)

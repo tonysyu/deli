@@ -10,9 +10,22 @@ available marker function (marker_disc, marker_diamond, ...)
 """
 import numpy as np
 
+from .element import GLElement, create_program
 
-def data(points, size=5, marker='disc', line_width=1,
-         fg_color=(0, 0, 0, 1), bg_color=(1, 1, 1, 1)):
+
+class MarkerElement(GLElement):
+
+    def __init__(self, points, state, size=5, marker='disc'):
+        fragments = FRAG_SHADER + MARKER[marker]
+        data = create_data(points, size=size, bg_color=state.fill_color)
+        self._program = create_program(data, VERT_SHADER, fragments)
+
+    def draw(self):
+        self._program.draw('points')
+
+
+def create_data(points, size=5, line_width=1,
+                fg_color=(0, 0, 0, 1), bg_color=(1, 1, 1, 1)):
     """ Return data and fragment shader for markers. """
     x, y = np.transpose(points)
     positions = np.transpose([x, y, np.zeros_like(x)])
@@ -28,12 +41,10 @@ def data(points, size=5, marker='disc', line_width=1,
     data['a_fg_color'] = fg_color
     data['a_bg_color'] = bg_color
     data['a_linewidth'] = line_width
-
-    fragments = frag_shader + MARKER[marker]
-    return data, fragments
+    return data
 
 
-vert_shader = """
+VERT_SHADER = """
 #version 120
 
 // Uniforms
@@ -73,7 +84,7 @@ void main (void) {
 """
 
 
-frag_shader = """
+FRAG_SHADER = """
 #version 120
 
 // Constants
