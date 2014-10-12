@@ -8,6 +8,7 @@ from vispy.util.transforms import ortho
 
 from .lines import LineElement
 from .markers import MarkerElement
+from .rect import RectElement
 
 
 identity_transform = np.eye(4, dtype=np.float32)
@@ -105,7 +106,7 @@ class GraphicsContext(object):
                                         size=size, marker='disc'))
 
     def draw_rect(self, rect):
-        pass
+        self._add_element(RectElement(rect, self._state))
 
     def clip_to_rect(self, *rect):
         pass
