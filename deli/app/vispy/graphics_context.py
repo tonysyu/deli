@@ -114,9 +114,14 @@ class GraphicsContext(object):
     def _add_element(self, element):
         x, y = self._state.ctm
         width, height = self._size
-        element['u_projection'] = ortho(-x, width, -y, height, -1, 1)
+
+        # Translate model in world coordinates
+        model = identity_transform.copy()
+        model[3, :2] = (x, y)
+
+        element['u_projection'] = ortho(0, width, 0, height, -1, 1)
         element["u_view"] = identity_transform
-        element["u_model"] = identity_transform
+        element["u_model"] = model
         element["u_antialias"] = 1
         element["u_size"] = 1
         self._gl_elements.append(element)
