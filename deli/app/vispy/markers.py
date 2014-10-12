@@ -1,12 +1,8 @@
-# -*- coding: utf-8 -*-
-# vispy: testskip
-# -----------------------------------------------------------------------------
-# Copyright (c) 2014, Vispy Development Team.
-# Distributed under the (new) BSD License. See LICENSE.txt for more info.
-# -----------------------------------------------------------------------------
 """
 Marker shader definitions. You need to combine marker_frag with one of the
 available marker function (marker_disc, marker_diamond, ...)
+
+Adapted from markers example from the vispy gallery.
 """
 import numpy as np
 
@@ -17,7 +13,7 @@ class MarkerElement(GLElement):
 
     def __init__(self, points, state, size=5, marker='disc'):
         fragments = FRAG_SHADER + MARKER[marker]
-        data = create_data(points, size=size, bg_color=state.fill_color)
+        data = create_data(points, size=size, fill_color=state.fill_color)
         self._program = create_program(data, VERT_SHADER, fragments)
 
     def draw(self):
@@ -25,21 +21,21 @@ class MarkerElement(GLElement):
 
 
 def create_data(points, size=5, line_width=1,
-                fg_color=(0, 0, 0, 1), bg_color=(1, 1, 1, 1)):
+                edge_color=(0, 0, 0, 1), fill_color=(1, 1, 1, 1)):
     """ Return data and fragment shader for markers. """
     x, y = np.transpose(points)
     positions = np.transpose([x, y, np.zeros_like(x)])
 
     n = len(x)
     data = np.zeros(n, dtype=[('a_position', np.float32, 3),
-                              ('a_fg_color', np.float32, 4),
-                              ('a_bg_color', np.float32, 4),
+                              ('a_edge_color', np.float32, 4),
+                              ('a_fill_color', np.float32, 4),
                               ('a_size', np.float32, 1),
                               ('a_linewidth', np.float32, 1)])
     data['a_position'] = positions
     data['a_size'] = size
-    data['a_fg_color'] = fg_color
-    data['a_bg_color'] = bg_color
+    data['a_edge_color'] = edge_color
+    data['a_fill_color'] = fill_color
     data['a_linewidth'] = line_width
     return data
 
@@ -58,15 +54,15 @@ uniform float u_size;
 // Attributes
 // ------------------------------------
 attribute vec3  a_position;
-attribute vec4  a_fg_color;
-attribute vec4  a_bg_color;
+attribute vec4  a_edge_color;
+attribute vec4  a_fill_color;
 attribute float a_linewidth;
 attribute float a_size;
 
 // Varyings
 // ------------------------------------
-varying vec4 v_fg_color;
-varying vec4 v_bg_color;
+varying vec4 v_edge_color;
+varying vec4 v_fill_color;
 varying float v_size;
 varying float v_linewidth;
 varying float v_antialias;
@@ -75,8 +71,8 @@ void main (void) {
     v_size = a_size * u_size;
     v_linewidth = a_linewidth;
     v_antialias = u_antialias;
-    v_fg_color  = a_fg_color;
-    v_bg_color  = a_bg_color;
+    v_edge_color  = a_edge_color;
+    v_fill_color  = a_fill_color;
     gl_Position = u_projection * u_view * u_model *
         vec4(a_position*u_size,1.0);
     gl_PointSize = v_size + 2*(v_linewidth + 1.5*v_antialias);
@@ -92,8 +88,8 @@ FRAG_SHADER = """
 
 // Varyings
 // ------------------------------------
-varying vec4 v_fg_color;
-varying vec4 v_bg_color;
+varying vec4 v_edge_color;
+varying vec4 v_fill_color;
 varying float v_size;
 varying float v_linewidth;
 varying float v_antialias;
@@ -120,16 +116,16 @@ void main()
     }
     else if( d < 0.0 )
     {
-       gl_FragColor = v_fg_color;
+       gl_FragColor = v_edge_color;
     }
     else
     {
         float alpha = d/v_antialias;
         alpha = exp(-alpha*alpha);
         if (r > 0)
-            gl_FragColor = vec4(v_fg_color.rgb, alpha*v_fg_color.a);
+            gl_FragColor = vec4(v_edge_color.rgb, alpha*v_edge_color.a);
         else
-            gl_FragColor = mix(v_bg_color, v_fg_color, alpha);
+            gl_FragColor = mix(v_fill_color, v_edge_color, alpha);
     }
 }
 """
