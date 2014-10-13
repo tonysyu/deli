@@ -1,10 +1,6 @@
 from pyface.qt import QtCore, QtGui
 
-from .constants import BUTTON_NAME_MAP
-
-
-def button_from_event(event):
-    return BUTTON_NAME_MAP[event.button()]
+from .utils import button_from_event
 
 
 class QtWindow(QtGui.QWidget):

@@ -1,6 +1,6 @@
 from pyface.qt import QtCore
 
-from .constants import KEY_MAP
+from .constants import BUTTON_NAME_MAP, KEY_MAP
 
 
 MODIFIER_MAP = {
@@ -24,6 +24,10 @@ def key_from_event(event_type, event):
     if key is None:
         key = unichr(key_code).lower()
     return key
+
+
+def button_from_event(event):
+    return BUTTON_NAME_MAP[event.button()]
 
 
 def get_modifier_state(modifiers):

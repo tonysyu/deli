@@ -5,6 +5,8 @@ from pyface.qt import QtCore, QtGui, QtOpenGL
 from vispy.gloo.context import GLContext
 from vispy import gloo
 
+from ..qt.utils import button_from_event
+
 
 class QGLBackend(QtOpenGL.QGLWidget):
     """ OpenGL backend for WindowCanvas abstract class. """
@@ -26,6 +28,7 @@ class QGLBackend(QtOpenGL.QGLWidget):
         QtOpenGL.QGLWidget.__init__(self, glformat, parent,
                                     share_widget, window_flags)
         self.setAutoBufferSwap(False)
+        self.setFocusPolicy(QtCore.Qt.WheelFocus)
         self.setMouseTracking(True)
         self.setSizePolicy(QtGui.QSizePolicy.Expanding,
                            QtGui.QSizePolicy.Expanding)
@@ -54,6 +57,37 @@ class QGLBackend(QtOpenGL.QGLWidget):
         self.close()
         self.doneCurrent()
         self.context().reset()
+
+    def keyPressEvent(self, event):
+        self._window.handle_key_event('key_press', event)
+
+    def keyReleaseEvent(self, event):
+        self._window.handle_key_event('key_release', event)
+
+    def enterEvent(self, event):
+        self._window.handle_mouse_event("mouse_enter", event)
+
+    def leaveEvent(self, event):
+        self._window.handle_mouse_event("mouse_leave", event)
+
+    def mouseMoveEvent(self, event):
+        self._window.handle_mouse_event("mouse_move", event)
+
+    def mouseDoubleClickEvent(self, event):
+        action_name = button_from_event(event) + '_dclick'
+        self._window.handle_mouse_event(action_name, event)
+
+    def mousePressEvent(self, event):
+        action_name = button_from_event(event) + '_down'
+        self._window.handle_mouse_event(action_name, event)
+
+    def mouseReleaseEvent(self, event):
+        action_name = button_from_event(event) + '_up'
+        self._window.handle_mouse_event(action_name, event)
+
+    def wheelEvent(self, event):
+        self._window.handle_mouse_event("mouse_wheel", event)
+
 
     def sizeHint(self):
         qt_size_hint = super(QGLBackend, self).sizeHint()
