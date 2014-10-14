@@ -8,6 +8,8 @@ from .element import GLElement, create_program
 class LineElement(GLElement):
 
     def __init__(self, points, state, segments=False):
+        super(LineElement, self).__init__(state)
+
         self._line_width =  state.line_width
         data = create_data(np.vstack(points), color=state.line_color)
         self._program = create_program(data, VERT_SHADER, FRAG_SHADER)
@@ -15,13 +17,14 @@ class LineElement(GLElement):
         self._draw_as_segments = segments
 
     def draw(self):
-        GL.glLineWidth(self._line_width)
-        GL.glEnable(GL.GL_LINE_SMOOTH)
-        if self._draw_as_segments:
-            self._program.draw('lines')
-        else:
-            self._program.draw('line_strip')
-        GL.glDisable(GL.GL_LINE_SMOOTH)
+        with self._draw_context():
+            GL.glLineWidth(self._line_width)
+            GL.glEnable(GL.GL_LINE_SMOOTH)
+            if self._draw_as_segments:
+                self._program.draw('lines')
+            else:
+                self._program.draw('line_strip')
+            GL.glDisable(GL.GL_LINE_SMOOTH)
 
 
 def create_data(points, line_width=3, color=(0, 0, 0, 1)):

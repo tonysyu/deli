@@ -12,12 +12,15 @@ from .element import GLElement, create_program
 class MarkerElement(GLElement):
 
     def __init__(self, points, state, size=5, marker='disc'):
+        super(MarkerElement, self).__init__(state)
+
         fragments = FRAG_SHADER + MARKER[marker]
         data = create_data(points, size=size, fill_color=state.fill_color)
         self._program = create_program(data, VERT_SHADER, fragments)
 
     def draw(self):
-        self._program.draw('points')
+        with self._draw_context():
+            self._program.draw('points')
 
 
 def create_data(points, size=5, line_width=1,

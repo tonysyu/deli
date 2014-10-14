@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import numpy as np
-from kiva.basecore2d import GraphicsState
+from kiva.basecore2d import GraphicsState as BaseGraphicsState
 
 from vispy import gloo
 from vispy.util.transforms import ortho
@@ -12,6 +12,13 @@ from .rect import RectElement
 
 
 identity_transform = np.eye(4, dtype=np.float32)
+
+
+class GraphicsState(BaseGraphicsState):
+
+    def __init__(self, *args, **kwargs):
+        super(GraphicsState, self).__init__(*args, **kwargs)
+        self.rect_clip = None
 
 
 class GraphicsContext(object):
@@ -26,6 +33,8 @@ class GraphicsContext(object):
         self._state_stack = [self._state]
 
     def render(self, event):
+        # Scissors, i.e. clipping, need to be turned off after drawing so
+        # previous clip planes don't persist.
         for element in self._gl_elements:
             element.draw()
         self._gl_elements = []
@@ -109,7 +118,9 @@ class GraphicsContext(object):
         self._add_element(RectElement(rect, self._state))
 
     def clip_to_rect(self, *rect):
-        pass
+        x0, y0 = self._state.ctm
+        x, y, width, height = rect
+        self._state.rect_clip = (x0+x, y0+y, width, height)
 
     def _add_element(self, element):
         x, y = self._state.ctm
