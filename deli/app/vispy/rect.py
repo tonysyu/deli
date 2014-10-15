@@ -5,16 +5,22 @@ import numpy as np
 
 import OpenGL.GL as GL
 
-from .element import GLElement, create_program
+from .element import GLElement, set_program_data
 
 
 class RectElement(GLElement):
 
-    def __init__(self, rect, state):
+    def __init__(self):
+        super(RectElement, self).__init__(VERT_SHADER, FRAG_SHADER)
+
+    def update(self, state, rect):
+        super(RectElement, self).update(state)
+
         self._fill_color = state.fill_color
         self._edge_color = state.line_color
+
         data = create_data(rect)
-        self._program = create_program(data, VERT_SHADER, FRAG_SHADER)
+        set_program_data(self._program, data)
 
     def draw(self):
         self._program['u_color'] = self._fill_color

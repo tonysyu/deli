@@ -6,17 +6,22 @@ Adapted from markers example from the vispy gallery.
 """
 import numpy as np
 
-from .element import GLElement, create_program
+from .element import GLElement, set_program_data
 
 
 class MarkerElement(GLElement):
 
-    def __init__(self, points, state, size=5, marker='disc'):
-        super(MarkerElement, self).__init__(state)
-
+    def __init__(self, marker='disc'):
+        # XXX: Custom markers are very broken here. Need to create and cache
+        # a marker element for each marker type.
         fragments = FRAG_SHADER + MARKER[marker]
+        super(MarkerElement, self).__init__(VERT_SHADER, fragments)
+
+    def update(self, state, points, size=5, marker='disc'):
+        super(MarkerElement, self).update(state)
+
         data = create_data(points, size=size, fill_color=state.fill_color)
-        self._program = create_program(data, VERT_SHADER, fragments)
+        set_program_data(self._program, data)
 
     def draw(self):
         with self._draw_context():

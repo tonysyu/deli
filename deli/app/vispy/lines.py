@@ -2,19 +2,22 @@ import numpy as np
 
 import OpenGL.GL as GL
 
-from .element import GLElement, create_program
+from .element import GLElement, set_program_data
 
 
 class LineElement(GLElement):
 
-    def __init__(self, points, state, segments=False):
-        super(LineElement, self).__init__(state)
+    def __init__(self):
+        super(LineElement, self).__init__(VERT_SHADER, FRAG_SHADER)
+
+    def update(self, state, points, segments=False):
+        super(LineElement, self).update(state)
 
         self._line_width =  state.line_width
-        data = create_data(np.vstack(points), color=state.line_color)
-        self._program = create_program(data, VERT_SHADER, FRAG_SHADER)
-
         self._draw_as_segments = segments
+
+        data = create_data(np.vstack(points), color=state.line_color)
+        set_program_data(self._program, data)
 
     def draw(self):
         with self._draw_context():

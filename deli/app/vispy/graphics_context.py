@@ -27,17 +27,22 @@ class GraphicsContext(object):
         gloo.set_viewport(0, 0, *size)
 
         self._size = size
-        self._gl_elements = []
         self._state = GraphicsState()
         self._state.ctm = (0, 0)
         self._state_stack = [self._state]
 
+        self._draw_stack = []
+        self._line_renderer = LineElement()
+        self._marker_renderer = MarkerElement()
+        self._rect_renderer = RectElement()
+
     def render(self, event):
         # Scissors, i.e. clipping, need to be turned off after drawing so
         # previous clip planes don't persist.
-        for element in self._gl_elements:
-            element.draw()
-        self._gl_elements = []
+        for renderer, state, args, kwargs in self._draw_stack:
+            self._update_renderer(renderer, state, *args, **kwargs)
+            renderer.draw()
+        self._draw_stack = []
 
     def clear(self, *args):
         pass
@@ -95,7 +100,11 @@ class GraphicsContext(object):
         points = np.zeros((len(starts) * 2, 2), dtype=starts.dtype)
         points[::2] = starts
         points[1::2] = ends
-        self._add_element(LineElement(points, self._state, segments=True))
+
+        state = self._state.copy()
+        args = [points]
+        kwargs = {'segments': True}
+        self._draw_stack.append((self._line_renderer, state, args, kwargs))
 
     def begin_path(self):
         self._points = []
@@ -103,36 +112,44 @@ class GraphicsContext(object):
     def stroke_path(self):
         if len(self._points) == 0:
             return
-        self._add_element(LineElement(self._points, self._state))
+
+        state = self._state.copy()
+        args = [self._points[:]]
+        self._draw_stack.append((self._line_renderer, state, args, {}))
         self._points = []
 
     def fill_path(self):
         pass
 
     def draw_marker_at_points(self, points, size=5, marker='disc'):
-        # XXX: Pass marker shape to the element.
-        self._add_element(MarkerElement(points, self._state,
-                                        size=size, marker='disc'))
+
+        state = self._state.copy()
+        args = [points]
+        # XXX: TODO: pass marker shape to the element.
+        kwargs = {'size': size, 'marker': 'disc'}
+        self._draw_stack.append((self._marker_renderer, state, args, kwargs))
 
     def draw_rect(self, rect):
-        self._add_element(RectElement(rect, self._state))
+        state = self._state.copy()
+        args = [rect]
+        self._draw_stack.append((self._rect_renderer, state, args, {}))
 
     def clip_to_rect(self, *rect):
         x0, y0 = self._state.ctm
         x, y, width, height = rect
         self._state.rect_clip = (x0+x, y0+y, width, height)
 
-    def _add_element(self, element):
-        x, y = self._state.ctm
+    def _update_renderer(self, renderer, state, *args, **kwargs):
+        x, y = state.ctm
         width, height = self._size
 
         # Translate model in world coordinates
         model = identity_transform.copy()
         model[3, :2] = (x, y)
 
-        element['u_projection'] = ortho(0, width, 0, height, -1, 1)
-        element["u_view"] = identity_transform
-        element["u_model"] = model
-        element["u_antialias"] = 1
-        element["u_size"] = 1
-        self._gl_elements.append(element)
+        renderer['u_projection'] = ortho(0, width, 0, height, -1, 1)
+        renderer["u_view"] = identity_transform
+        renderer["u_model"] = model
+        renderer["u_antialias"] = 1
+        renderer["u_size"] = 1
+        renderer.update(state, *args, **kwargs)
