@@ -50,7 +50,7 @@ class GraphicsContext(object):
         self._draw_stack = []
 
     def clear(self, *args):
-        pass
+        gloo.clear()
 
     def __enter__(self):
         # Set new state to copy of present state (which can be modified.

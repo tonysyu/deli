@@ -27,6 +27,5 @@ class Window(BaseWindow):
         if self.control is None:
             return
 
-        gloo.clear()
         self._gc.render(event)
         self.control.swapBuffers()
