@@ -32,7 +32,6 @@ class GraphicsContext(object):
         self._state.ctm = (0, 0)
         self._state_stack = [self._state]
 
-        self._draw_stack = []
         self._line_renderer = LineElement()
         self._marker_renderer = MarkerElement()
         self._rect_renderer = RectElement()
@@ -41,13 +40,7 @@ class GraphicsContext(object):
         self._text_pos = (0, 0)
 
     def render(self, event):
-        # Scissors, i.e. clipping, need to be turned off after drawing so
-        # previous clip planes don't persist.
-        for renderer, state, args, kwargs in self._draw_stack:
-            # XXX: These draw calls can probably be moved into methods.
-            self._update_renderer(renderer, state, *args, **kwargs)
-            renderer.draw()
-        self._draw_stack = []
+        pass
 
     def clear(self, *args):
         gloo.clear()
@@ -82,8 +75,9 @@ class GraphicsContext(object):
         return 1, 1, 0, 0
 
     def show_text(self, text):
-        state = self._state.copy()
-        self._draw_stack.append((self._text_renderer, state, [text], {}))
+        self._update_renderer(self._text_renderer, self._state)
+        self._text_renderer.update(self._state, text)
+        self._text_renderer.draw()
 
     def set_antialias(self, antialias):
         self._state.antialias = antialias
@@ -111,10 +105,9 @@ class GraphicsContext(object):
         points[::2] = starts
         points[1::2] = ends
 
-        state = self._state.copy()
-        args = [points]
-        kwargs = {'segments': True}
-        self._draw_stack.append((self._line_renderer, state, args, kwargs))
+        self._update_renderer(self._line_renderer, self._state)
+        self._line_renderer.update(self._state, points, segments=True)
+        self._line_renderer.draw()
 
     def begin_path(self):
         self._points = []
@@ -123,32 +116,32 @@ class GraphicsContext(object):
         if len(self._points) == 0:
             return
 
-        state = self._state.copy()
-        args = [self._points[:]]
-        self._draw_stack.append((self._line_renderer, state, args, {}))
+        self._update_renderer(self._line_renderer, self._state)
+        self._line_renderer.update(self._state, self._points)
+        self._line_renderer.draw()
         self._points = []
 
     def fill_path(self):
         pass
 
     def draw_marker_at_points(self, points, size=5, marker='disc'):
-        state = self._state.copy()
-        args = [points]
         # XXX: TODO: pass marker shape to the element.
         kwargs = {'size': size, 'marker': 'disc'}
-        self._draw_stack.append((self._marker_renderer, state, args, kwargs))
+        self._update_renderer(self._marker_renderer, self._state)
+        self._marker_renderer.update(self._state, points, **kwargs)
+        self._marker_renderer.draw()
 
     def draw_rect(self, rect):
-        state = self._state.copy()
-        args = [rect]
-        self._draw_stack.append((self._rect_renderer, state, args, {}))
+        self._update_renderer(self._rect_renderer, self._state)
+        self._rect_renderer.update(self._state, rect)
+        self._rect_renderer.draw()
 
     def clip_to_rect(self, *rect):
         x0, y0 = self._state.ctm
         x, y, width, height = rect
         self._state.rect_clip = (x0+x, y0+y, width, height)
 
-    def _update_renderer(self, renderer, state, *args, **kwargs):
+    def _update_renderer(self, renderer, state):
         width, height = self._size
 
         # Translate model in world coordinates
@@ -160,4 +153,3 @@ class GraphicsContext(object):
         renderer["u_model"] = model
         renderer["u_antialias"] = 1
         renderer["u_size"] = 1
-        renderer.update(state, *args, **kwargs)
