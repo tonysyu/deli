@@ -49,8 +49,8 @@ class GraphicsContext(object):
 
     def __enter__(self):
         # Set new state to copy of present state (which can be modified.
-        self._state = self._state.copy()
         self._state_stack.append(self._state)
+        self._state = self._state.copy()
 
     def __exit__(self, type, value, traceback):
         self._state = self._state_stack.pop()
