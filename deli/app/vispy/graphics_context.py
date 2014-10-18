@@ -35,8 +35,10 @@ class GraphicsContext(object):
         gloo.set_viewport(0, 0, *size)
 
         self._size = size
+        width, height = size
+        self._projection_matrix = ortho(0, width, 0, height, -1, 1)
         self._state = GraphicsState()
-        self._state.ctm = (0, 0)
+        self._state.ctm = identity_transform.copy()
         self._state_stack = [self._state]
 
         self._line_renderer = LINE_RENDERER
@@ -61,9 +63,7 @@ class GraphicsContext(object):
         self._state = self._state_stack.pop()
 
     def translate_ctm(self, dx, dy):
-        # XXX: This is just a hack to fake offsets
-        x, y = self._state.ctm
-        self._state.ctm = (x+dx, y+dy)
+        self._state.ctm[3, :2] += (dx, dy)
 
     def rotate_ctm(self, radian_angle):
         pass
@@ -143,20 +143,18 @@ class GraphicsContext(object):
         self._rect_renderer.update(self._state, rect)
         self._rect_renderer.draw()
 
+    @property
+    def current_origin(self):
+        return self._state.ctm[3, :2]
+
     def clip_to_rect(self, *rect):
-        x0, y0 = self._state.ctm
+        x0, y0 = self.current_origin
         x, y, width, height = rect
         self._state.rect_clip = (x0+x, y0+y, width, height)
 
     def _update_renderer(self, renderer, state):
-        width, height = self._size
-
-        # Translate model in world coordinates
-        model = identity_transform.copy()
-        model[3, :2] = state.ctm
-
-        renderer['u_projection'] = ortho(0, width, 0, height, -1, 1)
+        renderer['u_projection'] = self._projection_matrix
         renderer["u_view"] = identity_transform
-        renderer["u_model"] = model
+        renderer["u_model"] = self._state.ctm
         renderer["u_antialias"] = 1
         renderer["u_size"] = 1
