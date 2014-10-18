@@ -4,7 +4,7 @@ import numpy as np
 from kiva.basecore2d import GraphicsState as BaseGraphicsState
 
 from vispy import gloo
-from vispy.util.transforms import ortho
+from vispy.util.transforms import ortho, zrotate
 
 from .lines import LineElement
 from .markers import MarkerElement
@@ -66,7 +66,8 @@ class GraphicsContext(object):
         self._state.ctm[3, :2] += (dx, dy)
 
     def rotate_ctm(self, radian_angle):
-        pass
+        degree_angle = -180 * radian_angle / np.pi
+        self._state.ctm = zrotate(self._state.ctm, degree_angle)
 
     def set_font(self, font):
         pass

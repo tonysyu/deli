@@ -17,7 +17,7 @@ from .element import GLElement
 
 
 def _text_to_vbo(text, font, anchor_x, anchor_y, lowres_size):
-    """Convert text characters to VBO"""
+    """Convert text characters to vertex buffer object."""
     text_vtype = np.dtype([('a_position', 'f4', 2),
                            ('a_texcoord', 'f4', 2)])
     vertices = np.zeros(len(text) * 4, dtype=text_vtype)
