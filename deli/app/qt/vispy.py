@@ -2,8 +2,6 @@ from __future__ import absolute_import
 
 from traits.api import Instance
 
-from vispy import gloo
-
 from ..vispy.graphics_context import GraphicsContext
 from ..vispy.qgl_backend import QGLBackend
 from .base_window import BaseWindow
