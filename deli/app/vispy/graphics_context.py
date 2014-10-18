@@ -84,7 +84,7 @@ class GraphicsContext(object):
     def show_text(self, text):
         self._update_renderer(self._text_renderer, self._state)
         self._text_renderer.update(self._state, text)
-        self._text_renderer.draw()
+        self._text_renderer.draw(self._size)
 
     def set_antialias(self, antialias):
         self._state.antialias = antialias

@@ -336,7 +336,7 @@ class TextElement(GLElement):
         assert len(pos) == 2
         self._pos = tuple(pos)
 
-    def draw(self):
+    def draw(self, projection_size):
         # attributes / uniforms are not available until program is built
         if len(self.text) == 0:
             return
@@ -351,9 +351,8 @@ class TextElement(GLElement):
                              dtype=np.uint32)[:, np.newaxis])
             self._ib = IndexBuffer(idx.ravel())
 
-        # Rather arbitrary scale. With size=12 it takes up ~1/10 of space
-        # XXX: Need to scale this with the projection size
-        px_scale = 2.0/700, 2.0/500
+        width, height = projection_size
+        px_scale = 2.0/width, 2.0/height
 
         ps = (self._font_size / 72.) * 92.
         self._program['u_npix'] = ps
