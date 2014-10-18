@@ -9,6 +9,7 @@ from vispy.util.transforms import ortho
 from .lines import LineElement
 from .markers import MarkerElement
 from .rect import RectElement
+from .text import TextElement
 
 
 identity_transform = np.eye(4, dtype=np.float32)
@@ -35,11 +36,15 @@ class GraphicsContext(object):
         self._line_renderer = LineElement()
         self._marker_renderer = MarkerElement()
         self._rect_renderer = RectElement()
+        self._text_renderer = TextElement()
+
+        self._text_pos = (0, 0)
 
     def render(self, event):
         # Scissors, i.e. clipping, need to be turned off after drawing so
         # previous clip planes don't persist.
         for renderer, state, args, kwargs in self._draw_stack:
+            # XXX: These draw calls can probably be moved into methods.
             self._update_renderer(renderer, state, *args, **kwargs)
             renderer.draw()
         self._draw_stack = []
@@ -67,13 +72,18 @@ class GraphicsContext(object):
         pass
 
     def set_text_position(self, x, y):
-        pass
+        """ Set relative text position.
+
+        The absolute position depends on the current transform matrix as well.
+        """
+        self._text_pos = (x, y)
 
     def get_full_text_extent(self, text):
         return 1, 1, 0, 0
 
     def show_text(self, text):
-        pass
+        state = self._state.copy()
+        self._draw_stack.append((self._text_renderer, state, [text], {}))
 
     def set_antialias(self, antialias):
         self._state.antialias = antialias
@@ -122,7 +132,6 @@ class GraphicsContext(object):
         pass
 
     def draw_marker_at_points(self, points, size=5, marker='disc'):
-
         state = self._state.copy()
         args = [points]
         # XXX: TODO: pass marker shape to the element.
@@ -140,12 +149,11 @@ class GraphicsContext(object):
         self._state.rect_clip = (x0+x, y0+y, width, height)
 
     def _update_renderer(self, renderer, state, *args, **kwargs):
-        x, y = state.ctm
         width, height = self._size
 
         # Translate model in world coordinates
         model = identity_transform.copy()
-        model[3, :2] = (x, y)
+        model[3, :2] = state.ctm
 
         renderer['u_projection'] = ortho(0, width, 0, height, -1, 1)
         renderer["u_view"] = identity_transform
