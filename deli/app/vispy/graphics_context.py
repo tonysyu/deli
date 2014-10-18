@@ -14,6 +14,13 @@ from .text import TextElement
 
 identity_transform = np.eye(4, dtype=np.float32)
 
+# These objects are expensive to initialize, and the graphics context gets
+# recreated when resizing.
+LINE_RENDERER = LineElement()
+MARKER_RENDERER = MarkerElement()
+RECT_RENDERER = RectElement()
+TEXT_RENDERER = TextElement()
+
 
 class GraphicsState(BaseGraphicsState):
 
@@ -32,10 +39,10 @@ class GraphicsContext(object):
         self._state.ctm = (0, 0)
         self._state_stack = [self._state]
 
-        self._line_renderer = LineElement()
-        self._marker_renderer = MarkerElement()
-        self._rect_renderer = RectElement()
-        self._text_renderer = TextElement()
+        self._line_renderer = LINE_RENDERER
+        self._marker_renderer = MARKER_RENDERER
+        self._rect_renderer = RECT_RENDERER
+        self._text_renderer = TEXT_RENDERER
 
         self._text_pos = (0, 0)
 
