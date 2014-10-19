@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#
 from __future__ import division
 
 import sys
@@ -16,8 +15,20 @@ from vispy.scene.visuals.text.text import FontManager
 from .element import GLElement
 
 
+# Note that initializing the font manager is very costly.
+FONT_MANAGER = FontManager()
+ANCHOR_Y_ENUM = ('top', 'center', 'middle', 'baseline', 'bottom')
+ANCHOR_X_ENUM = ('left', 'center', 'right')
+BLEND_FUNC = ('src_alpha', 'one_minus_src_alpha')
+
+def rect_extents_to_corners(x0, y0, x1, y1):
+    return [[x0, y0], [x0, y1], [x1, y1], [x1, y0]]
+
+
 def _text_to_vbo(text, font, anchor_x, anchor_y, lowres_size):
     """Convert text characters to vertex buffer object."""
+    # XXX: This function may benefit from a LRU cache.
+
     text_vtype = np.dtype([('a_position', 'f4', 2),
                            ('a_texcoord', 'f4', 2)])
     vertices = np.zeros(len(text) * 4, dtype=text_vtype)
@@ -33,8 +44,10 @@ def _text_to_vbo(text, font, anchor_x, anchor_y, lowres_size):
     # trigger SDF rendering, which changes our viewport
     orig_viewport = get_parameter('viewport')
 
+    positions = []
+    texcoords = []
     # XXX: Iterating over characters in Python is a really bad idea.
-    for ii, char in enumerate(text):
+    for char in text:
         glyph = font[char]
         kerning = glyph['kerning'].get(prev, 0.) * ratio
         x0 = x_off + glyph['offset'][0] * ratio + kerning
@@ -42,18 +55,18 @@ def _text_to_vbo(text, font, anchor_x, anchor_y, lowres_size):
         x1 = x0 + glyph['size'][0]
         y1 = y0 - glyph['size'][1]
         u0, v0, u1, v1 = glyph['texcoords']
-        position = [[x0, y0], [x0, y1], [x1, y1], [x1, y0]]
-        texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
-        vi = ii * 4
-        vertices['a_position'][vi:vi+4] = position
-        vertices['a_texcoord'][vi:vi+4] = texcoords
+        positions.extend(rect_extents_to_corners(x0, y0, x1, y1))
+        texcoords.extend(rect_extents_to_corners(u0, v0, u1, v1))
         x_move = glyph['advance'] * ratio + kerning
         x_off += x_move
+        width += x_move
         ascender = max(ascender, y0 - slop)
         descender = min(descender, y1 + slop)
-        width += x_move
         height = max(height, glyph['size'][1] - 2*slop)
         prev = char
+    vertices['a_position'] = positions
+    vertices['a_texcoord'] = texcoords
+
     # Also analyse chars with large ascender and descender, otherwise the
     # vertical alignment can be very inconsistent
     for char in 'hy':
@@ -63,6 +76,7 @@ def _text_to_vbo(text, font, anchor_x, anchor_y, lowres_size):
         ascender = max(ascender, y0 - slop)
         descender = min(descender, y1 + slop)
         height = max(height, glyph['size'][1] - 2*slop)
+
     set_viewport(*orig_viewport)
 
     # Tight bounding box (loose would be width, font.height /.asc / .desc)
@@ -155,7 +169,7 @@ class TextElement(GLElement):
         varying vec2 v_texcoord;
         const float center = 0.5;
 
-        // CatRom interpolation code
+        // CatRom (bicubic) interpolation code
         vec4 filter1D_radius2(sampler2D kernel, float index, float x,
                               vec4 c0, vec4 c1, vec4 c2, vec4 c3) {
             float w, w_sum = 0.0;
@@ -262,13 +276,12 @@ class TextElement(GLElement):
         super(TextElement, self).__init__(self.VERTEX_SHADER,
                                           self.FRAGMENT_SHADER)
         # Check input
-        valid_keys = ('top', 'center', 'middle', 'baseline', 'bottom')
-        _check_valid('anchor_y', anchor_y, valid_keys)
-        valid_keys = ('left', 'center', 'right')
-        _check_valid('anchor_x', anchor_x, valid_keys)
+        _check_valid('anchor_y', anchor_y, ANCHOR_Y_ENUM)
+        _check_valid('anchor_x', anchor_x, ANCHOR_X_ENUM)
+
         # Init font handling stuff
         # _font_manager is a temporary solution to use global mananger
-        self._font_manager = font_manager or FontManager()
+        self._font_manager = font_manager or FONT_MANAGER
         self._font = self._font_manager.get_font(face, bold, italic)
         self._vertices = None
         self._anchors = (anchor_x, anchor_y)
@@ -282,6 +295,7 @@ class TextElement(GLElement):
     def update(self, state, text):
         super(TextElement, self).update(state)
         self.text = text
+        self.color = state.line_color
 
     @property
     def text(self):
@@ -337,12 +351,13 @@ class TextElement(GLElement):
         self._pos = tuple(pos)
 
     def draw(self, projection_size):
-        # attributes / uniforms are not available until program is built
+        width, height = projection_size
+        px_scale = 2.0/width, 2.0/height
+
         if len(self.text) == 0:
             return
+
         if self._vertices is None:
-            # we delay creating vertices because it requires a context,
-            # which may or may not exist when the object is initialized
             self._vertices = _text_to_vbo(self._text, self._font,
                                           self._anchors[0], self._anchors[1],
                                           self._font._lowres_size)
@@ -350,9 +365,6 @@ class TextElement(GLElement):
                    np.arange(0, 4*len(self._text), 4,
                              dtype=np.uint32)[:, np.newaxis])
             self._ib = IndexBuffer(idx.ravel())
-
-        width, height = projection_size
-        px_scale = 2.0/width, 2.0/height
 
         ps = (self._font_size / 72.) * 92.
         self._program['u_npix'] = ps
@@ -364,8 +376,7 @@ class TextElement(GLElement):
         self._program['u_color'] = self._color.rgba
         self._program['u_font_atlas'] = self._font._atlas
         self._program.bind(self._vertices)
-        set_state(blend=True, depth_test=False,
-                  blend_func=('src_alpha', 'one_minus_src_alpha'))
+        set_state(blend=True, depth_test=False, blend_func=BLEND_FUNC)
 
         with self._draw_context():
             self._program.draw('triangles', self._ib)
