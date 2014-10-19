@@ -77,10 +77,12 @@ class GraphicsContext(object):
 
         The absolute position depends on the current transform matrix as well.
         """
-        self._text_pos = (x, y)
+        self._state.ctm[3, :2] += (x, y)
 
     def get_full_text_extent(self, text):
-        return 1, 1, 0, 0
+        text_extent = self._text_renderer.get_text_extent(text)
+        left, bottom, width, height = text_extent
+        return width, height, bottom, left
 
     def show_text(self, text):
         self._update_renderer(self._text_renderer, self._state)

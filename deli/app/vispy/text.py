@@ -21,6 +21,7 @@ ANCHOR_Y_ENUM = ('top', 'center', 'middle', 'baseline', 'bottom')
 ANCHOR_X_ENUM = ('left', 'center', 'right')
 BLEND_FUNC = ('src_alpha', 'one_minus_src_alpha')
 
+
 def rect_extents_to_corners(x0, y0, x1, y1):
     return [[x0, y0], [x0, y1], [x1, y1], [x1, y0]]
 
@@ -97,7 +98,10 @@ def _text_to_vbo(text, font, anchor_x, anchor_y, lowres_size):
 
     vertices['a_position'] += (dx, dy)
     vertices['a_position'] /= lowres_size
-    return VertexBuffer(vertices)
+
+    # XXX: Subtract descender to include that in the height
+    text_extent = (0, descender, width, height - descender)
+    return VertexBuffer(vertices), text_extent
 
 
 class TextElement(GLElement):
@@ -270,8 +274,8 @@ class TextElement(GLElement):
         """
 
     def __init__(self, text='', color='black', bold=False, italic=False,
-                 face='OpenSans', font_size=12, pos=(0, 0), rotation=0.,
-                 anchor_x='center', anchor_y='center', font_manager=None):
+                 face='OpenSans', font_size=10, pos=(0, 0), rotation=0.,
+                 anchor_x='left', anchor_y='baseline', font_manager=None):
 
         super(TextElement, self).__init__(self.VERTEX_SHADER,
                                           self.FRAGMENT_SHADER)
@@ -350,6 +354,16 @@ class TextElement(GLElement):
         assert len(pos) == 2
         self._pos = tuple(pos)
 
+    def get_text_extent(self, text):
+        _, text_extent = _text_to_vbo(text, self._font,
+                                      self._anchors[0], self._anchors[1],
+                                      self._font._lowres_size)
+        # XXX: Arbitrary scale, but it seems to work.
+        lowres_size = self._font._lowres_size * 0.9
+        scale = self._font_size / float(lowres_size)
+        left, bottom, width, height = [e * scale for e in text_extent]
+        return left, bottom, width, height
+
     def draw(self, projection_size):
         width, height = projection_size
         px_scale = 2.0/width, 2.0/height
@@ -358,15 +372,18 @@ class TextElement(GLElement):
             return
 
         if self._vertices is None:
-            self._vertices = _text_to_vbo(self._text, self._font,
-                                          self._anchors[0], self._anchors[1],
-                                          self._font._lowres_size)
+            self._vertices, _ = _text_to_vbo(self._text,
+                                             self._font,
+                                             self._anchors[0],
+                                             self._anchors[1],
+                                             self._font._lowres_size)
             idx = (np.array([0, 1, 2, 0, 2, 3], np.uint32) +
                    np.arange(0, 4*len(self._text), 4,
                              dtype=np.uint32)[:, np.newaxis])
             self._ib = IndexBuffer(idx.ravel())
 
         ps = (self._font_size / 72.) * 92.
+
         self._program['u_npix'] = ps
         self._program['u_font_atlas_shape'] = self._font._atlas.shape[:2]
         self._program['u_kernel'] = self._font._kernel
