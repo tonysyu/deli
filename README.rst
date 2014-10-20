@@ -28,12 +28,17 @@ Requirements
 
 * numpy
 * traits
+
+The following requirements will, hopefully, be removed in the future:
 * pyface
 * enable
 * kiva
 * matplotlib
+
+The following are optional requirements:
 * enaml (optional)
 * traitsui (optional)
+* vispy (optional)
 
 
 Licence
@@ -63,22 +68,6 @@ to have a better design than they do (although secretly, I kind of want to
 think that). The whole point of this project is for me to play around with a
 few ideas that have come up over time.
 
-This project got it's start as I was finishing the Design Patterns book [GoF]_
-for the first time. (I'm not a software developer by training, so I read it
-rather late in life.)
-
-
-Why the name "deli"?
-====================
-
-I actually wanted to name this package "SpyGlass", which is an area of Austin,
-TX and a really great name for a data-visualization package. Alas, that name
-is already taken in PyPi. For some reason, my mind was stuck with naming it
-something Austin-related, and I decided to name it after a popular taco place
-here, TacoDeli. It's somewhat appropriate, I think: Plotting usually entails
-combining a lot of little, highly-customizable components. The package itself
-is also a combination of parts and ideas from a number of other popular
-plotting packages. (It's a bit of a stretch, I know.)
 
 .. _PyX: http://pyx.sourceforge.net/
 .. _matplotlib: http://matplotlib.sourceforge.net/

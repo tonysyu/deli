@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
+Text rendering element based on vispy code.
+
+
+XXX: This is mostly copied from `vispy.scene.visuals.text` and needs to be
+     cleaned up.
+
+"""
 from __future__ import division
 
 import sys
