@@ -1,0 +1,22 @@
+import numpy as np
+from enaml.widgets.api import Container, Window
+
+from deli.enaml.graph import Graph
+from deli.enaml.line_artist import LineArtist
+
+
+x = np.linspace(-2.0, 10.0)
+y = np.sin(x)
+
+
+enamldef Main(Window):
+
+    Container:
+
+        Graph:
+
+            title = 'Line graph'
+
+            LineArtist:
+                x_data = x
+                y_data = y

@@ -2,7 +2,7 @@ import numpy as np
 from enaml.widgets.api import Container, Window
 from scipy.special import jn
 
-from deli.demo_utils.enaml_widget import EnamlWidget
+from deli.enaml.base_widget import BaseWidget
 from deli.graph import Graph
 from deli.artist.line_artist import LineArtist
 
@@ -20,5 +20,5 @@ def create_graph():
 enamldef Main(Window):
 
     Container:
-        EnamlWidget:
+        BaseWidget:
             component << create_graph()
